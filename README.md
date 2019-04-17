@@ -1,4 +1,4 @@
-# ricci_test
+# lottery_pc
 
 ## Project setup
 ```
