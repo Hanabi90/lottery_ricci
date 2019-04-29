@@ -1,23 +1,22 @@
 <template>
     <div class="home">
-        <div class="swiper-container">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide">
-                    <img src="../assets/images/demo.jpg">
-                </div>
-                <div class="swiper-slide">
-                    <img src="../assets/images/demo_one.jpg" alt>
-                </div>
-                <div class="swiper-slide">
-                    <img src="../assets/images/demo_two.jpg" alt>
-                </div>
-            </div>
-            <!-- Add Pagination -->
-            <div class="swiper-pagination"></div>
-            <!-- Add Arrows -->
-            <div class="swiper-button-next"></div>
-            <div class="swiper-button-prev"></div>
-        </div>
+        <swiper :options="swiperOption" ref="mySwiper" @someSwiperEvent="callback">
+            <!-- slides -->
+            <swiper-slide>
+                <img src="../assets/images/demo.jpg">
+            </swiper-slide>
+            <swiper-slide>
+                <img src="../assets/images/demo_one.jpg">
+            </swiper-slide>
+            <swiper-slide>
+                <img src="../assets/images/demo_two.jpg">
+            </swiper-slide>
+            <!-- Optional controls -->
+            <div class="swiper-pagination" slot="pagination"></div>
+            <div class="swiper-button-prev" slot="button-prev"></div>
+            <div class="swiper-button-next" slot="button-next"></div>
+            <div class="swiper-scrollbar" slot="scrollbar"></div>
+        </swiper>
         <div class="marquee">
             <div class="box">
                 <p>公告栏</p>
@@ -31,7 +30,8 @@
 </template>
 
 <script>
-import Swiper from 'swiper'
+import { swiper, swiperSlide } from 'vue-awesome-swiper'
+import 'swiper/dist/css/swiper.css'
 import MarqueeText from 'vue-marquee-text-component'
 import List from '../components/home/list'
 export default {
@@ -39,36 +39,41 @@ export default {
     data() {
         return {
             test_text:
-                '<<沙巴体育维护公告》沙巴体育将于 4 月 24 日 13:30 至 16:00 进行维护>>'
+                '<<沙巴体育维护公告》沙巴体育将于 4 月 24 日 13:30 至 16:00 进行维护>>',
+            swiperOption: {
+                slidesPerView: 1,
+                loop: true,
+                autoplay: {
+                    delay: 2500,
+                    disableOnInteraction: false
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev'
+                }
+            }
+        }
+    },
+    computed: {
+        swiper() {
+            return this.$refs.mySwiper.swiper
         }
     },
     mounted() {
-        let swiper = new Swiper('.swiper-container', {
-            slidesPerView: 1,
-            loop: true,
-            autoplay: {
-                delay: 2500,
-                disableOnInteraction: false
-            },
-            pagination: {
-                el: '.swiper-pagination',
-                clickable: true
-            },
-            navigation: {
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev'
-            }
-        })
+        this.swiper()
     },
     components: {
         MarqueeText,
-        List
+        List,
+        swiper,
+        swiperSlide
     }
 }
 </script>
-<style lang="css">
-@import '../styles/swiper.css';
-</style>
 <style lang="stylus" scoped>
 .home
     .swiper-container

@@ -56,6 +56,50 @@
                 <div></div>
             </div>
             <div class="footer_border"></div>
+            <ul class="about">
+                <li>
+                    <h5>产品下载</h5>
+                    <p>EA铂金馆PC端</p>
+                    <p>AG翡翠厅PC端</p>
+                    <p>AG翡翠厅APP</p>
+                    <p>PT小游戏PC端</p>
+                </li>
+                <li>
+                    <h5>关于我们</h5>
+                    <p>关于Vwin</p>
+                    <p>责任博彩</p>
+                    <p>优惠规则与条款</p>
+                    <p>隐私权政策</p>
+                    <p>联系我们</p>
+                </li>
+                <li>
+                    <h5>使用帮助</h5>
+                    <p>存款流程</p>
+                    <p>提款流程</p>
+                    <p>常见问题</p>
+                    <p>体育规则</p>
+                    <p>沙巴体育规则</p>
+                    <p>娱乐场规则</p>
+                </li>
+                <li style="margin-top:24px">
+                    <p>电子游戏规则</p>
+                    <p>快乐彩规则</p>
+                    <p>世界乐透规则</p>
+                    <p>时时彩规则</p>
+                    <p>PK拾规则</p>
+                </li>
+                <li>
+                    <h5>关注我们</h5>
+                    <div class="weichat">
+                        <div class="icon"></div>
+                        <p>微信</p>
+                    </div>
+                    <div class>
+                        <div class="icon"></div>
+                        <p>微博</p>
+                    </div>
+                </li>
+            </ul>
         </div>
     </div>
 </template>
@@ -179,7 +223,23 @@ export default {
         &:hover
             filter grayscale(0) opacity(1)
 .footer_border
-    border-bottom 1px solid #fff
+    clear both
+    border-bottom 1px dashed #545556
     width 100%
-    margin-bottom 10px
+    margin-bottom 40px
+.about
+    overflow hidden
+    li
+        cursor pointer
+        float left
+        margin-right 80px
+        overflow hidden
+        h5
+            font-size 14px
+            color #fff
+            margin-bottom 10px
+        p
+            font-size 13px
+            color #717171
+            line-height 30px
 </style>
