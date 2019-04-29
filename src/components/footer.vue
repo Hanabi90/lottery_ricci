@@ -90,16 +90,52 @@
                 </li>
                 <li>
                     <h5>关注我们</h5>
-                    <div class="weichat">
+                    <div class="wechat">
                         <div class="icon"></div>
                         <p>微信</p>
                     </div>
-                    <div class>
+                    <div class="webo">
                         <div class="icon"></div>
                         <p>微博</p>
                     </div>
                 </li>
+                <li>
+                    <div class="youku">
+                        <div class="icon"></div>
+                        <p>优酷</p>
+                    </div>
+                </li>
+                <li class="proxy">
+                    <h5>加盟合作</h5>
+                    <button>
+                        <i class="button_icon"></i>
+                        <span>代理合作共创辉煌</span>
+                    </button>
+                    <div class="contact">
+                        <i></i>
+                        <p>
+                            <span>400-120-8228</span>
+                            <span>国内24小时服务电话</span>
+                        </p>
+                    </div>
+                    <h5 class="visitor">
+                        <i>
+                            <span>24小时访客数量</span>
+                            <strong>1</strong>
+                            <strong>4</strong>
+                            <strong>6</strong>
+                            <strong>5</strong>
+                            <strong>6</strong>
+                            <strong>8</strong>
+                        </i>
+                    </h5>
+                </li>
             </ul>
+            <div class="footer_border"></div>
+            <div class="fc">
+                <h6>Vwin 隶属于 KINGHONOS LTD located in No. 35 New Road, Belize City, Belize, C. A.</h6>
+                <h6>&copy;2013-2019 Vwin.com版权所有</h6>
+            </div>
         </div>
     </div>
 </template>
@@ -228,6 +264,7 @@ export default {
     width 100%
     margin-bottom 40px
 .about
+    padding-bottom 20px
     overflow hidden
     li
         cursor pointer
@@ -242,4 +279,109 @@ export default {
             font-size 13px
             color #717171
             line-height 30px
+            transition color 0.2s linear
+            &:hover
+                color #fff
+    li.proxy
+        width 302px
+        margin-right 0
+.wechat, .webo, .youku
+    .icon
+        width 27px
+        height 27px
+        filter grayscale(1) opacity(0.5)
+        transition all 0.2s linear
+    &:hover
+        p
+            color #fff
+        .icon
+            filter grayscale(0) opacity(1)
+.wechat
+    .icon
+        background url('../assets/images/wechat_hover.png') no-repeat 0 0
+.webo
+    .icon
+        background url('../assets/images/weibo_hover.png') no-repeat 0 0
+.youku
+    margin-top 20px
+    .icon
+        background url('../assets/images/weibo_hover.png') no-repeat 0 0
+button
+    padding 10px 18px
+    background-color #545556
+    border-radius 5px
+    border 2px solid #545556
+    width 100%
+    color #b9b9b9
+    margin-bottom 20px
+    transition all 0.2s linear
+    &:hover
+        color #fff
+        background-color #98171a
+        border 2px solid #98171a
+.button_icon
+    width 34px
+    height 34px
+    background-image url('../assets/images/icon-shake.png')
+    display inline-block
+    margin-right 10px
+    vertical-align middle
+    animation 0.8s ease-in-out infinite alternate move
+@keyframes move
+    0%
+        -moz-transform translateY(-2px)
+        -ms-transform translateY(-2px)
+        -webkit-transform translateY(-2px)
+        transform translateY(-2px)
+    50%
+        -moz-transform translateY(2px)
+        -ms-transform translateY(2px)
+        -webkit-transform translateY(2px)
+        transform translateY(2px)
+    100%, 70%
+        -moz-transform translateY(0)
+        -ms-transform translateY(0)
+        -webkit-transform translateY(0)
+        transform translateY(0)
+    0%
+        left -200px
+    100%
+        left 100%
+.contact
+    padding 10px 0
+    border-radius 5px
+    border 2px solid #545556
+    padding-left 74px
+    overflow hidden
+    i, p
+        float left
+    i
+        width 34px
+        height 34px
+        background url('../assets/images/icon-call.png') no-repeat 0 0
+        margin-top 5px
+        margin-right 10px
+    p
+        span
+            display block
+            line-height 20px
+.visitor
+    font-size 12px
+    margin-top 20px
+    span
+        margin-right 20px
+    strong
+        background #ddd
+        border-radius 3px
+        padding 4px 6px
+        margin-right 10px
+        color #000
+        text-decoration overline
+.fc
+    font-size 13px
+    text-align center
+    color #717171
+    padding-bottom 20px
+    h6:first-child
+        margin-bottom 20px
 </style>

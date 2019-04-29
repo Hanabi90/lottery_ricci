@@ -1,6 +1,6 @@
 <template>
     <div class="home">
-        <swiper :options="swiperOption" ref="mySwiper" @someSwiperEvent="callback">
+        <swiper :options="swiperOption" ref="mySwiper">
             <!-- slides -->
             <swiper-slide>
                 <img src="../assets/images/demo.jpg">
@@ -62,9 +62,6 @@ export default {
         swiper() {
             return this.$refs.mySwiper.swiper
         }
-    },
-    mounted() {
-        this.swiper()
     },
     components: {
         MarqueeText,
