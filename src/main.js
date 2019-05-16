@@ -2,8 +2,10 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-
-Vue.config.productionTip = false
+import { Message } from 'iview'
+import 'iview/dist/styles/iview.css'
+Vue.prototype.$Message = Message
+Vue.config.productionTip = true
 
 new Vue({
     router,

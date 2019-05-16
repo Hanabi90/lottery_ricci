@@ -283,7 +283,7 @@ export default {
             &:hover
                 color #fff
     li.proxy
-        width 302px
+        width 300px
         margin-right 0
 .wechat, .webo, .youku
     .icon

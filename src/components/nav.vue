@@ -14,11 +14,25 @@
                 <li>线路中心</li>
             </ul>
             <ul class="nav_top_right">
-                <li>
-                    <button>登录</button>
+                <li v-if="this.$store.state.loginCode==0" class="login_content">
+                    <button @click="open('login')">登录</button>
+                    <button @click="open('registered')">注册</button>
+                    <Login ref="login"/>
+                    <Registered ref="registered"/>
                 </li>
-                <li>
-                    <button>注册</button>
+                <li v-else-if="this.$store.state.loginCode==1" class="money_content">
+                    <p>
+                        <span>用户名:</span>
+                        <span>{{this.$store.state.nickname}}</span>
+                    </p>
+                    <p>
+                        <span>现金金额:</span>
+                        <span>{{this.$store.state.money.availablebalance}}</span>
+                        <span>信誉金额:</span>
+                        <span>{{this.$store.state.money.creditavailable}}</span>
+                    </p>
+                    <button class="refresh" @click="refresh">刷新</button>
+                    <button @click="loginOut">退出</button>
                 </li>
                 <li class="border_style">
                     <i class="phone"></i>
@@ -41,10 +55,27 @@
                     <img id="vwin-logo" src="../assets/images/vwin-logo-acmiland-cn.png">
                 </div>
                 <ul class="nav_list">
-                    <li class="active">首页</li>
-                    <li>体育</li>
+                    <router-link tag="li" to="/">首页</router-link>
+                    <router-link tag="li" to="/test">体育</router-link>
                     <li>沙巴体育</li>
-                    <li>彩票</li>
+                    <router-link
+                        ref="routerLink"
+                        :to="`/lottery?lotteryId=${this.$store.state.lotteryId}`"
+                        tag="li"
+                        data-lottery="ture"
+                        event="none"
+                    >
+                        彩票
+                        <Icon type="ios-arrow-down"></Icon>
+                        <div class="lotteryList">
+                            <ul v-for="(item,id) of this.lotteryList" :key="id">
+                                <h5>{{item.title}}</h5>
+                                <li v-for="(element,index) of item.list" :key="index">
+                                    <span @click="jump(element.lotteryid)">{{element.title}}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </router-link>
                     <li>电子游戏</li>
                     <li>棋牌</li>
                     <li>最新优惠</li>
@@ -60,15 +91,82 @@
     </div>
 </template>
 <script>
+import Login from '../components/home/login'
+import Registered from '../components/home/registered'
+import { getbalance, loginOut, getMenu } from '@/api/index.js'
+import { Icon } from 'iview'
 export default {
     name: 'lobby_nav',
     data() {
         return {
-            nowDate: ''
+            nowDate: '',
+            spinShow: true,
+            nickname: '',
+            lotteryList: {},
+            id: ''
         }
     },
+    mounted() {
+        getMenu().then(res => {
+            let listType = res.data.lottery_classification
+            let listArray = res.data.lottery_menu_data //彩票列表
+            for (const item in listType) {
+                this.lotteryList[item] = {}
+                this.lotteryList[item].list = listArray.filter(
+                    element => element.parentid == listType[item].id
+                )
+                this.lotteryList[item].title = listType[item].title
+            }
+        })
+        this.getTime()
+        if (sessionStorage.getItem('token')) {
+            this.$store.dispatch('handleLogin', 1)
+            this.$store.dispatch(
+                'handleNickName',
+                sessionStorage.getItem('nickname')
+            )
+            getbalance().then(res => {
+                this.$store.dispatch('handleMoney', res.data)
+            })
+        }
+        this.$router.onReady(() => {
+            this.$store.dispatch('handleLotteryId', this.$route.query.lotteryId)
+        })
+    },
     methods: {
-        getTime: function() {
+        //跳转
+        jump(id) {
+            this.$store.dispatch('handleLotteryId', id)
+            this.$router.push({ path: 'lottery', query: { lotteryId: id } })
+        },
+        //刷新金额
+        refresh() {
+            getbalance().then(res => {
+                this.spinShow = true
+                this.$store
+                    .dispatch('handleMoney', res.data)
+                    .then(res => (this.spinShow = false))
+            })
+        },
+        //退出登录
+        loginOut() {
+            loginOut().then(res => {
+                if (res.code == 0) {
+                    sessionStorage.clear()
+                    this.$Message.success('退出成功')
+                    this.$store.dispatch('handleReset')
+                }
+            })
+        },
+        //打开登录页面
+        open(target) {
+            for (const iterator in this.$refs) {
+                this.$refs[iterator].onOff = false
+            }
+            this.$refs[target].onOff = true
+        },
+        //获取当前时间
+        getTime() {
             let date = new Date(),
                 year = date.getFullYear(),
                 month = date.getMonth() + 1,
@@ -106,8 +204,10 @@ export default {
             setTimeout(this.getTime, 1000)
         }
     },
-    mounted() {
-        this.getTime()
+    components: {
+        Login,
+        Registered,
+        Icon
     }
 }
 </script>
@@ -124,7 +224,7 @@ export default {
 .nav_top
     width 1200px
     margin auto
-    overflow hidden
+    height 40px
 .flag
     color defaultColor
     font-size 13px
@@ -145,7 +245,7 @@ export default {
     li
         flex 1
         white-space nowrap
-        padding 0 16px
+        padding 0 7px
         font-size 12px
         border-right 1px solid #424141
         color defaultColor
@@ -158,7 +258,7 @@ export default {
         font-size 12px
         white-space nowrap
         span
-            padding 0 10px
+            padding 0 6px
             color #f7e6b0
         i
             display inline-block
@@ -171,13 +271,25 @@ export default {
                 background url('../assets/images/icon-liveChat.gif') no-repeat bottom right
             &.free_call
                 background url('../assets/images/icon-freeCall.png') no-repeat bottom right
+    .money_content
+        display flex
+        p
+            flex 1
+            position relative
+        button
+            margin-top 6px
+            &.refresh
+                background #d49815
 button
     background #d83f41
     border none
     color #fff
     border-radius 16px
-    padding 4px 16px
+    padding 0 20px
     margin 0 6px
+    outline none
+    height 26px
+    line-height 26px
 .border_style
     border-left 1px solid #424141
     padding-left 10px
@@ -191,14 +303,42 @@ button
     .nav_list
         float right
         display flex
-        li
+        &>li
             flex 1
             white-space nowrap
             padding 0 20px
             &:hover
                 background #a92c2d
+                color #fff
             &:last-child:hover
                 background none
+            &[data-lottery='ture']:hover
+                div
+                    display block
+            &[data-lottery='ture']
+                div
+                    position absolute
+                    background #000000bd
+                    overflow hidden
+                    line-height 26px
+                    left 50%
+                    display none
+                    ul
+                        float left
+                        margin 10px
+                        h5
+                            font-size 14px
+                            margin-bottom 10px
+                        li
+                            font-size 12px
+                            color #e8e8e8
+                            span
+                                padding 6px 10px
+                                border-radius 6px
+                            &:hover
+                                span
+                                    background #a92c2d
+                                    color #fff
 .btn-sign
     button:hover
         i
@@ -210,6 +350,8 @@ button
         background #fff
         color #000
         padding 10px 14px
+        height 36px
+        line-height 0
         i
             display inline-block
             background url('../assets/images/ic-nav-gift.png') bottom no-repeat
@@ -229,6 +371,8 @@ button
     #vwin-logo
         width 182px
         height auto
-.active
+.is-active
     background #a92c2d
+.login_content
+    position relative
 </style>

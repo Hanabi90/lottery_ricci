@@ -267,7 +267,6 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-$cyan = #60daaa
 .home_list
     background #ddd
     padding-top 10px
@@ -547,7 +546,6 @@ $cyan = #60daaa
         margin-top 15px
         margin-left 30px
     .con3_title
-        margin-top 15px
         margin-left 10px
         float left
         P
