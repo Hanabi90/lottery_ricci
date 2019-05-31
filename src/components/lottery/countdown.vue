@@ -1,6 +1,6 @@
 <template>
     <div class="container flip-clock">
-        <template v-for="(data,index) in timeData" v-show="show">
+        <template v-for="(data,index) in timeData">
             <span
                 v-if="index"
                 v-bind:key="data.label"
@@ -27,7 +27,10 @@ export default {
     props: {
         deadline: {
             type: String,
-            default: '2019-5-11 00:00:00'
+            default: '2019-5-26 00:00:00'
+        },
+        difftime: {
+            default: 0
         },
         stop: {
             type: Boolean
@@ -49,7 +52,6 @@ export default {
         const uuid = uuidv4()
         return {
             now: Math.trunc(new Date().getTime() / 1000),
-            date: null,
             interval: null,
             diff: 0,
             show: false,
@@ -81,51 +83,26 @@ export default {
             ]
         }
     },
-    created() {
-        if (!this.deadline) {
-            throw new Error("Missing props 'deadline'")
-        }
-        const endTime = this.deadline
-        this.date = Math.trunc(Date.parse(endTime.replace(/-/g, '/')) / 1000)
-        if (!this.date) {
-            throw new Error("Invalid props value, correct the 'deadline'")
-        }
-        this.interval = setInterval(() => {
-            this.now = Math.trunc(new Date().getTime() / 1000)
-        }, 1000)
-    },
-    mounted() {
-        if (this.diff !== 0) {
-            this.show = true
-        }
-    },
     computed: {
         seconds() {
-            return Math.trunc(this.diff) % 60
+            return Math.trunc(this.difftime) % 60
         },
         minutes() {
-            return Math.trunc(this.diff / 60) % 60
+            return Math.trunc(this.difftime / 60) % 60
         },
         hours() {
-            return Math.trunc(this.diff / 60 / 60) % 24
+            return Math.trunc(this.difftime / 60 / 60) % 24
         },
         days() {
-            return Math.trunc(this.diff / 60 / 60 / 24)
+            return Math.trunc(this.difftime / 60 / 60 / 24)
         }
     },
     watch: {
-        now(value) {
-            this.diff = this.date - this.now
-            if (this.diff <= 0 || this.stop) {
-                this.diff = 0
-                this.updateTime(3, 0)
-                clearInterval(this.interval)
-            } else {
-                this.updateTime(0, this.days)
-                this.updateTime(1, this.hours)
-                this.updateTime(2, this.minutes)
-                this.updateTime(3, this.seconds)
-            }
+        difftime(value) {
+            this.updateTime(0, this.days)
+            this.updateTime(1, this.hours)
+            this.updateTime(2, this.minutes)
+            this.updateTime(3, this.seconds)
         }
     },
     filters: {
@@ -162,13 +139,11 @@ export default {
             }
         }
     },
-    beforeDestroy() {
-        if (window['cancelAnimationFrame']) {
-            cancelAnimationFrame(this.frame)
-        }
-    },
-    destroyed() {
-        clearInterval(interval)
+    updated() {
+        this.updateTime(0, this.days)
+        this.updateTime(1, this.hours)
+        this.updateTime(2, this.minutes)
+        this.updateTime(3, this.seconds)
     }
 }
 </script>

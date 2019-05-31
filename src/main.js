@@ -5,7 +5,7 @@ import store from './store'
 import { Message } from 'iview'
 import 'iview/dist/styles/iview.css'
 Vue.prototype.$Message = Message
-Vue.config.productionTip = true
+Vue.config.productionTip = false
 
 new Vue({
     router,

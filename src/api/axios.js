@@ -3,6 +3,7 @@ import Vue from 'vue'
 import store from '../store'
 import { LoadingBar, Message } from 'iview'
 Vue.use(LoadingBar, Message)
+//建立实例
 const service = axios.create({
     // 设置超时时间
     timeout: 6000,
@@ -32,6 +33,10 @@ service.interceptors.response.use(
     response => {
         // 请求响应后关闭加载框
         LoadingBar.start()
+        if (typeof response.data == 'string') {
+            console.log(response.data.toString())
+            response.data = JSON.parse(response.data.toString())
+        }
         const responseCode = response.status
         // 如果返回的状态码为200，说明接口请求成功，可以正常拿到数据
         // 否则的话抛出错误
@@ -42,18 +47,17 @@ service.interceptors.response.use(
                 //已从其他端口登录
                 case 0:
                     return Promise.resolve(response.data)
+                //其他地方登陆
                 case -15:
+                //操作超时，未登录
+                case -13:
                     Message.error(response.data.msg)
                     store.dispatch('handleLogin', false)
                     sessionStorage.clear()
-                    return
-                case -13:
-                    Message.error(response.data.msg)
-                    store.dispatch('handleReset')
-                    sessionStorage.clear()
-                    return
+                    return new Promise(() => {})
                 default:
-                    return
+                    Message.error(response.data.msg)
+                    return new Promise(() => {})
             }
         } else {
             LoadingBar.error()
@@ -63,7 +67,6 @@ service.interceptors.response.use(
     error => {
         // 请求响应后关闭加载框
         LoadingBar.error()
-        // 断网 或者 请求超时 状态
         if (!error.response) {
             // 请求超时状态
             if (error.message.includes('timeout')) {

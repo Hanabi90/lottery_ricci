@@ -2,53 +2,77 @@
     <div class="lotteryGroup">
         <ul class="nav">
             <li
-                v-for="(item,value) of methodCrowd"
+                v-for="(item,value) of infoList"
                 :key="value"
                 :class="value==methodCrowdActive?'active':''"
                 @click="getMethodId(item,value)"
-            >{{item.crowdname}}</li>
-            <li class="special_play">
-                <i></i>
-                <span>特殊玩法</span>
-            </li>
+            >{{item.title}}</li>
         </ul>
         <ul class="navTwo">
             <li v-for="(item,value) of getmethod" :key="value">
-                <i>{{item.menuName}}</i>
+                <i>{{item.gtitle}}</i>
                 <span
-                    v-for="(list,index) of item.data"
+                    v-for="(list,index) of item.label"
                     :key="index+'a'"
-                    :class="index==0&&value==0?'active':''"
-                >{{list.title}}</span>
+                    :class="index==itemActive.index&&value==itemActive.value?'active':''"
+                    @click="getItem(item.gtitle,list,value,index)"
+                >{{list.name}}</span>
             </li>
             <li class="bonusGroup">
-                <span>单注奖金</span>
-                <Select v-model="bonus" style="width:130px" transfer>
-                    <Option
-                        v-for="item in bonusList"
-                        :value="item.value"
-                        :key="item.value"
-                    >{{ item.label }}</Option>
-                </Select>
+                <div>
+                    <span>单注奖金:</span>
+                    <InputNumber
+                        size="small"
+                        :parser="value => value"
+                        :step="2"
+                        :max="prizeGroup"
+                        v-model="nowPrizeGroup"
+                    ></InputNumber>
+                </div>
+                <div>
+                    <span>单注返点:</span>
+                    <span>{{rebate}}</span>
+                </div>
+                <div>
+                    <span>单注返点:</span>
+                    <RadioGroup v-model="iWalletType">
+                        <Radio label="1">现金</Radio>
+                        <Radio label="2">信用</Radio>
+                    </RadioGroup>
+                </div>
             </li>
         </ul>
-        <Lotterynumber/>
-        <Order/>
+        <Lotterynumber ref="lotterynumber" :method-list="methodList"/>
+        <Order
+            :methodid="methodid"
+            :i-wallet-type="iWalletType"
+            :method-list="methodList"
+            :rebate="rebate"
+            :modes="methodList.modes"
+            :now-prize-group="nowPrizeGroup"
+            :lotterynumber="this.$refs.lotterynumber"
+            :prize="this.prize"
+        />
     </div>
 </template>
 
 <script>
-import { Select, Option } from 'iview'
+import { InputNumber, RadioGroup, Radio } from 'iview'
 import Lotterynumber from './lotteryNumber'
 import Order from '@/components/lottery/order.vue'
-import { MethodCrowd, getmethod } from '@/api/index.js'
+import { MethodCrowd, getmethod, getLotteryInfo } from '@/api/index.js'
 export default {
     name: 'lotteryGroup',
     data() {
         return {
-            methodCrowd: [], //大组
+            infoList: '',
             getmethod: [], //二级组
             methodCrowdActive: 0,
+            methodList: {}, //最终玩法
+            itemActive: {
+                value: 0,
+                index: 0
+            },
             activeNow: {
                 navOne: 0,
                 navTwo: {
@@ -56,54 +80,68 @@ export default {
                     index: 0
                 }
             },
-            bonusList: [
-                {
-                    value: 'bonus1',
-                    label: '奖金 18.00-5.0%'
-                },
-                {
-                    value: 'bonus2',
-                    label: '奖金 19.00-0.0%'
-                }
-            ],
-            bonus: 'bonus1'
+            prizeGroup: 0, //返点
+            nowPrizeGroup: 1984, //当前选择返点
+            iWalletType: '1', //1-现金 2-信用
+            methodid: '', //具体玩法id
+            bonus: 'bonus1',
+            prize: 0 //彩票奖金
+        }
+    },
+    computed: {
+        rebate() {
+            return (this.prizeGroup - this.nowPrizeGroup) / 20 + '%'
         }
     },
     mounted() {
-        MethodCrowd(this.$store.state.lotteryId).then(res => {
-            this.methodCrowd = res.data
-            getmethod(
-                `${this.$store.state.lotteryId}/${res.data[0].crowdid}`
-            ).then(res => {
-                this.getmethod = res.data
-            })
-        })
-        this.$router.afterEach(() => {
-            MethodCrowd(this.$store.state.lotteryId).then(res => {
-                this.methodCrowd = res.data
-                getmethod(
-                    `${this.$store.state.lotteryId}/${res.data[0].crowdid}`
-                ).then(res => {
-                    this.getmethod = res.data
-                })
-            })
+        getLotteryInfo({ memnuid: this.$store.state.menuId }).then(res => {
+            this.infoList = res.data
+            this.getmethod = res.data[0].label
+            this.methodList = {
+                ...res.data[0].label[0].label[0],
+                title: res.data[0].label[0].gtitle
+            }
+            this.prize = res.data[0].label[0].label[0].prize_level_special[0]
+            this.nowPrizeGroup = res.data[0].label[0].label[0].nowPrizeGroup
+            this.prizeGroup = res.data[0].label[0].label[0].nowPrizeGroup
+            this.methodid = res.data[0].label[0].label[0].methodid
         })
     },
     methods: {
         getMethodId(item, value) {
-            getmethod(`${this.$store.state.lotteryId}/${item.crowdid}`).then(
-                res => {
-                    this.methodCrowdActive = value
-                    this.getmethod = res.data
-                }
-            )
+            this.methodCrowdActive = value
+            this.getmethod = item.label
+            this.methodList = {
+                ...item.label[0].label[0],
+                title: item.label[0].gtitle
+            }
+            this.itemActive = { value: 0, index: 0 }
+            this.$nextTick(() => {
+                this.$refs.lotterynumber.reset()
+            })
+        },
+        //获取最终玩法
+        getItem(title, item, value, index) {
+            this.$store.dispatch('handleLotteryNumber', '')
+            //重置选号区域
+            this.$nextTick(() => {
+                this.$refs.lotterynumber.reset()
+            })
+            //item最终选项，value-行 index-列
+            this.methodid = item.methodid
+            this.itemActive = { value, index }
+            this.methodList = { ...item, title }
+            this.prize = item.prize_level_special[0]
+            this.nowPrizeGroup = item.nowPrizeGroup
+            this.prizeGroup = item.nowPrizeGroup
         }
     },
     components: {
-        Select,
-        Option,
         Lotterynumber,
-        Order
+        Order,
+        InputNumber,
+        RadioGroup,
+        Radio
     }
 }
 </script>
@@ -134,6 +172,7 @@ export default {
                 border-top 1px solid #ffe0b8
     .navTwo
         padding-top 20px
+        height 140px
         font-size 12px
         position relative
         padding-right 190px
@@ -157,5 +196,5 @@ export default {
             &.bonusGroup
                 position absolute
                 right 20px
-                top 30px
+                top 16px
 </style>

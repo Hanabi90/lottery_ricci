@@ -78,7 +78,8 @@
 
 <script>
 export default {
-    name: 'prizeList'
+    name: 'prizeList',
+    mounted() {}
 }
 </script>
 

@@ -60,7 +60,7 @@
                     <li>沙巴体育</li>
                     <router-link
                         ref="routerLink"
-                        :to="`/lottery?lotteryId=${this.$store.state.lotteryId}`"
+                        :to="`/lottery?menuId=${this.$store.state.menuId}`"
                         tag="li"
                         data-lottery="ture"
                         event="none"
@@ -68,10 +68,12 @@
                         彩票
                         <Icon type="ios-arrow-down"></Icon>
                         <div class="lotteryList">
-                            <ul v-for="(item,id) of this.lotteryList" :key="id">
+                            <ul v-for="(item,keys) of this.lotteryList" :key="keys">
                                 <h5>{{item.title}}</h5>
-                                <li v-for="(element,index) of item.list" :key="index">
-                                    <span @click="jump(element.lotteryid)">{{element.title}}</span>
+                                <li v-for="(element,index) of item.lottery_data" :key="index">
+                                    <span
+                                        @click="jump(element.lotteryid,element.menuid)"
+                                    >{{element.title}}</span>
                                 </li>
                             </ul>
                         </div>
@@ -80,9 +82,9 @@
                     <li>棋牌</li>
                     <li>最新优惠</li>
                     <li class="btn-sign">
-                        <button>
+                        <button @click="openCenter">
                             <i></i>
-                            <span>签到</span>
+                            <span>个人中心</span>
                         </button>
                     </li>
                 </ul>
@@ -102,21 +104,13 @@ export default {
             nowDate: '',
             spinShow: true,
             nickname: '',
-            lotteryList: {},
+            lotteryList: '',
             id: ''
         }
     },
     mounted() {
         getMenu().then(res => {
-            let listType = res.data.lottery_classification
-            let listArray = res.data.lottery_menu_data //彩票列表
-            for (const item in listType) {
-                this.lotteryList[item] = {}
-                this.lotteryList[item].list = listArray.filter(
-                    element => element.parentid == listType[item].id
-                )
-                this.lotteryList[item].title = listType[item].title
-            }
+            this.lotteryList = res.data
         })
         this.getTime()
         if (sessionStorage.getItem('token')) {
@@ -130,14 +124,24 @@ export default {
             })
         }
         this.$router.onReady(() => {
-            this.$store.dispatch('handleLotteryId', this.$route.query.lotteryId)
+            this.$store.dispatch('handleMenuId', this.$route.query.menuId)
         })
     },
     methods: {
+        //个人中心
+        openCenter() {
+            let onOff = this.$store.state.userCenter
+            this.$store.dispatch('handleUserCenter', !onOff)
+        },
         //跳转
-        jump(id) {
-            this.$store.dispatch('handleLotteryId', id)
-            this.$router.push({ path: 'lottery', query: { lotteryId: id } })
+        jump(lotteryId, menuId) {
+            this.$store.dispatch('handleMenuId', menuId)
+            this.$router.push({ path: 'lottery', query: { menuId: menuId } })
+            sessionStorage.setItem('lotteryId', lotteryId)
+            this.$store.dispatch('handleHackReset', false)
+            this.$nextTick(() => {
+                this.$store.dispatch('handleHackReset', true)
+            })
         },
         //刷新金额
         refresh() {

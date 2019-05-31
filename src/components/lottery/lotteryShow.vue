@@ -3,12 +3,12 @@
         <li class="lottery_logo"></li>
         <li>
             <div>
-                <p>第20190502-043期</p>
+                <p>第{{issue}}期</p>
                 <p>投注剩余时间</p>
             </div>
         </li>
         <li>
-            <CountDown :deadline="'2019-5-16 00:00:00'"/>
+            <CountDown :difftime="timercount" :deadline="saleend"/>
         </li>
         <li>
             <p class="lottery_history_issue">
@@ -25,11 +25,50 @@
         </li>
     </ul>
 </template>
-
 <script>
 import CountDown from './countdown'
+import { getissue } from '@/api/index'
 export default {
     name: 'lottery_show',
+    data() {
+        return {
+            saleend: '0000-00-00 00:00:00',
+            issue: '',
+            timercount: 0
+        }
+    },
+    mounted() {
+        this.handleIssues()
+    },
+    methods: {
+        down() {
+            if (this.timercount) {
+                setTimeout(() => {
+                    this.timercount -= 1
+                    this.down()
+                }, 1000)
+            } else {
+                setTimeout(() => {
+                    this.handleIssues()
+                }, 1000)
+            }
+        },
+        handleIssues() {
+            getissue({
+                lotteryid: sessionStorage.getItem('lotteryId')
+            }).then(res => {
+                this.$store.dispatch('handleIssue', res.data.issue)
+                this.saleend = res.data.saleend
+                this.issue = res.data.issue
+                let now = Math.trunc(new Date().getTime() / 1000),
+                    date = Math.trunc(
+                        Date.parse(res.data.saleend.replace(/-/g, '/')) / 1000
+                    )
+                this.timercount = date - now
+                this.down()
+            })
+        }
+    },
     components: {
         CountDown
     }

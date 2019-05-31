@@ -45,7 +45,7 @@ export default {
         return {
             onOff: false,
             login: {
-                username: 'tzdrex',
+                username: 'tzdricci',
                 loginpass: '1234qwer'
             }
         }
@@ -67,6 +67,7 @@ export default {
                         this.$store.dispatch('handleMoney', res.data)
                     })
                 } else {
+                    console.log(11111)
                     this.$Message.error(res.msg)
                     this.login = {
                         username: '',

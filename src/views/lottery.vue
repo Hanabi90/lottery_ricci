@@ -1,5 +1,5 @@
 <template>
-    <div class="lottery">
+    <div v-if="this.$store.state.hackReset" class="lottery">
         <Sidebar/>
         <div class="container">
             <div>

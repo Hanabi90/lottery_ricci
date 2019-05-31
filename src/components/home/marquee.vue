@@ -3,7 +3,7 @@
         <div class="box">
             <p>公告栏</p>
             <p>
-                <marquee-text :duration="10">{{this.test_text}}</marquee-text>
+                <marquee-text :duration="speed">{{textList}}</marquee-text>
             </p>
         </div>
     </div>
@@ -11,12 +11,21 @@
 
 <script>
 import MarqueeText from 'vue-marquee-text-component'
+import { getnotice } from '@/api/index'
 export default {
     data() {
         return {
-            test_text:
-                '<<沙巴体育维护公告》沙巴体育将于 4 月 24 日 13:30 至 16:00 进行1维护>>'
+            textList: '',
+            speed: 40
         }
+    },
+    mounted() {
+        getnotice().then(res => {
+            this.speed *= res.data.affects
+            res.data.results.forEach(item => {
+                this.textList += item.subject + item.content
+            })
+        })
     },
     components: {
         MarqueeText
@@ -30,6 +39,7 @@ export default {
     color #fff
     font-size 12px
     line-height 30px
+    cursor pointer
     .box
         width 1200px
         margin auto

@@ -7,25 +7,27 @@
             <li>倍率</li>
             <li>注数</li>
             <li>金额</li>
-            <li>清空</li>
-        </ul>
-        <ul class="orderContent">
-            <li>[前三码_复式]56789,01234,13579,-,-</li>
-            <li>1900.00</li>
             <li>
-                <Select v-model="money1" style="width:60px" transfer>
-                    <Option
-                        v-for="item in money"
-                        :value="item.value"
-                        :key="item.value"
-                    >{{ item.label }}</Option>
-                </Select>
+                <Button @click="handleClear" type="primary">清空</Button>
             </li>
-            <li>1倍</li>
-            <li>125注</li>
-            <li>2.500元</li>
-            <li>删除</li>
         </ul>
+        <div class="content">
+            <ul
+                v-for="(item,value) of this.$store.state.orderList "
+                :key="value"
+                class="orderContent"
+            >
+                <li>{{item.desc}}</li>
+                <li>{{item.money}}</li>
+                <li>元</li>
+                <li>{{item.times}}倍</li>
+                <li>{{item.nums}}注</li>
+                <li>{{item.money}}元</li>
+                <li>
+                    <Button @click="handleDelete(value)" type="error">删除</Button>
+                </li>
+            </ul>
+        </div>
         <ul class="orderNow">
             <li>
                 <span>已选</span>
@@ -42,7 +44,7 @@
                 <i class="icon"></i>
                 <span>发起追号</span>
                 <span>取消追号</span>
-                <button>立即投注</button>
+                <button @click="submint">立即投注</button>
             </li>
             <li>
                 <i class="icon"></i>
@@ -53,31 +55,49 @@
 </template>
 
 <script>
-import { Select, Option } from 'iview'
+import { Button } from 'iview'
+import { betting } from '@/api/index'
 export default {
     name: 'lotteryOrderList',
     data() {
-        return {
-            money: [
-                {
-                    value: '元',
-                    label: '元'
+        return {}
+    },
+    methods: {
+        handleClear() {
+            this.$store.dispatch('handleOrderList', { type: 'clear' })
+        },
+        handleDelete(value) {
+            let arr = [...this.$store.state.orderList]
+            arr.splice(value, 1)
+            this.$store.dispatch('handleOrderList', {
+                data: arr,
+                type: 'delete'
+            })
+        },
+        submint() {
+            let postdata = {
+                betparams: {
+                    iWalletType: 1, // 钱包类型
+                    curmid: this.$route.query.menuId, //菜單ID,
+                    lt_issue_start: this.$store.state.issus, //购买的彩票奖期
+                    lt_project: [...this.$store.state.orderList]
                 },
-                {
-                    value: '角',
-                    label: '角'
-                },
-                {
-                    value: '分',
-                    label: '分'
+                bettraceparams: {
+                    lt_trace_if: 'no',
+                    lt_trace_stop: '',
+                    lt_trace_money: '',
+                    lt_trace_issues: ''
                 }
-            ],
-            money1: '元'
+            }
+            betting({ postdata: JSON.stringify(postdata) }).then(res => {
+                this.$Message.success('投注成功')
+                this.$store.dispatch('handleOrderHistory', [...res.data.betlog])
+                this.$store.dispatch('handleOrderList', { type: 'clear' })
+            })
         }
     },
     components: {
-        Select,
-        Option
+        Button
     }
 }
 </script>
@@ -86,28 +106,33 @@ export default {
 .lotteryOrderList
     clear both
     background url('../../assets/images/ssc-repeat_001.jpg')
+    .content
+        max-height 200px
+        overflow-y scroll
+        text-align center
+        .orderContent
+            min-height 30px
+            border-bottom 1px solid #4c4c4c
+            background #383838
+            display flex
+            font-size 12px
+            color #fff
+            line-height 30px
+            li
+                padding 10px 0
+                flex 1
+                text-align center
+                &:first-child
+                    flex 1.5
     .orderTitle
         background #505050
         border-bottom 1px solid #313131
         display flex
+        padding-right 18px
         li
             line-height 44px
             flex 1
             color #e8e8e8
-            text-align center
-            &:first-child
-                flex 1.5
-    .orderContent
-        min-height 30px
-        border-bottom 1px solid #4c4c4c
-        background #383838
-        display flex
-        font-size 12px
-        color #fff
-        line-height 30px
-        li
-            padding 10px 0
-            flex 1
             text-align center
             &:first-child
                 flex 1.5

@@ -6,20 +6,20 @@
         <BackTop>
             <div class="backtop">返回顶端</div>
         </BackTop>
-        <DrawerRight/>
+        <UserCenter/>
     </div>
 </template>
 <script>
 import Nav from '@/components/nav.vue'
 import Footer from '@/components/footer.vue'
-import DrawerRight from '@/components/drawerRight.vue'
+import UserCenter from '@/components/userCenter.vue'
 import { BackTop } from 'iview'
 export default {
     components: {
         Nav,
         Footer,
         BackTop,
-        DrawerRight
+        UserCenter
     }
 }
 </script>
