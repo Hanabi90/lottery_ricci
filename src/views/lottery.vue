@@ -17,7 +17,8 @@
                     <Bulletin/>
                 </div>
             </div>
-            <LotteryOrderList/>
+            <LotteryOrderList ref="orderList"/>
+            <Trace/>
             <OrderHistory/>
         </div>
     </div>
@@ -32,8 +33,14 @@ import PrizeList from '@/components/lottery/prizeList.vue'
 import Bulletin from '@/components/lottery/bulletin.vue'
 import LotteryOrderList from '@/components/lottery/lotteryOrderList.vue'
 import OrderHistory from '@/components/lottery/orderHistory.vue'
+import Trace from '@/components/lottery/trace.vue'
 export default {
     name: 'lottery',
+    data() {
+        return {
+            trace: false
+        }
+    },
     components: {
         Sidebar,
         LotteryShow,
@@ -42,7 +49,8 @@ export default {
         PrizeList,
         Bulletin,
         LotteryOrderList,
-        OrderHistory
+        OrderHistory,
+        Trace
     }
 }
 </script>

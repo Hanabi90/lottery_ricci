@@ -8,37 +8,44 @@
             </div>
         </li>
         <li>
-            <CountDown :difftime="timercount" :deadline="saleend"/>
+            <CountDown :difftime="timercount"/>
         </li>
         <li>
             <p class="lottery_history_issue">
-                <span>第20190502-042期</span>
+                <span>第{{lotteryNumber.issue}}期</span>
                 <span>号码走势</span>
             </p>
             <p class="lottery_num_box">
-                <span>1</span>
-                <span>1</span>
-                <span>1</span>
-                <span>1</span>
-                <span>1</span>
+                <span v-for="(item,index) of lotteryNumber.code.split('')" :key="index">{{item}}</span>
             </p>
         </li>
     </ul>
 </template>
 <script>
 import CountDown from './countdown'
-import { getissue } from '@/api/index'
+import { getissue, getprize } from '@/api/index'
 export default {
     name: 'lottery_show',
     data() {
         return {
-            saleend: '0000-00-00 00:00:00',
             issue: '',
-            timercount: 0
+            timercount: 0,
+            lotteryNumber: {
+                code: ''
+            }, //开奖结果
+            opentimeList: [], //开奖时间
+            openTimeOnOff: true //开奖函数只执行一次
         }
     },
     mounted() {
+        let lotteryid = sessionStorage.getItem('lotteryId')
         this.handleIssues()
+        getprize({ lotteryid, size: 7 }).then(res => {
+            for (const key in res.data[0]) {
+                this.$set(this.lotteryNumber, key, res.data[0][key])
+                this.$store.dispatch('handleOpenList', res.data)
+            }
+        })
     },
     methods: {
         down() {
@@ -53,19 +60,64 @@ export default {
                 }, 1000)
             }
         },
+        handleOpenTime() {
+            let lotteryid = sessionStorage.getItem('lotteryId')
+            let opentime = this.opentimeList[0].opentime,
+                current = this.opentimeList[0].current
+            console.log()
+            if (opentime) {
+                setTimeout(() => {
+                    this.$set(this.opentimeList[0], 'opentime', opentime - 1)
+                    this.handleOpenTime()
+                }, 1000)
+            } else {
+                getprize({ lotteryid, size: 7 }).then(res => {
+                    let getCurrent = res.data[0].issue.split('-')[1]
+                    if (current == getCurrent) {
+                        for (const key in res.data[0]) {
+                            this.$set(this.lotteryNumber, key, res.data[0][key])
+                        }
+                        this.$store.dispatch('handleOpenList', res.data)
+                        this.opentimeList.shift()
+                    }
+                    if (current < getCurrent) {
+                        this.opentimeList.shift()
+                    }
+                    if (current > getCurrent) {
+                        this.openTimeOnOff = true
+                        return
+                    }
+                    setTimeout(() => {
+                        this.handleOpenTime()
+                    }, 1000)
+                })
+            }
+        },
         handleIssues() {
+            let lotteryid = sessionStorage.getItem('lotteryId')
             getissue({
-                lotteryid: sessionStorage.getItem('lotteryId')
+                lotteryid
             }).then(res => {
                 this.$store.dispatch('handleIssue', res.data.issue)
                 this.saleend = res.data.saleend
                 this.issue = res.data.issue
-                let now = Math.trunc(new Date().getTime() / 1000),
+                let now = Math.trunc(
+                        Date.parse(res.data.nowtime.replace(/-/g, '/')) / 1000
+                    ),
                     date = Math.trunc(
                         Date.parse(res.data.saleend.replace(/-/g, '/')) / 1000
-                    )
+                    ),
+                    open = (date = Math.trunc(
+                        Date.parse(res.data.opentime.replace(/-/g, '/')) / 1000
+                    )),
+                    opentime = open - now
                 this.timercount = date - now
+                this.opentimeList.push({ current: res.data.current, opentime })
                 this.down()
+                if (this.openTimeOnOff) {
+                    this.handleOpenTime()
+                }
+                this.openTimeOnOff = false
             })
         }
     },

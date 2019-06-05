@@ -18,7 +18,7 @@
                 class="orderContent"
             >
                 <li>{{item.desc}}</li>
-                <li>{{item.money}}</li>
+                <li>现金</li>
                 <li>元</li>
                 <li>{{item.times}}倍</li>
                 <li>{{item.nums}}注</li>
@@ -41,8 +41,7 @@
                 <span>元</span>
             </li>
             <li>
-                <i class="icon"></i>
-                <span>发起追号</span>
+                <Checkbox @on-change="changeTrace(trace)" v-model="trace">发起追号</Checkbox>
                 <span>取消追号</span>
                 <button @click="submint">立即投注</button>
             </li>
@@ -55,14 +54,19 @@
 </template>
 
 <script>
-import { Button } from 'iview'
+import { Button, Checkbox } from 'iview'
 import { betting } from '@/api/index'
 export default {
     name: 'lotteryOrderList',
     data() {
-        return {}
+        return {
+            trace: false
+        }
     },
     methods: {
+        changeTrace(trace) {
+            this.$parent.$data.trace = trace
+        },
         handleClear() {
             this.$store.dispatch('handleOrderList', { type: 'clear' })
         },
@@ -75,6 +79,10 @@ export default {
             })
         },
         submint() {
+            if (!this.$store.state.orderList.length) {
+                this.$Message.error('号码不完整')
+                return
+            }
             let postdata = {
                 betparams: {
                     iWalletType: 1, // 钱包类型
@@ -97,7 +105,8 @@ export default {
         }
     },
     components: {
-        Button
+        Button,
+        Checkbox
     }
 }
 </script>

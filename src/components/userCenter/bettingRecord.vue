@@ -76,7 +76,7 @@
                         <span>{{item.username}}</span>
                         <span>{{item.cnname}}</span>
                         <span>{{item.issue}}</span>
-                        <span>{{item.code}}</span>
+                        <span class="code">{{item.code}}</span>
                         <span>{{item.methodname}}</span>
                         <span>{{item.totalprice}}</span>
                         <span>{{item.bonus}}</span>
@@ -285,4 +285,8 @@ export default {
                 flex 1
                 text-align center
                 font-size 12px
+            .code
+                overflow hidden
+                text-overflow ellipsis
+                white-space nowrap
 </style>

@@ -1,6 +1,7 @@
 import axios from 'axios'
 import Vue from 'vue'
 import store from '../store'
+import Router from '../router'
 import { LoadingBar, Message } from 'iview'
 Vue.use(LoadingBar, Message)
 //建立实例
@@ -51,9 +52,11 @@ service.interceptors.response.use(
                 case -15:
                 //操作超时，未登录
                 case -13:
+                case -51:
                     Message.error(response.data.msg)
                     store.dispatch('handleLogin', false)
                     sessionStorage.clear()
+                    Router.push('/')
                     return new Promise(() => {})
                 default:
                     Message.error(response.data.msg)

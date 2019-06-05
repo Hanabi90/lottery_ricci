@@ -19,11 +19,15 @@
                 <span>{{item.methodname}}</span>
                 <span>{{item.issue}}</span>
                 <span>{{item.modes}}</span>
-                <span>{{item.code}}</span>
+                <span class="code">{{item.code}}</span>
                 <span>{{item.multiple}}</span>
                 <span>{{item.totalprice}}</span>
                 <span>{{}}</span>
-                <span>{{}}</span>
+                <Button
+                    :disabled="!item.canCancel"
+                    @click="handleCancel(item.projectid)"
+                    type="warning"
+                >撤单</Button>
             </li>
         </ul>
         <p>暂无数据</p>
@@ -31,8 +35,23 @@
 </template>
 
 <script>
+import { Button } from 'iview'
+import { ordercancel } from '@/api/index'
 export default {
-    name: 'orderHistory'
+    name: 'orderHistory',
+    methods: {
+        handleCancel(projectid) {
+            ordercancel({ projectid }).then(res => {
+                let arr = [...this.$store.state.orderHistory]
+                arr = arr.filter(item => item.projectid != projectid)
+                this.$store.dispatch('handleOrderHistory', arr)
+                this.$Message.success('撤单成功')
+            })
+        }
+    },
+    components: {
+        Button
+    }
 }
 </script>
 
@@ -63,6 +82,15 @@ export default {
                 color #e8e8e8
                 &:first-child
                     flex 1.5
+            .code
+                overflow hidden
+                text-overflow ellipsis
+                white-space nowrap
+            button
+                flex 1
+                padding 0
+                line-height 26px
+                margin-top -4px
     p
         text-align center
         line-height 60px

@@ -68,7 +68,7 @@
                         彩票
                         <Icon type="ios-arrow-down"></Icon>
                         <div class="lotteryList">
-                            <ul v-for="(item,keys) of this.lotteryList" :key="keys">
+                            <ul v-for="(item,keys) of this.$store.state.lotteryMenue" :key="keys">
                                 <h5>{{item.title}}</h5>
                                 <li v-for="(element,index) of item.lottery_data" :key="index">
                                     <span
@@ -104,14 +104,10 @@ export default {
             nowDate: '',
             spinShow: true,
             nickname: '',
-            lotteryList: '',
             id: ''
         }
     },
     mounted() {
-        getMenu().then(res => {
-            this.lotteryList = res.data
-        })
         this.getTime()
         if (sessionStorage.getItem('token')) {
             this.$store.dispatch('handleLogin', 1)
@@ -121,6 +117,9 @@ export default {
             )
             getbalance().then(res => {
                 this.$store.dispatch('handleMoney', res.data)
+            })
+            getMenu().then(res => {
+                this.$store.dispatch('handleLotteryMenue', { ...res.data })
             })
         }
         this.$router.onReady(() => {
@@ -141,6 +140,7 @@ export default {
             this.$store.dispatch('handleHackReset', false)
             this.$nextTick(() => {
                 this.$store.dispatch('handleHackReset', true)
+                this.$store.dispatch('handleOrderList', { type: 'clear' })
             })
         },
         //刷新金额
@@ -159,6 +159,7 @@ export default {
                     sessionStorage.clear()
                     this.$Message.success('退出成功')
                     this.$store.dispatch('handleReset')
+                    this.$router.push('/')
                 }
             })
         },

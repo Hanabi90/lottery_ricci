@@ -34,7 +34,7 @@
 
 <script>
 import { Form, FormItem, Select, Option, Input, Button } from 'iview'
-import { setsequestion } from '@/api/index'
+import { setsequestion, checksequestion } from '@/api/index'
 export default {
     name: 'bindquestion',
     data() {
@@ -105,6 +105,11 @@ export default {
                 }
             })
         }
+    },
+    mounted() {
+        checksequestion().then(res => {
+            console.log(res.data)
+        })
     },
     components: {
         Form,

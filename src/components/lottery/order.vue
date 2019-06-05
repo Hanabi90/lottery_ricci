@@ -26,7 +26,7 @@
             <span>{{money}}</span>
             <span>元</span>
             <span>奖金</span>
-            <span>{{bonus}}</span>
+            <span>{{bonus.prizeSort?(bonus.prizeSort[0]+'-'+bonus.prizeSort[bonus.prizeSort.length-1]):bonus}}</span>
             <button class="buttonColor" @click="submint">一键投注</button>
             <button @click="addOrder">添加投注</button>
         </div>
@@ -67,7 +67,7 @@ export default {
     computed: {
         //投注单数
         orders() {
-            let arr = this.$store.state.lotteryNumber,
+            let arr = { ...this.$store.state.lotteryNumber },
                 nums = 0
             if (
                 arr.methods === '五星直选复式' &&
@@ -78,7 +78,21 @@ export default {
                     1
                 )
             }
-            if (arr.methods === '五星直选单式' && arr.list) {
+            if (
+                (arr.methods === '五星直选单式' ||
+                    arr.methods === '四星直选单式' ||
+                    arr.methods === '前三直选单式' ||
+                    arr.methods === '前三组选混合' ||
+                    arr.methods === '中三直选单式' ||
+                    arr.methods === '中三组选混合' ||
+                    arr.methods === '后三直选单式' ||
+                    arr.methods === '后三组选混合' ||
+                    arr.methods === '前二直选单式' ||
+                    arr.methods === '前二组选单式' ||
+                    arr.methods === '后二直选单式' ||
+                    arr.methods === '后二组选单式') &&
+                arr.list
+            ) {
                 nums = arr.list.length
             }
             if (arr.methods === '五星组选组120' && arr.list[0].size >= 5) {
@@ -149,9 +163,221 @@ export default {
                 arr.methods === '特殊一帆风顺' ||
                 arr.methods === '特殊好事成双' ||
                 arr.methods === '特殊三星报喜' ||
-                arr.methods === '特殊四季发财'
+                arr.methods === '特殊四季发财' ||
+                arr.methods === '四星不定位后四一码' ||
+                arr.methods === '三星不定位前三一码' ||
+                arr.methods === '三星不定位后三一码'
             ) {
                 nums = arr.list[0].size
+            }
+
+            //四星
+
+            if (arr.methods === '四星直选复式') {
+                let arrList = [...arr.list]
+                arrList.pop()
+                if (arrList.every(item => item.size > 0)) {
+                    nums = arrList.reduce(
+                        (preValue, curValue) => preValue * curValue.size,
+                        1
+                    )
+                }
+            }
+            //三星
+            if (
+                arr.methods === '前三直选复式' ||
+                arr.methods === '中三直选复式' ||
+                arr.methods === '后三直选复式' ||
+                arr.methods === '三星大小单双前三' ||
+                arr.methods === '三星大小单双后三'
+            ) {
+                let arrList = []
+                for (let index = 0; index < arr.list.length - 2; index++) {
+                    arrList.push(arr.list[index])
+                }
+                if (arrList.every(item => item.size > 0)) {
+                    nums = arrList.reduce(
+                        (preValue, curValue) => preValue * curValue.size,
+                        1
+                    )
+                }
+            }
+            if (
+                arr.methods === '前二直选复式' ||
+                arr.methods === '后二直选复式' ||
+                arr.methods === '二星大小单双前二' ||
+                arr.methods === '二星大小单双后二'
+            ) {
+                let arrList = []
+                for (let index = 0; index < 2; index++) {
+                    arrList.push(arr.list[index])
+                }
+                if (arrList.every(item => item.size > 0)) {
+                    nums = arrList.reduce(
+                        (preValue, curValue) => preValue * curValue.size,
+                        1
+                    )
+                }
+            }
+            if (
+                arr.methods === '前三直选和值' ||
+                arr.methods === '中三直选和值' ||
+                arr.methods === '后三直选和值'
+            ) {
+                let arrList = []
+                for (let index = 0; index < 2; index++) {
+                    let count = Array.from(arr.list[index])
+                    count.forEach(item => {
+                        nums += this.groupList(item)
+                    })
+                }
+            }
+            if (
+                arr.methods === '前二直选和值' ||
+                arr.methods === '后二直选和值'
+            ) {
+                let arrList = []
+                for (let index = 0; index < 2; index++) {
+                    let count = Array.from(arr.list[index])
+                    count.forEach(item => {
+                        nums += this.groupList(item, 2)
+                    })
+                }
+            }
+            if (
+                arr.methods === '前三直选跨度' ||
+                arr.methods === '中三直选跨度' ||
+                arr.methods === '后三直选跨度'
+            ) {
+                let arrList = []
+                let count = Array.from(arr.list[0])
+                count.forEach(item => {
+                    nums += this.handleDifferenceValue(item)
+                })
+            }
+            if (
+                arr.methods === '前二直选跨度' ||
+                arr.methods === '后二直选跨度'
+            ) {
+                let arrList = []
+                let count = Array.from(arr.list[0])
+                count.forEach(item => {
+                    nums += this.handleDifferenceValue(item, 2)
+                })
+            }
+            if (
+                arr.methods === '前三直选和值尾数' ||
+                arr.methods === '前三直选特殊号' ||
+                arr.methods === '中三直选和值尾数' ||
+                arr.methods === '中三直选特殊号' ||
+                arr.methods === '后三直选和值尾数' ||
+                arr.methods === '后三直选特殊号'
+            ) {
+                nums += arr.list[0].size
+            }
+            if (
+                arr.methods === '前三组选组三复式' ||
+                arr.methods === '中三组选组三复式' ||
+                arr.methods === '后三组选组三复式'
+            ) {
+                nums += this.handleGroup(Array.from(arr.list[0]), 2) * 2
+            }
+            if (
+                arr.methods === '前二组选复式' ||
+                arr.methods === '后二组选复式'
+            ) {
+                nums += this.handleGroup(Array.from(arr.list[0]), 2)
+            }
+            if (
+                arr.methods === '前三组选组六复式' ||
+                arr.methods === '中三组选组六复式' ||
+                arr.methods === '后三组选组六复式'
+            ) {
+                nums += this.handleGroup(Array.from(arr.list[0]), 3)
+            }
+            if (
+                arr.methods === '前三组选和值' ||
+                arr.methods === '中三组选和值' ||
+                arr.methods === '后三组选和值'
+            ) {
+                let arrList = []
+                for (let index = 0; index < 2; index++) {
+                    let count = Array.from(arr.list[index])
+                    count.forEach(item => {
+                        nums += this.groupSumList(item)
+                    })
+                }
+            }
+            if (
+                arr.methods === '前二组选和值' ||
+                arr.methods === '后二组选和值'
+            ) {
+                let arrList = []
+                for (let index = 0; index < 1; index++) {
+                    let count = Array.from(arr.list[index])
+                    count.forEach(item => {
+                        nums += this.groupSumList(item, 2)
+                    })
+                }
+            }
+            if (
+                arr.methods === '前三组选包胆' ||
+                arr.methods === '中三组选包胆' ||
+                arr.methods === '后三组选包胆'
+            ) {
+                for (const item of arr.list[0].values()) {
+                    nums += this.handleBall()
+                }
+            }
+            if (
+                arr.methods === '前二组选包胆' ||
+                arr.methods === '后二组选包胆'
+            ) {
+                for (const item of arr.list[0].values()) {
+                    nums += this.handleBall(2)
+                }
+            }
+            if (arr.methods === '定位胆定位胆') {
+                for (const item of arr.list) {
+                    nums += item.size
+                }
+            }
+            if (arr.methods === '五星不定位三码' && arr.list[0].size >= 3) {
+                nums = math.combo(Array.from(arr.list[0]), 3).length
+            }
+            if (
+                (arr.methods === '五星不定位二码' ||
+                    arr.methods === '四星不定位后四二码' ||
+                    arr.methods === '三星不定位前三二码' ||
+                    arr.methods === '三星不定位后三二码') &&
+                arr.list[0].size >= 2
+            ) {
+                nums = math.combo(Array.from(arr.list[0]), 2).length
+            }
+            if (arr.methods === '任四直选复式') {
+                let leg = 0
+                for (const item of arr.list) {
+                    item.size > 0 && leg++
+                }
+                if (leg >= 4) {
+                    nums = this.handleFree(arr.list)
+                }
+            }
+            if (arr.methods === '任四直选单式') {
+                if (this.lotterynumber) {
+                    let leg = 0
+                    for (const key in this.lotterynumber.lotteryPosition) {
+                        if (this.lotterynumber.lotteryPosition[key].value) {
+                            leg++
+                        }
+                    }
+                    if (leg > 4) {
+                        nums = arr.list.length * 5
+                    }
+                    if (leg == 4) {
+                        nums = arr.list.length
+                    }
+                }
             }
             return nums
         },
@@ -167,12 +393,31 @@ export default {
             )
         },
         bonus() {
-            let prize =
-                (this.nowPrizeGroup / 2000) *
-                this.prize *
-                this.modes[this.unitActive].rate *
-                this.multiple
-            return Math.floor(prize * 10000) / 10000
+            let prize
+            if (
+                this.methodList.prize_level_special &&
+                this.methodList.prize_level_special.length > 1
+            ) {
+                prize = []
+                this.prize.forEach(item => {
+                    let count =
+                        (this.nowPrizeGroup / 2000) *
+                        item *
+                        this.modes[this.unitActive].rate *
+                        this.multiple
+                    prize.push(Math.floor(count * 10000) / 10000)
+                })
+                let prizeSort = [...prize].sort((a, b) => a - b)
+                return { prize, prizeSort }
+            } else {
+                prize =
+                    (this.nowPrizeGroup / 2000) *
+                    this.prize[0] *
+                    this.modes[this.unitActive].rate *
+                    this.multiple
+
+                return Math.floor(prize * 10000) / 10000
+            }
         }
     },
     methods: {
@@ -199,6 +444,8 @@ export default {
             }
             betting({ postdata: JSON.stringify(postdata) }).then(res => {
                 this.$Message.success('投注成功')
+                this.$store.dispatch('handleLotteryNumber', '')
+                this.lotterynumber.reset()
                 this.$store.dispatch('handleOrderHistory', [...res.data.betlog])
             })
         },
@@ -225,10 +472,76 @@ export default {
             this.lotterynumber.reset()
         },
         handleOrder() {
-            let singleList = [] //单式
-            if (this.$store.state.lotteryNumber.methods == '五星直选单式') {
+            let singleList = [], //单式
+                trace = [], //和值
+                specialNum = [], //特殊号
+                descText = [], //为任选单式类型 组合
+                title = this.$store.state.lotteryNumber.methods
+            if (
+                title == '五星直选单式' ||
+                title == '四星直选单式' ||
+                title == '前三直选单式' ||
+                title == '前三组选混合' ||
+                title == '中三直选单式' ||
+                title == '中三组选混合' ||
+                title == '后三直选单式' ||
+                title == '后三组选混合' ||
+                title == '前二直选单式' ||
+                title == '前二组选单式' ||
+                title == '后二直选单式' ||
+                title == '后二组选单式' ||
+                title == '任四直选单式'
+            ) {
                 singleList = this.$store.state.lotteryNumber.list
             }
+            if (
+                title == '前三直选和值' ||
+                title == '前三组选和值' ||
+                title == '中三直选和值' ||
+                title == '中三组选和值' ||
+                title == '后三直选和值' ||
+                title == '后三组选和值'
+            ) {
+                let count = this.$store.state.lotteryNumber.list
+                trace = Array.from(count[0])
+                    .concat(Array.from(count[1]))
+                    .sort((a, b) => a - b)
+            }
+            if (
+                title == '前三直选跨度' ||
+                title == '前三直选和值尾数' ||
+                title == '前三组选组三复式' ||
+                title == '前三组选组六复式' ||
+                title == '中三直选跨度' ||
+                title == '中三直选和值尾数' ||
+                title == '中三组选组三复式' ||
+                title == '中三组选组六复式' ||
+                title == '后三直选跨度' ||
+                title == '后三直选和值尾数' ||
+                title == '后三组选组三复式' ||
+                title == '后三组选组六复式' ||
+                title == '前二直选跨度' ||
+                title == '前二组选复式' ||
+                title == '后二直选跨度' ||
+                title == '后二组选复式' ||
+                title == '五星不定位三码' ||
+                title == '五星不定位二码' ||
+                title == '四星不定位后四二码' ||
+                title === '三星不定位前三二码' ||
+                title === '三星不定位后三二码'
+            ) {
+                let count = this.$store.state.lotteryNumber.list
+                trace = Array.from(count[0]).sort((a, b) => a - b)
+            }
+            if (
+                title == '前三直选特殊号' ||
+                title == '中三直选特殊号' ||
+                title == '后三直选特殊号'
+            ) {
+                let count = this.$store.state.lotteryNumber.list
+                specialNum = Array.from(count[0])
+            }
+
             let codes = [...this.$store.state.lotteryNumber.list].map(item =>
                 Array.from(item)
                     .sort((a, b) => a - b)
@@ -239,31 +552,71 @@ export default {
                 codesDesc = codes[0]
             //拼接组合投注号码
             for (let index = 1; index < codes.length; index++) {
-                if (codes[index]) {
+                if (codes[index].length) {
                     codesSplice = codesSplice + '|' + codes[index]
                     codesDesc = codesDesc + ',' + codes[index]
                 }
             }
-            let handleCodes = singleList.length
-                ? singleList.join('&')
-                : codesSplice
-            let desc = singleList.length
-                ? `[${this.methodList.title}_${
-                      this.methodList.desc
-                  }] ${singleList.join(' ')}`
-                : `[${this.methodList.title}_${
-                      this.methodList.desc
-                  }] ${codesDesc}`
+            if (title == '定位胆定位胆') {
+                codesSplice = codes[0]
+                codesDesc = codes[0]
+                for (let index = 1; index < codes.length; index++) {
+                    codesSplice = codesSplice + '|' + codes[index]
+                    if (codes[index].length) {
+                        codesDesc = codesDesc + ',' + codes[index]
+                    }
+                }
+            }
+            let handleCodes
+
+            if (singleList.length) {
+                handleCodes = singleList.join('&')
+            } else if (trace.length) {
+                handleCodes = trace.join('&')
+            } else if (specialNum.length) {
+                handleCodes = specialNum.join('&')
+            } else {
+                handleCodes = codesSplice
+            }
+
+            let desc, descNumber
+
+            if (singleList.length) {
+                descNumber = singleList.join(' ')
+            } else if (trace.length) {
+                descNumber = trace.join(',')
+            } else if (specialNum.length) {
+                descNumber = specialNum.join('|')
+            } else {
+                descNumber = codesDesc
+            }
+            if (title == '任四直选单式') {
+                for (const key in this.lotterynumber.lotteryPosition) {
+                    if (this.lotterynumber.lotteryPosition[key].value) {
+                        descText.push(
+                            this.lotterynumber.lotteryPosition[key].text
+                        )
+                    }
+                }
+                desc = desc = `[${this.methodList.title}_${
+                    this.methodList.desc
+                }] [${descText.join(',')}] ${descNumber}`
+            } else {
+                desc = desc = `[${this.methodList.title}_${
+                    this.methodList.desc
+                }] ${descNumber}`
+            }
 
             let lt_project = {
                 type: this.$store.state.lotteryNumber.type, //彩种类型
-                methodid: Number(this.methodid),
+                methodid: this.methodid,
                 point: this.rebate.slice(0, -1) / 100,
                 codes: handleCodes,
                 nums: this.orders, //投注数
                 times: this.multiple, //倍数
                 money: this.money, //金额,
                 mode: this.modes[this.unitActive].modeid,
+                location: descText.join(','), //任选单式
                 desc: desc,
                 buqsno: 'buqsno5ce3a094c4706'
             }
@@ -281,7 +634,161 @@ export default {
             if (this.multiple < 1) {
                 this.multiple = 1
             }
+        },
+        //和值
+        groupList(value, leg) {
+            let count = []
+            let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+            for (let i = 0; i < arr.length; i++) {
+                for (let j = 0; j < arr.length; j++) {
+                    if (leg == 2) {
+                        if (arr[i] + arr[j] == value) {
+                            count.push([arr[i], arr[j]])
+                        }
+                    } else {
+                        for (let k = 0; k < arr.length; k++) {
+                            if (arr[i] + arr[j] + arr[k] == value) {
+                                count.push([arr[i], arr[j], arr[k]])
+                            }
+                        }
+                    }
+                }
+            }
+            return count.length
+        },
+        //组选和值
+        groupSumList(value, leg) {
+            let count = new Set()
+            let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+            for (let i = 0; i < arr.length; i++) {
+                for (let j = 0; j < arr.length; j++) {
+                    if ((leg = 2)) {
+                        if (arr[i] + arr[j] == value) {
+                            if (arr[i] != arr[j]) {
+                                count.add(
+                                    [arr[i], arr[j]]
+                                        .sort((a, b) => a - b)
+                                        .join('')
+                                )
+                            }
+                        }
+                    } else {
+                        for (let k = 0; k < arr.length; k++) {
+                            if (arr[i] + arr[j] + arr[k] == value) {
+                                if (arr[i] + arr[j] - (arr[i] + arr[k]) != 0) {
+                                    count.add(
+                                        [arr[i], arr[j], arr[k]]
+                                            .sort((a, b) => a - b)
+                                            .join('')
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return count.size
+        },
+        //求差
+        handleDifferenceValue(value, leg) {
+            let count = [], //组合排列
+                arrResult = [], //存放结果
+                arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] //初始数据
+            for (let i = 0; i < arr.length; i++) {
+                for (let j = 0; j < arr.length; j++) {
+                    if (leg == 2) {
+                        count.push([arr[i], arr[j]])
+                    } else {
+                        for (let k = 0; k < arr.length; k++) {
+                            count.push([arr[i], arr[j], arr[k]])
+                        }
+                    }
+                }
+            }
+            count.forEach(item => {
+                item.sort((a, b) => a - b)
+                if (leg == 2) {
+                    if (item[1] - item[0] == value) {
+                        arrResult.push(item)
+                    }
+                }
+                {
+                    if (item[2] - item[0] == value) {
+                        arrResult.push(item)
+                    }
+                }
+            })
+            return arrResult.length
+        },
+        handleGroup(arr, length) {
+            let count = math.combo(arr, length)
+            return count.length
+        },
+        handleBall(leg) {
+            let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] //初始数据
+            return leg == 2 ? arr.length - 1 : (arr.length * 2 - 2) * 3
+        },
+        handleFree(arr) {
+            let count = [],
+                leg = 0,
+                removeRepeat = new Set()
+            for (const item of arr) {
+                if (item.size) {
+                    count.push(Array.from(item))
+                }
+            }
+
+            count = count.map((item, index) =>
+                item.map(element => index.toString().concat(element))
+            )
+            count = this.doExchange(count)
+            count.forEach(item => {
+                let arr = math.combo(item, 4)
+                arr.forEach(ele => {
+                    removeRepeat.add(ele.join(''))
+                })
+            })
+            leg = removeRepeat.size
+
+            return leg
+        },
+        doExchange(arr) {
+            var len = arr.length
+            // 当数组大于等于2个的时候
+            if (len >= 2) {
+                // 第一个数组的长度
+                var len1 = arr[0].length
+                // 第二个数组的长度
+                var len2 = arr[1].length
+                // 2个数组产生的组合数
+                var lenBoth = len1 * len2
+                //  申明一个新数组
+                var items = new Array(lenBoth)
+                // 申明新数组的索引
+                var index = 0
+                for (var i = 0; i < len1; i++) {
+                    for (var j = 0; j < len2; j++) {
+                        if (arr[0][i] instanceof Array) {
+                            items[index] = arr[0][i].concat(arr[1][j])
+                        } else {
+                            items[index] = [arr[0][i]].concat(arr[1][j])
+                        }
+                        index++
+                    }
+                }
+                var newArr = new Array(len - 1)
+                for (var i = 2; i < arr.length; i++) {
+                    newArr[i - 1] = arr[i]
+                }
+                newArr[0] = items
+                return this.doExchange(newArr)
+            } else {
+                return arr[0]
+            }
         }
+    },
+    mounted() {
+        // console.log(this.doExchange([[0, 1], [0], [0], [0]]))
     }
 }
 </script>

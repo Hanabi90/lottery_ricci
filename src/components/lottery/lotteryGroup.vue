@@ -42,7 +42,7 @@
                 </div>
             </li>
         </ul>
-        <Lotterynumber ref="lotterynumber" :method-list="methodList"/>
+        <Lotterynumber :order="this.$refs.order" ref="lotterynumber" :method-list="methodList"/>
         <Order
             :methodid="methodid"
             :i-wallet-type="iWalletType"
@@ -52,6 +52,7 @@
             :now-prize-group="nowPrizeGroup"
             :lotterynumber="this.$refs.lotterynumber"
             :prize="this.prize"
+            ref="order"
         />
     </div>
 </template>
@@ -101,7 +102,7 @@ export default {
                 ...res.data[0].label[0].label[0],
                 title: res.data[0].label[0].gtitle
             }
-            this.prize = res.data[0].label[0].label[0].prize_level_special[0]
+            this.prize = res.data[0].label[0].label[0].prize_level_special
             this.nowPrizeGroup = res.data[0].label[0].label[0].nowPrizeGroup
             this.prizeGroup = res.data[0].label[0].label[0].nowPrizeGroup
             this.methodid = res.data[0].label[0].label[0].methodid
@@ -115,6 +116,8 @@ export default {
                 ...item.label[0].label[0],
                 title: item.label[0].gtitle
             }
+            this.methodid = item.label[0].label[0].methodid
+            this.prize = item.label[0].label[0].prize_level_special
             this.itemActive = { value: 0, index: 0 }
             this.$nextTick(() => {
                 this.$refs.lotterynumber.reset()
@@ -131,7 +134,7 @@ export default {
             this.methodid = item.methodid
             this.itemActive = { value, index }
             this.methodList = { ...item, title }
-            this.prize = item.prize_level_special[0]
+            this.prize = item.prize_level_special
             this.nowPrizeGroup = item.nowPrizeGroup
             this.prizeGroup = item.nowPrizeGroup
         }
@@ -172,7 +175,7 @@ export default {
                 border-top 1px solid #ffe0b8
     .navTwo
         padding-top 20px
-        height 140px
+        min-height 140px
         font-size 12px
         position relative
         padding-right 190px

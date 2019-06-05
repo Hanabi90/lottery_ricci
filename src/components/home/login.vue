@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import { login, getbalance } from '@/api/index.js'
+import { login, getbalance, getMenu } from '@/api/index.js'
 export default {
     name: 'login',
     data() {
@@ -56,24 +56,18 @@ export default {
         },
         handlelogin() {
             login(this.login).then(res => {
-                if (res.code == 0) {
-                    sessionStorage.setItem('token', res.data.token)
-                    sessionStorage.setItem('nickname', res.data.nickname)
-                    this.onOff = false
-                    this.$store.dispatch('handleLogin', 1)
-                    this.$store.dispatch('handleNickName', res.data.nickname)
-                    this.$Message.info('登录成功')
-                    getbalance().then(res => {
-                        this.$store.dispatch('handleMoney', res.data)
-                    })
-                } else {
-                    console.log(11111)
-                    this.$Message.error(res.msg)
-                    this.login = {
-                        username: '',
-                        loginpass: ''
-                    }
-                }
+                sessionStorage.setItem('token', res.data.token)
+                sessionStorage.setItem('nickname', res.data.nickname)
+                this.onOff = false
+                this.$store.dispatch('handleLogin', 1)
+                this.$store.dispatch('handleNickName', res.data.nickname)
+                this.$Message.info('登录成功')
+                getbalance().then(res => {
+                    this.$store.dispatch('handleMoney', res.data)
+                })
+                getMenu().then(res => {
+                    this.$store.dispatch('handleLotteryMenue', { ...res.data })
+                })
             })
         }
     }

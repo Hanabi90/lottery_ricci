@@ -88,6 +88,12 @@ export const setsequestion = formData =>
         url: 'user/setsequestion',
         data: qs.stringify(formData)
     })
+//取得先前设置的密保问题
+export const checksequestion = formData =>
+    service.request({
+        method: 'post',
+        url: 'security/checksequestion'
+    })
 //修改昵称
 export const updatenickname = formData =>
     service.request({
@@ -184,10 +190,24 @@ export const getissue = formData =>
         url: `getissue`,
         data: qs.stringify(formData)
     })
+//獲取中獎號碼接口
+export const getprize = formData =>
+    service.request({
+        method: 'post',
+        url: `getprize`,
+        data: qs.stringify(formData)
+    })
 //投注接口
 export const betting = formData =>
     service.request({
         method: 'post',
         url: `lottery/betting`,
+        data: qs.stringify(formData)
+    })
+//投注接口
+export const ordercancel = formData =>
+    service.request({
+        method: 'post',
+        url: `ordercancel`,
         data: qs.stringify(formData)
     })

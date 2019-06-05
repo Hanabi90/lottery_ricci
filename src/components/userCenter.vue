@@ -4,14 +4,14 @@
             <div class="title">
                 <Icon @click="close" :class="'close'" size="20" type="md-close-circle"/>
             </div>
-            <Tabs :style="{'padding':'0 20px 20px'}" :value="active">
+            <Tabs :style="{'padding':'0 20px 20px'}" v-model="active">
                 <TabPane
                     v-for="item of tableList"
                     :key="item.name"
                     :label="item.name"
                     :name="item.name"
                 >
-                    <component :is="item.content"/>
+                    <component v-if="active==item.name" :is="item.content"/>
                 </TabPane>
             </Tabs>
         </div>
@@ -55,7 +55,7 @@ export default {
                 },
                 {
                     name: '消息',
-                    content: 'Loginpassword'
+                    content: 'Information'
                 },
                 {
                     name: '公告',
@@ -78,7 +78,8 @@ export default {
         Loginpassword,
         Bindquestion,
         GameHistory,
-        BettingRecord
+        BettingRecord,
+        Information
     }
 }
 </script>
@@ -97,6 +98,7 @@ export default {
     overscroll-behavior none
     .userCenter
         width 782px
+        height 676px
         margin auto
         margin-top 160px
         overflow hidden

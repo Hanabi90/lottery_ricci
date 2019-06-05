@@ -2,74 +2,10 @@
     <div class="prizeList">
         <h5>近期开奖</h5>
         <ul>
-            <li class="list">
-                <div class="time">0508-033</div>
+            <li v-for="(item,value) of this.$store.state.openList" :key="value" class="list">
+                <div class="time">{{item.issue}}</div>
                 <div class="prizeNumber">
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                </div>
-            </li>
-            <li class="list">
-                <div class="time">0508-033</div>
-                <div class="prizeNumber">
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                </div>
-            </li>
-            <li class="list">
-                <div class="time">0508-033</div>
-                <div class="prizeNumber">
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                </div>
-            </li>
-            <li class="list">
-                <div class="time">0508-033</div>
-                <div class="prizeNumber">
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                </div>
-            </li>
-            <li class="list">
-                <div class="time">0508-033</div>
-                <div class="prizeNumber">
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                </div>
-            </li>
-            <li class="list">
-                <div class="time">0508-033</div>
-                <div class="prizeNumber">
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                </div>
-            </li>
-            <li class="list">
-                <div class="time">0508-033</div>
-                <div class="prizeNumber">
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
-                    <span>8</span>
+                    <span v-for="(element,index) of item.code.split('')" :key="index">{{element}}</span>
                 </div>
             </li>
         </ul>
@@ -96,15 +32,20 @@ export default {
         font-size 14px
     .list
         overflow hidden
-        margin 0 20px
+        padding 0 20px
         color #dcdcdc
         border-bottom 1px dashed #555
         font-size 14px
         line-height 30px
         padding-top 2px
+        &:first-child
+            background #ff8f00
+            font-size 14px
+            font-weight bold
+            color #000
         .time
             float left
-            margin-right 30px
+            margin-right 20px
         .prizeNumber
             float right
             span

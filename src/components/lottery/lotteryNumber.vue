@@ -43,6 +43,13 @@
         </div>
         <ul class="number_container">
             <li v-if="quickUpload.has(methodList.name)" class="listSingle">
+                <p style="margin-bottom:10px" v-if="getTitle">
+                    <Checkbox
+                        v-for="(item,index) of lotteryPosition"
+                        :key="index"
+                        v-model="lotteryPosition[index].value"
+                    >{{item.text}}</Checkbox>
+                </p>
                 <div>
                     <Input
                         class="textContent"
@@ -62,17 +69,24 @@
             </li>
             <!-- 五组 -->
             <li v-else v-for="(item,index) of getLayout" :key="index">
+                <p style="margin-bottom:10px" v-if="getTitle">
+                    <Checkbox
+                        v-for="(item,index) of lotteryPosition"
+                        :key="index"
+                        v-model="lotteryPosition[index].value"
+                    >{{item.text}}</Checkbox>
+                </p>
                 <div class="list">
                     <h5>{{item.title}}</h5>
                     <div>
                         <span
-                            @click="chosenNumber(number,index)"
+                            @click="chosenNumber(number,index,$event)"
                             v-for="number of item.no"
                             :key="number"
                             :class="{'active':activeClass(number,index)}"
                         >{{number}}</span>
                     </div>
-                    <div v-if="quickChosen()">
+                    <div ref="typeList" v-if="quickChosen()">
                         <span
                             @click="chosenType(lable,index,$event)"
                             v-for="lable of getLabel()"
@@ -87,13 +101,19 @@
                         <span v-for="supple of item[switcherNow]" :key="supple">{{supple}}</span>
                     </div>
                 </div>-->
+                <div v-if="methodList.name=='特殊号'" class="supplement">
+                    <h5>奖金</h5>
+                    <div>
+                        <span v-for="supple of prizeList" :key="supple">{{supple}}</span>
+                    </div>
+                </div>
             </li>
         </ul>
     </div>
 </template>
 
 <script>
-import { Tooltip, Input, Upload, Button } from 'iview'
+import { Tooltip, Input, Upload, Button, Checkbox } from 'iview'
 export default {
     name: 'lotteryNumber',
     props: {
@@ -105,7 +125,8 @@ export default {
                     selectarea: {}
                 }
             }
-        }
+        },
+        order: {}
     },
     data() {
         return {
@@ -125,12 +146,41 @@ export default {
                 new Set([]),
                 new Set([])
             ],
-            quickDontShow: new Set(['QZUHZ', 'Q3BD']), //不显示快捷选好
+            quickDontShow: new Set(['QZUHZ', 'Q3BD', 'QZXHZ']), //不显示快捷选好
             quickUpload: new Set(['单式', '混合']), //是否显示单式玩法
-            singleList: '' //单式内容
+            singleList: '', //单式内容
+            lotteryPosition: {
+                0: { text: '万位', value: '' },
+                1: { text: '千位', value: '' },
+                2: { text: '百位', value: '' },
+                3: { text: '十位', value: '' },
+                4: { text: '个位', value: '' }
+            }
         }
     },
     computed: {
+        getTitle() {
+            let groupTitle
+            if (this.methodList) {
+                groupTitle = this.methodList.title + this.methodList.name
+            }
+
+            if (
+                groupTitle == '任四直选单式' ||
+                groupTitle == '任三直选单式' ||
+                groupTitle == '任三组选单式' ||
+                groupTitle == '任二直选单式' ||
+                groupTitle == '任二组选单式' ||
+                groupTitle == '任四组选组选24'
+            ) {
+                return true
+            } else {
+                return false
+            }
+        },
+        prizeList() {
+            return this.order.bonus.prize
+        },
         getLayout() {
             let list
             if (
@@ -149,12 +199,26 @@ export default {
         handleSingleList() {
             let codes = [],
                 reg = /[^\d,，;；\n\s*]/g,
-                leg = 0
-            if (
-                this.methodList.title + this.methodList.name ==
-                '五星直选单式'
-            ) {
+                leg = 0,
+                title = this.methodList.title + this.methodList.name
+            if (title == '五星直选单式') {
                 leg = 5
+            }
+            if (title == '四星直选单式' || title == '任四直选单式') {
+                leg = 4
+            }
+            if (
+                title == '前三直选单式' ||
+                title == '前三组选混合' ||
+                title == '中三直选单式' ||
+                title == '中三组选混合' ||
+                title == '后三直选单式' ||
+                title == '后三组选混合'
+            ) {
+                leg = 3
+            }
+            if (title == '前二直选单式' || title == '前二组选单式') {
+                leg = 2
             }
             if (this.singleList) {
                 codes = new Set([
@@ -166,6 +230,44 @@ export default {
                     }
                 }
                 codes = Array.from(codes)
+                if (
+                    title == '前三组选混合' ||
+                    title == '中三组选混合' ||
+                    title == '后三组选混合'
+                ) {
+                    let arr = []
+                    codes.forEach(item => {
+                        let element = item.split('')
+                        if (
+                            element[0] +
+                                element[1] -
+                                (element[0] + element[2]) !=
+                            0
+                        ) {
+                            arr.push(item)
+                        }
+                    })
+                    codes = arr
+                }
+                if (title == '前二组选单式') {
+                    let arr = []
+                    codes.forEach(item => {
+                        let element = item.split('')
+                        if (element[0] != element[1]) {
+                            arr.push(item)
+                        }
+                    })
+                    codes = arr
+                }
+                if (title == '任四直选单式') {
+                    codes = this.foo3(this.singleList.replace(reg, ''))
+                    for (let index = 0; index < codes.length; index++) {
+                        const element = codes[index]
+                        if (element.length != leg) {
+                            codes.splice(index, 1)
+                        }
+                    }
+                }
             }
             return codes
         }
@@ -231,14 +333,20 @@ export default {
         change(item) {
             this.switcherNow = item
         },
-        chosenNumber(number, index) {
+        chosenNumber(number, index, $event) {
             //去除快捷选取的激活样式
-            event.path[2].lastElementChild
-                .querySelectorAll('span')
-                .forEach(item => (item.className = ''))
+            let e = window.event || $event
 
-            //添加样式 添加选好
+            if (!this.methodList.name == '和值') {
+                this.$refs.typeList[index]
+                    .querySelectorAll('span')
+                    .forEach(item => (item.className = ''))
+            }
+            if (this.methodList.name == '包胆') {
+                this.activeGroup[index].clear()
+            }
             if (this.activeGroup[index].has(number)) {
+                //添加样式 添加选好
                 this.activeGroup[index].delete(number)
             } else {
                 this.activeGroup[index].add(number)
@@ -251,13 +359,18 @@ export default {
             })
         },
         chosenType(lable, index, $event) {
-            $event.path[1]
-                .querySelectorAll('span')
-                .forEach(item => (item.className = ''))
-            if ($event.toElement.className == 'active') {
-                $event.toElement.className = ''
+            let e = window.event || $event
+
+            if (!this.methodList.name == '和值') {
+                this.$refs.typeList[index]
+                    .querySelectorAll('span')
+                    .forEach(item => (item.className = ''))
+            }
+
+            if (e.target.className == 'active') {
+                e.target.className = ''
             } else {
-                $event.toElement.className = 'active'
+                e.target.className = 'active'
             }
             //清空
             this.activeGroup[index].clear()
@@ -312,18 +425,19 @@ export default {
         Tooltip,
         Input,
         Upload,
-        Button
+        Button,
+        Checkbox
     }
 }
 </script>
 
 <style lang="stylus" scoped>
 .lotteryNumber
-    height 320px
+    min-height 320px
     background url('../../assets/images/ssc-repeat_001.jpg')
     border-bottom 1px solid #1a1a1a
     .numberTitle
-        padding 20px
+        padding 10px 20px
         border-top 1px solid #424242
         overflow hidden
         h5

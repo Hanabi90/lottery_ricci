@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 
 Vue.use(Vuex)
 let oState = {
+    lotteryMenue: {}, //彩票菜单
     loginCode: 0, // 0 未登录 1 登录
     money: {
         availablebalance: '', //现金
@@ -17,7 +18,8 @@ let oState = {
     hackReset: true, //利用v-if 重组组件lottery 组件
     issue: '', //当前奖期
     orderList: [], //投购篮
-    orderHistory: [] //投注历史记录
+    orderHistory: [], //投注历史记录
+    openList: [] //开奖历史
 }
 export default new Vuex.Store({
     state: { ...oState },
@@ -26,6 +28,9 @@ export default new Vuex.Store({
             for (const iterator in oState) {
                 state[iterator] = oState[iterator]
             }
+        },
+        lotteryMenue(state, data) {
+            state.lotteryMenue = { ...data }
         },
         login(state, data) {
             // 变更状态
@@ -72,11 +77,17 @@ export default new Vuex.Store({
         },
         orderHistory(state, data) {
             state.orderHistory = [...data]
+        },
+        openList(state, data) {
+            state.openList = [...data]
         }
     },
     actions: {
         handleReset(context) {
             context.commit('reset')
+        },
+        handleLotteryMenue(context, data) {
+            context.commit('lotteryMenue', data)
         },
         handleLogin(context, data) {
             context.commit('login', data)
@@ -110,6 +121,9 @@ export default new Vuex.Store({
         },
         handleOrderHistory(context, data) {
             context.commit('orderHistory', data)
+        },
+        handleOpenList(context, data) {
+            context.commit('openList', data)
         }
     }
 })
