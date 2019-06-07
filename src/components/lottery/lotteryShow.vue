@@ -82,8 +82,6 @@ export default {
                     }
                     if (current < getCurrent) {
                         this.opentimeList.shift()
-                    }
-                    if (current > getCurrent) {
                         this.openTimeOnOff = true
                         return
                     }

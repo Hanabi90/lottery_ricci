@@ -44,11 +44,13 @@
         <ul class="number_container">
             <li v-if="quickUpload.has(methodList.name)" class="listSingle">
                 <p style="margin-bottom:10px" v-if="getTitle">
+                    <span style="margin-right:25px;font-size:14px">位置</span>
                     <Checkbox
                         v-for="(item,index) of lotteryPosition"
                         :key="index"
                         v-model="lotteryPosition[index].value"
                     >{{item.text}}</Checkbox>
+                    <i>{{methodList.methoddesc}}</i>
                 </p>
                 <div>
                     <Input
@@ -69,12 +71,14 @@
             </li>
             <!-- 五组 -->
             <li v-else v-for="(item,index) of getLayout" :key="index">
-                <p style="margin-bottom:10px" v-if="getTitle">
+                <p style="margin-bottom:10px" v-if="getTitle&&index==0">
+                    <span style="margin-right:25px;font-size:14px">位置</span>
                     <Checkbox
                         v-for="(item,index) of lotteryPosition"
                         :key="index"
                         v-model="lotteryPosition[index].value"
                     >{{item.text}}</Checkbox>
+                    <i>{{methodList.methoddesc}}</i>
                 </p>
                 <div class="list">
                     <h5>{{item.title}}</h5>
@@ -101,7 +105,7 @@
                         <span v-for="supple of item[switcherNow]" :key="supple">{{supple}}</span>
                     </div>
                 </div>-->
-                <div v-if="methodList.name=='特殊号'" class="supplement">
+                <div v-if="methodList.name=='特殊号'||methodList.title=='龙虎和'" class="supplement">
                     <h5>奖金</h5>
                     <div>
                         <span v-for="supple of prizeList" :key="supple">{{supple}}</span>
@@ -147,14 +151,14 @@ export default {
                 new Set([])
             ],
             quickDontShow: new Set(['QZUHZ', 'Q3BD', 'QZXHZ']), //不显示快捷选好
-            quickUpload: new Set(['单式', '混合']), //是否显示单式玩法
+            quickUpload: new Set(['单式', '混合', '组三单式', '组六单式']), //是否显示单式玩法
             singleList: '', //单式内容
             lotteryPosition: {
-                0: { text: '万位', value: '' },
-                1: { text: '千位', value: '' },
-                2: { text: '百位', value: '' },
-                3: { text: '十位', value: '' },
-                4: { text: '个位', value: '' }
+                0: { text: '万位', value: false },
+                1: { text: '千位', value: false },
+                2: { text: '百位', value: false },
+                3: { text: '十位', value: false },
+                4: { text: '个位', value: false }
             }
         }
     },
@@ -171,7 +175,20 @@ export default {
                 groupTitle == '任三组选单式' ||
                 groupTitle == '任二直选单式' ||
                 groupTitle == '任二组选单式' ||
-                groupTitle == '任四组选组选24'
+                groupTitle == '任四组选组选24' ||
+                groupTitle == '任四组选组选12' ||
+                groupTitle == '任四组选组选6' ||
+                groupTitle == '任四组选组选4' ||
+                groupTitle == '任三直选和值' ||
+                groupTitle == '任三组选组三复式' ||
+                groupTitle == '任三组选组三单式' ||
+                groupTitle == '任三组选组六复式' ||
+                groupTitle == '任三组选组六单式' ||
+                groupTitle == '任三组选混合' ||
+                groupTitle == '任三组选和值' ||
+                groupTitle == '任二直选和值' ||
+                groupTitle == '任二组选复式' ||
+                groupTitle == '任二组选和值'
             ) {
                 return true
             } else {
@@ -213,11 +230,20 @@ export default {
                 title == '中三直选单式' ||
                 title == '中三组选混合' ||
                 title == '后三直选单式' ||
-                title == '后三组选混合'
+                title == '后三组选混合' ||
+                title == '任三直选单式' ||
+                title == '任三组选组三单式' ||
+                title == '任三组选组六单式' ||
+                title == '任三组选混合'
             ) {
                 leg = 3
             }
-            if (title == '前二直选单式' || title == '前二组选单式') {
+            if (
+                title == '前二直选单式' ||
+                title == '前二组选单式' ||
+                title == '任二直选单式' ||
+                title == '任二组选单式'
+            ) {
                 leg = 2
             }
             if (this.singleList) {
@@ -259,14 +285,52 @@ export default {
                     })
                     codes = arr
                 }
-                if (title == '任四直选单式') {
-                    codes = this.foo3(this.singleList.replace(reg, ''))
-                    for (let index = 0; index < codes.length; index++) {
-                        const element = codes[index]
+                if (title == '任二组选单式') {
+                    let arr = []
+                    codes.forEach(item => {
+                        let element = item.split('')
+                        if (element[0] != element[1]) {
+                            arr.push([element[0], element[1]])
+                        }
+                    })
+
+                    codes = Array.from(
+                        new Set(
+                            arr.map(item => item.sort((a, b) => a - b).join(''))
+                        )
+                    )
+                }
+                if (title == '任三组选组三单式') {
+                    codes = new Set([
+                        ...this.foo3(this.singleList.replace(reg, ''))
+                    ])
+                    for (const element of codes.values()) {
                         if (element.length != leg) {
-                            codes.splice(index, 1)
+                            codes.delete(element)
+                        } else {
+                            let repeatArr = new Set([...element.split('')])
+                            if (repeatArr.size != 2) {
+                                codes.delete(element)
+                            }
                         }
                     }
+                    codes = Array.from(codes)
+                }
+                if (title == '任三组选组六单式') {
+                    codes = new Set([
+                        ...this.foo3(this.singleList.replace(reg, ''))
+                    ])
+                    for (const element of codes.values()) {
+                        if (element.length != leg) {
+                            codes.delete(element)
+                        } else {
+                            let repeatArr = new Set([...element.split('')])
+                            if (repeatArr.size == 2) {
+                                codes.delete(element)
+                            }
+                        }
+                    }
+                    codes = Array.from(codes)
                 }
             }
             return codes
@@ -355,6 +419,8 @@ export default {
             this.$store.dispatch('handleLotteryNumber', {
                 list: this.activeGroup,
                 methods: this.methodList.title + this.methodList.name,
+                title: this.methodList.title,
+                name: this.methodList.name,
                 type: this.methodList.selectarea.type
             })
         },

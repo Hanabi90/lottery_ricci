@@ -1,7 +1,8 @@
 <template>
     <div class="lotteryOrderList">
         <ul class="orderTitle">
-            <li>玩法与投注号码</li>
+            <li>玩法</li>
+            <li>投注号码</li>
             <li>模式</li>
             <li>资金模式</li>
             <li>倍率</li>
@@ -18,6 +19,7 @@
                 class="orderContent"
             >
                 <li>{{item.desc}}</li>
+                <li>{{item.codes}}</li>
                 <li>现金</li>
                 <li>元</li>
                 <li>{{item.times}}倍</li>

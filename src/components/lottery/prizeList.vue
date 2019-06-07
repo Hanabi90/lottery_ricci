@@ -49,5 +49,5 @@ export default {
         .prizeNumber
             float right
             span
-                margin-right 16px
+                margin-right 14px
 </style>
