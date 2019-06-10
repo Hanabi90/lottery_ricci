@@ -32,7 +32,7 @@
             <FormItem label="请选择日期">
                 <DatePicker
                     v-model="bettingRecord.starttime"
-                    format="yyyy/MM/dd hh:mm:ss"
+                    format="yyyy-MM-dd HH:mm:ss"
                     type="datetimerange"
                     placeholder="请选择日期"
                     style="width: 280px"

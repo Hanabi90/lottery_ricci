@@ -24,7 +24,7 @@
             <FormItem label="请选择日期">
                 <DatePicker
                     v-model="orderHistoryList.starttime"
-                    format="yyyy/MM/dd hh:mm:ss"
+                    format="yyyy-MM-dd HH:mm:ss"
                     type="datetimerange"
                     placeholder="请选择日期"
                     style="width: 280px"
@@ -114,7 +114,7 @@ export default {
                 modes: '', //投注模式
                 lotteryid: '', //彩种名称
                 starttime: '', //起始时间
-                pn: '', //请求的数据记录数量
+                pn: 9, //请求的数据记录数量
                 p: 1 //请求的页面序号
             },
             lotteryList: {}, //彩票id
