@@ -100,7 +100,7 @@ export default {
         width 782px
         height 676px
         margin auto
-        margin-top 160px
+        margin-top 80px
         overflow hidden
         border-radius 10px
         background #fff

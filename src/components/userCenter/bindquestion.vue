@@ -98,7 +98,6 @@ export default {
                 if (valid) {
                     setsequestion({ ...this.formInline }).then(res => {
                         this.$Message.success('Success!')
-                        console.log(res)
                     })
                 } else {
                     this.$Message.error('信息填写不完整!')
@@ -107,9 +106,7 @@ export default {
         }
     },
     mounted() {
-        checksequestion().then(res => {
-            console.log(res.data)
-        })
+        checksequestion().then(res => {})
     },
     components: {
         Form,

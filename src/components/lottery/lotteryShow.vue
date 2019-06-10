@@ -34,7 +34,8 @@ export default {
                 code: ''
             }, //开奖结果
             opentimeList: [], //开奖时间
-            openTimeOnOff: true //开奖函数只执行一次
+            openTimeOnOff: true, //开奖函数只执行一次
+            count: 0
         }
     },
     mounted() {
@@ -64,7 +65,6 @@ export default {
             let lotteryid = sessionStorage.getItem('lotteryId')
             let opentime = this.opentimeList[0].opentime,
                 current = this.opentimeList[0].current
-            console.log()
             if (opentime) {
                 setTimeout(() => {
                     this.$set(this.opentimeList[0], 'opentime', opentime - 1)
@@ -73,17 +73,30 @@ export default {
             } else {
                 getprize({ lotteryid, size: 7 }).then(res => {
                     let getCurrent = res.data[0].issue.split('-')[1]
+                    let nowissue = this.issue.split('-') //当前的奖期
                     if (current == getCurrent) {
+                        this.count = 0 //从新计数
                         for (const key in res.data[0]) {
-                            this.$set(this.lotteryNumber, key, res.data[0][key])
+                            this.$set(this.lotteryNumber, key, res.data[0][key]) //开奖
                         }
                         this.$store.dispatch('handleOpenList', res.data)
                         this.opentimeList.shift()
                     }
-                    if (current < getCurrent) {
-                        this.opentimeList.shift()
-                        this.openTimeOnOff = true
-                        return
+                    if (current != getCurrent) {
+                        this.count += 1
+                        if (this.count > 3) {
+                            this.opentimeList.shift()
+                            this.opentimeList[0].opentime -= 3
+                            this.openTimeOnOff = true
+                            this.count = 0
+                            //开奖失败
+                            this.$set(
+                                this.lotteryNumber,
+                                'issue',
+                                `${nowissue[0]}-${nowissue[1] - 1}`
+                            ) //开奖
+                            this.$set(this.lotteryNumber, 'code', '-----')
+                        }
                     }
                     setTimeout(() => {
                         this.handleOpenTime()

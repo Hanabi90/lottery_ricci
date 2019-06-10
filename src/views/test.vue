@@ -31,7 +31,6 @@ JGxIXZmW2J7Qks1c+inXB4KQIuXK2a6DLfuGnxRWCTa0XJvHr6vLWvx1J8zVktOq
 i5Azz9DtRubvoQJFAgMBAAE=
 -----END PUBLIC KEY-----`
             )
-            console.log('加密：' + jse.encrypt(pas))
             return jse.encrypt(pas)
         },
         rsa_encrypt(str) {
@@ -48,12 +47,7 @@ i5Azz9DtRubvoQJFAgMBAAE=
             return ret
         }
     },
-    mounted() {
-        console.log(
-            'tttttttttttt',
-            this.rsa_encrypt('e19d5cd5af0378da05f63f891c7467af')
-        )
-    }
+    mounted() {}
 }
 </script>
 

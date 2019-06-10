@@ -178,7 +178,6 @@ export default {
                 this.bettingRecord.starttime[1]
             )
             if (bettingRecord.p < this.pages) {
-                console.log(2)
                 return new Promise(resolve => {
                     bettingRecord.p = this.bettingRecord.p + 1
                     this.$set(this.bettingRecord, 'p', this.bettingRecord.p + 1)

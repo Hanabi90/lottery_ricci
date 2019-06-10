@@ -26,7 +26,7 @@
                 <li>{{item.nums}}注</li>
                 <li>{{item.money}}元</li>
                 <li>
-                    <Button @click="handleDelete(value)" type="error">删除</Button>
+                    <Button @click="handleDelete(value,$event)" type="error">删除</Button>
                 </li>
             </ul>
         </div>
@@ -43,7 +43,8 @@
                 <span>元</span>
             </li>
             <li>
-                <Checkbox @on-change="changeTrace(trace)" v-model="trace">发起追号</Checkbox>
+                <span class="iconTrace"></span>
+                <span>发起追号</span>
                 <span>取消追号</span>
                 <button @click="submint">立即投注</button>
             </li>
@@ -62,12 +63,17 @@ export default {
     name: 'lotteryOrderList',
     data() {
         return {
-            trace: false
+            trace: true
         }
     },
     methods: {
-        changeTrace(trace) {
-            this.$parent.$data.trace = trace
+        changeTrace(trace, event) {
+            if (this.$store.state.orderList.length) {
+                this.$parent.$data.trace = trace
+            } else {
+                this.trace = false
+                this.$Message.error('请添加注单')
+            }
         },
         handleClear() {
             this.$store.dispatch('handleOrderList', { type: 'clear' })
@@ -93,10 +99,22 @@ export default {
                     lt_project: [...this.$store.state.orderList]
                 },
                 bettraceparams: {
-                    lt_trace_if: 'no',
-                    lt_trace_stop: '',
-                    lt_trace_money: '',
-                    lt_trace_issues: ''
+                    lt_trace_if: 'no', //是否追号
+                    lt_trace_stop: 'no', //中奖后是否停止追号 no-中奖后继续追号
+                    zhuihao: 2, //1：利潤率追號；2：同倍追號；3：翻倍追號；
+                    lt_trace_count_input: 10, //追号期数，指要追多少期
+                    lt_trace_money: 0.1, //追号总金额
+                    lt_trace_times_margin: 1, //起始倍数
+                    lt_trace_margin: 50, //最低收益
+                    lt_trace_times_same: 1, //固定值1
+                    lt_trace_diff: 1, //固定值1
+                    lt_trace_times_diff: 2, //固定值2
+                    lt_trace_issues: [
+                        {
+                            lt_trace_issues: '20190531-048', //期数
+                            lt_trace_times: 1 //
+                        }
+                    ]
                 }
             }
             betting({ postdata: JSON.stringify(postdata) }).then(res => {
@@ -107,8 +125,7 @@ export default {
         }
     },
     components: {
-        Button,
-        Checkbox
+        Button
     }
 }
 </script>

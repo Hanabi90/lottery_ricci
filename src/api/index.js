@@ -169,6 +169,13 @@ export const getbethistory = formData =>
         url: 'gameinfo/getbethistory',
         data: qs.stringify(formData)
     })
+//游戏帐变记录
+export const getorderhistory = formData =>
+    service.request({
+        method: 'post',
+        url: 'report/getorderhistory',
+        data: qs.stringify(formData)
+    })
 
 //获取彩票菜单
 export const getMenu = formData =>
@@ -209,5 +216,12 @@ export const ordercancel = formData =>
     service.request({
         method: 'post',
         url: `ordercancel`,
+        data: qs.stringify(formData)
+    })
+//獲取最近50條獎期信息
+export const getcreateissues = formData =>
+    service.request({
+        method: 'post',
+        url: `getcreateissues`,
         data: qs.stringify(formData)
     })

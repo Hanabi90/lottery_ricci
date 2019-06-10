@@ -784,12 +784,6 @@ export default {
                     curmid: Number(this.$route.query.menuId), //菜單ID,
                     lt_issue_start: this.$store.state.issus, //购买的彩票奖期
                     lt_project: [lt_project]
-                },
-                bettraceparams: {
-                    lt_trace_if: 'no',
-                    lt_trace_stop: '',
-                    lt_trace_money: '',
-                    lt_trace_issues: ''
                 }
             }
             betting({ postdata: JSON.stringify(postdata) }).then(res => {
@@ -797,6 +791,7 @@ export default {
                 this.$store.dispatch('handleLotteryNumber', '')
                 this.lotterynumber.reset()
                 this.$store.dispatch('handleOrderHistory', [...res.data.betlog])
+                // this.$store.dispatch('handleMoney',)
             })
         },
         //添加投注单
@@ -1119,9 +1114,6 @@ export default {
             }
         }
     },
-    mounted() {
-        console.log(this.groupSumList(17))
-    }
 }
 </script>
 

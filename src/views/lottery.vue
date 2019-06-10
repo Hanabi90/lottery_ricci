@@ -18,7 +18,7 @@
                 </div>
             </div>
             <LotteryOrderList ref="orderList"/>
-            <Trace/>
+            <Trace v-if="trace"/>
             <OrderHistory/>
         </div>
     </div>

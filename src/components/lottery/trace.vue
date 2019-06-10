@@ -32,47 +32,72 @@
                 <i>期</i>
             </span>
             <span>
-                <Button type="primary">生成号码</Button>
+                <Button @click="getissuesList" type="primary">生成号码</Button>
             </span>
         </div>
+        <ul class="listContent">
+            <li v-for="(item,index) of new Array(qissueno)" :key="index">
+                <Checkbox></Checkbox>
+                <span style="margin:0 50px">1</span>
+                <span style="margin:0 50px;margin-right:100px">20190607-778</span>
+                <InputNumber size="small" :style="{width:'80px'}" :min="1"></InputNumber>
+                <span style="margin-left:10px">倍</span>
+                <span style="margin:0 100px">￥00</span>
+            </li>
+        </ul>
     </div>
 </template>
 
 <script>
-import { RadioGroup, Radio, Select, Option, InputNumber, Button } from 'iview'
+import { getcreateissues } from '@/api/index'
+import {
+    RadioGroup,
+    Radio,
+    Select,
+    Option,
+    InputNumber,
+    Button,
+    Checkbox
+} from 'iview'
 export default {
     name: 'trace',
     data() {
         return {
             zhuihao: '1', //1：利潤率追號；2：同倍追號；3：翻倍追號；,
-            qissueno: '',
+            qissueno: 0, //期号
             multiple: 1, //倍数
             qissuenoList: [
                 {
-                    value: '5',
+                    value: 5,
                     label: '5期'
                 },
                 {
-                    value: '10',
+                    value: 10,
                     label: '10期'
                 },
                 {
-                    value: '15',
+                    value: 15,
                     label: '15期'
                 },
                 {
-                    value: '20',
+                    value: 20,
                     label: '20期'
                 },
                 {
-                    value: '25',
+                    value: 25,
                     label: '25期'
                 },
                 {
-                    value: 'all',
+                    value: 50,
                     label: '全部'
                 }
             ]
+        }
+    },
+    methods: {
+        getissuesList() {
+            let lotteryid = sessionStorage.getItem('lotteryId')
+            getcreateissues({ lotteryid }).then(res => {})
         }
     },
     components: {
@@ -81,7 +106,8 @@ export default {
         Select,
         Option,
         InputNumber,
-        Button
+        Button,
+        Checkbox
     }
 }
 </script>
@@ -90,7 +116,6 @@ export default {
 .trace
     clear both
     background url('../../assets/images/ssc-repeat_001.jpg')
-    margin-top 10px
     .content
         overflow hidden
         padding 10px 0
@@ -106,4 +131,11 @@ export default {
             font-size 12px
             label
                 font-size 12px
+    .listContent
+        color #fff
+        li
+            padding 10px
+            padding-left 40px
+            border-top 1px solid #464646
+            border-bottom 1px solid #1a1a1a
 </style>
