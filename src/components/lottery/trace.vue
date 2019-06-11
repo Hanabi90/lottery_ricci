@@ -36,13 +36,13 @@
             </span>
         </div>
         <ul class="listContent">
-            <li v-for="(item,index) of new Array(qissueno)" :key="index">
-                <Checkbox></Checkbox>
-                <span style="margin:0 50px">1</span>
-                <span style="margin:0 50px;margin-right:100px">20190607-778</span>
+            <li v-for="(item,index) of handleList" :key="index">
+                <Checkbox v-model="item.active"></Checkbox>
+                <span style="margin:0 50px">{{item.index}}</span>
+                <span style="margin:0 50px;margin-right:100px">{{item.issue}}</span>
                 <InputNumber size="small" :style="{width:'80px'}" :min="1"></InputNumber>
                 <span style="margin-left:10px">倍</span>
-                <span style="margin:0 100px">￥00</span>
+                <span style="margin:0 100px">{{item.money}}</span>
             </li>
         </ul>
     </div>
@@ -94,6 +94,24 @@ export default {
             ]
         }
     },
+    computed: {
+        handleList() {
+            let issue = this.$store.state.issue.split('-'), //当前期数
+                leg = this.qissueno, //期数
+                multiple = this.multiple, //倍数
+                list = [] //列表存放
+            for (let index = 0; index < leg; index++) {
+                list.push({
+                    active: true,
+                    index: index + 1,
+                    issue: issue[0] + '-' + (issue[1] * 1 + index),
+                    multiple,
+                    money: 10
+                })
+            }
+            return list
+        }
+    },
     methods: {
         getissuesList() {
             let lotteryid = sessionStorage.getItem('lotteryId')
@@ -138,4 +156,8 @@ export default {
             padding-left 40px
             border-top 1px solid #464646
             border-bottom 1px solid #1a1a1a
+            span
+                display inline-block
+                width 80px
+                text-align center
 </style>

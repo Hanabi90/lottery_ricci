@@ -5,10 +5,7 @@ Vue.use(Vuex)
 let oState = {
     lotteryMenue: {}, //彩票菜单
     loginCode: 0, // 0 未登录 1 登录
-    money: {
-        availablebalance: '', //现金
-        creditavailable: '' //信誉
-    },
+    money: '',
     nickname: '',
     drawerRight: true, //个人中心开关
     userCenter: false, //用户中心
@@ -37,7 +34,7 @@ export default new Vuex.Store({
             state.loginCode = data
         },
         money(state, data) {
-            state.money = data
+            state.money = data.money
         },
         nickname(state, data) {
             state.nickname = data
@@ -58,7 +55,7 @@ export default new Vuex.Store({
             state.hackReset = data
         },
         issue(state, data) {
-            state.issus = data
+            state.issue = data
         },
         orderList(state, data) {
             switch (data.type) {

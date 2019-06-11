@@ -15,12 +15,12 @@
                 </div>
                 <button class="submint_button" @click="handlelogin">立即登录</button>
                 <div class="remanber">
-                    <div>
-                        <i></i>
+                    <div @click="handleUser">
+                        <i :class="{active:rememberUserName}"></i>
                         <span>记住用户名</span>
                     </div>
                     <div>
-                        <i class="arrow_right"></i>
+                        <i></i>
                         <span>免费注册</span>
                     </div>
                 </div>
@@ -47,14 +47,33 @@ export default {
             login: {
                 username: 'tzdricci',
                 loginpass: '1234qwer'
-            }
+            },
+            rememberUserName: false
+        }
+    },
+    mounted() {
+        if (localStorage.getItem('userName')) {
+            this.rememberUserName = true
+            this.$set(this.login, 'username', localStorage.getItem('userName'))
         }
     },
     methods: {
         close() {
             this.onOff = false
         },
+        handleUser() {
+            if (this.rememberUserName) {
+                this.rememberUserName = false
+                localStorage.removeItem('userName')
+            } else {
+                this.rememberUserName = true
+                localStorage.setItem('userName', this.login.username)
+            }
+        },
         handlelogin() {
+            if (this.rememberUserName && this.login.username) {
+                localStorage.setItem('userName', this.login.username)
+            }
             login(this.login).then(res => {
                 sessionStorage.setItem('token', res.data.token)
                 sessionStorage.setItem('nickname', res.data.nickname)
@@ -66,7 +85,9 @@ export default {
                     this.$store.dispatch('handleMoney', res.data)
                 })
                 getMenu().then(res => {
-                    this.$store.dispatch('handleLotteryMenue', { ...res.data })
+                    this.$store.dispatch('handleLotteryMenue', {
+                        ...res.data
+                    })
                 })
             })
         }
@@ -154,6 +175,16 @@ export default {
                 border-radius 3px
                 vertical-align bottom
                 margin-right 5px
+            i.active
+                background #ff632c
+                border-color #ff632c
+                position relative
+                &::after
+                    content '√'
+                    position absolute
+                    color #fff
+                    left 2px
+                    top 2px
         &>div:last-child
             float right
         .arrow_right

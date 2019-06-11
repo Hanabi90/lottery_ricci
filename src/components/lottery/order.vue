@@ -782,7 +782,7 @@ export default {
                 betparams: {
                     iWalletType: 1, // 钱包类型
                     curmid: Number(this.$route.query.menuId), //菜單ID,
-                    lt_issue_start: this.$store.state.issus, //购买的彩票奖期
+                    lt_issue_start: this.$store.state.issue, //购买的彩票奖期
                     lt_project: [lt_project]
                 }
             }
@@ -895,6 +895,15 @@ export default {
                     }
                 })
                 singleList.sort((a, b) => a - b)
+            }
+            if(title=="前二直选和值"||title=="后二直选和值"){
+               this.$store.state.lotteryNumber.list.forEach(item =>
+                    Array.from(item).forEach(item=>{
+                        singleList.push(item)
+                    })
+                        
+                )
+                singleList.sort((a, b) => a - b)          
             }
             let codes = [...this.$store.state.lotteryNumber.list].map(item =>
                 Array.from(item)
@@ -1113,7 +1122,7 @@ export default {
                 return arr[0]
             }
         }
-    },
+    }
 }
 </script>
 

@@ -43,8 +43,10 @@
                 <span>元</span>
             </li>
             <li>
-                <span class="iconTrace"></span>
-                <span>发起追号</span>
+                <span @click="handleTrace">
+                    <i class="icon" :class="{active:trace}"></i>
+                    <span>发起追号</span>
+                </span>
                 <span>取消追号</span>
                 <button @click="submint">立即投注</button>
             </li>
@@ -63,18 +65,20 @@ export default {
     name: 'lotteryOrderList',
     data() {
         return {
-            trace: true
+            trace: false
         }
     },
     methods: {
-        changeTrace(trace, event) {
+        //是否追号
+        handleTrace() {
             if (this.$store.state.orderList.length) {
-                this.$parent.$data.trace = trace
+                this.$parent.$data.trace = this.trace = !this.trace
             } else {
                 this.trace = false
                 this.$Message.error('请添加注单')
             }
         },
+
         handleClear() {
             this.$store.dispatch('handleOrderList', { type: 'clear' })
         },
@@ -91,11 +95,12 @@ export default {
                 this.$Message.error('号码不完整')
                 return
             }
+            this.$parent.$data.trace = this.trace = false //关闭追号
             let postdata = {
                 betparams: {
                     iWalletType: 1, // 钱包类型
                     curmid: this.$route.query.menuId, //菜單ID,
-                    lt_issue_start: this.$store.state.issus, //购买的彩票奖期
+                    lt_issue_start: this.$store.state.issue, //购买的彩票奖期
                     lt_project: [...this.$store.state.orderList]
                 },
                 bettraceparams: {
@@ -180,6 +185,16 @@ export default {
                 border 1px solid #dcdcdc
                 border-radius 3px
                 margin-bottom -2px
+            i.active
+                background #ff632c
+                border-color #ff632c
+                position relative
+                &::after
+                    content '√'
+                    position absolute
+                    color #fff
+                    left 2px
+                    top -22px
             button
                 height 42px
                 border none

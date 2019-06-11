@@ -74,7 +74,7 @@
                         <span class="code">{{item.methodname}}</span>
                         <span>{{item.modes}}</span>
                         <span>{{item.amount}}</span>
-                        <span>{{item.availablebalance}}</span>
+                        <span>{{item.money}}</span>
                         <span>{{item.transferstatus}}</span>
                     </li>
                     <li v-if="pages<=orderHistoryList.p">

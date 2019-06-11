@@ -22,9 +22,10 @@
                 <div>
                     <span>单注奖金:</span>
                     <InputNumber
-                        size="small"
+                        size="large"
                         :parser="value => value"
                         :step="2"
+                        :min="1300"
                         :max="prizeGroup"
                         v-model="nowPrizeGroup"
                     ></InputNumber>
@@ -91,7 +92,13 @@ export default {
     },
     computed: {
         rebate() {
-            return (this.prizeGroup - this.nowPrizeGroup) / 20 + '%'
+            return (
+                parseFloat(
+                    ((this.prizeGroup - this.nowPrizeGroup) / 20).toPrecision(
+                        12
+                    )
+                ) + '%'
+            )
         }
     },
     mounted() {

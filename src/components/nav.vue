@@ -26,10 +26,8 @@
                         <span>{{this.$store.state.nickname}}</span>
                     </p>
                     <p>
-                        <span>现金金额:</span>
-                        <span>{{this.$store.state.money.availablebalance}}</span>
-                        <span>信誉金额:</span>
-                        <span>{{this.$store.state.money.creditavailable}}</span>
+                        <span>金额:</span>
+                        <span>{{this.$store.state.money}}</span>
                     </p>
                     <button class="refresh" @click="refresh">刷新</button>
                     <button @click="loginOut">退出</button>
@@ -102,7 +100,6 @@ export default {
     data() {
         return {
             nowDate: '',
-            spinShow: true,
             nickname: '',
             id: ''
         }
@@ -147,9 +144,7 @@ export default {
         refresh() {
             getbalance().then(res => {
                 this.spinShow = true
-                this.$store
-                    .dispatch('handleMoney', res.data)
-                    .then(res => (this.spinShow = false))
+                this.$store.dispatch('handleMoney', res.data)
             })
         },
         //退出登录
