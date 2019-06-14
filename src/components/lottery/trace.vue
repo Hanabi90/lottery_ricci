@@ -75,7 +75,7 @@
                     :min="1"
                 ></InputNumber>
                 <span style="margin-left:10px">倍</span>
-                <span style="margin:0 100px">{{item.money}}</span>
+                <span style="margin:0 100px">{{item.money}}元</span>
             </li>
         </ul>
     </div>
@@ -130,7 +130,7 @@ export default {
     },
     computed: {
         total() {
-            const total = {
+            let total = {
                 totalMoney: 0,
                 totalIssue: 0
             }
@@ -172,7 +172,7 @@ export default {
         },
         //倍数变动-money 从新计算
         handleMoney(item) {
-            let money = item.multiple * item.money
+            let money = item.multiple * this.orderList.totalMoney
             this.$set(item, 'money', money)
         }
     },
