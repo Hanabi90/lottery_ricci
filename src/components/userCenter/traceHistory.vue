@@ -2,33 +2,41 @@
     <div>
         <Form :model="orderHistoryList" :label-width="72" inline>
             <FormItem label="彩种名称">
-                <Select v-model="orderHistoryList.lotteryid" style="width:110px">
+                <Select
+                    v-model="orderHistoryList.lotteryid"
+                    style="width:110px"
+                    @on-change="getMethods"
+                >
                     <Option v-for="(item,value) of lotteryList" :key="value" :value="value">{{item}}</Option>
                 </Select>
             </FormItem>
-            <FormItem label="投注模式">
-                <Select v-model="orderHistoryList.modes" style="width:120px">
-                    <Option v-for="(item,key) of lotteryModes" :key="key" :value="key">{{item}}</Option>
+            <FormItem label="游戏玩法">
+                <Select v-model="orderHistoryList.methodid" style="width:120px">
+                    <Option
+                        v-for="(item,index) of lotteryMethodList"
+                        :key="index"
+                        :value="item.methodid"
+                    >{{item.methodname}}</Option>
                 </Select>
             </FormItem>
-            <FormItem label="帐变类型">
-                <Select v-model="orderHistoryList.ordertypeid" style="width:100px">
+            <FormItem label="追号状态">
+                <Select v-model="orderHistoryList.taskstatus" style="width:100px">
                     <Option
-                        v-for="item of ordertypeid"
-                        :key="item.id"
-                        :value="item.id"
-                    >{{item.cntitle}}</Option>
+                        v-for="item of tasksList"
+                        :key="item.value"
+                        :value="item.value"
+                    >{{item.text}}</Option>
                 </Select>
             </FormItem>
             <Button style="width:160px" @click="handleOrderHistory" type="primary">查询</Button>
-            <FormItem label="请选择日期">
-                <DatePicker
-                    v-model="orderHistoryList.starttime"
-                    format="yyyy-MM-dd HH:mm:ss"
-                    type="datetimerange"
-                    placeholder="请选择日期"
-                    style="width: 280px"
-                ></DatePicker>
+            <FormItem label="类型">
+                <Select v-model="orderHistoryList.userpointtype" style="width:100px">
+                    <Option
+                        v-for="item of userpointtypeList"
+                        :key="item.value"
+                        :value="item.value"
+                    >{{item.text}}</Option>
+                </Select>
             </FormItem>
             <FormItem label="下级用户名">
                 <Select
@@ -43,21 +51,34 @@
                     >{{item.username}}</Option>
                 </Select>
             </FormItem>
+            <FormItem label="彩种奖期">
+                <Input v-model="orderHistoryList.issue" placeholder="请选择"></Input>
+            </FormItem>
+            <FormItem label="请选择日期">
+                <DatePicker
+                    v-model="orderHistoryList.starttime"
+                    format="yyyy-MM-dd HH:mm:ss"
+                    type="datetimerange"
+                    placeholder="请选择日期"
+                    style="width: 280px"
+                ></DatePicker>
+            </FormItem>
             <FormItem label="下级">
                 <Checkbox v-model="orderHistoryList.includechild"></Checkbox>
             </FormItem>
         </Form>
         <div class="content">
             <div class="title">
-                <h5>用户名</h5>
-                <h5>时间</h5>
-                <h5>帐变类型</h5>
+                <h5>追号时间</h5>
+                <h5>用户</h5>
                 <h5>彩种</h5>
-                <h5>玩法</h5>
-                <h5>投注模式</h5>
-                <h5>余额变动</h5>
-                <h5>余额</h5>
-                <h5>状态</h5>
+                <h5>开始期数</h5>
+                <h5>追号内容</h5>
+                <h5>追号总金额</h5>
+                <h5>完成金额</h5>
+                <h5>取消金额</h5>
+                <h5>中奖后终止</h5>
+                <h5>追号状态</h5>
             </div>
             <Scroll
                 v-if="scroll"
@@ -67,25 +88,28 @@
             >
                 <ul class="list">
                     <li v-for="(item,value) of userHistory" :key="value">
+                        <span>{{item.updatetime}}</span>
                         <span>{{item.username}}</span>
-                        <span>{{item.times}}</span>
-                        <span>{{item.cntitle}}</span>
                         <span>{{item.cnname}}</span>
-                        <span class="code">{{item.methodname}}</span>
-                        <span>{{item.modes}}</span>
-                        <span>{{item.amount}}</span>
-                        <span>{{item.money}}</span>
-                        <span>{{item.transferstatus}}</span>
+                        <span>{{item.beginissue}}</span>
+                        <span class="code">{{item.codes}}</span>
+                        <span>{{item.taskprice}}</span>
+                        <span>{{item.finishprice}}</span>
+                        <span>{{item.cancelprice}}</span>
+                        <span>{{item.stoponwin==1?'是':'否'}}</span>
+                        <span
+                            :style="{color:item.status==0?'#018625':'#b9b9b9'}"
+                        >{{item.status==0?'进行中':'已完成'}}</span>
                     </li>
                     <li v-if="pages<=orderHistoryList.p">
                         <span>{{datafinish}}</span>
                     </li>
                 </ul>
             </Scroll>
-            <div class="total">
+            <!-- <div class="total">
                 <span style="margin-left:20px;margin-right:420px">余额变动总计</span>
                 <span>{{totalMoney}}</span>
-            </div>
+            </div>-->
         </div>
     </div>
 </template>
@@ -99,37 +123,45 @@ import {
     DatePicker,
     Button,
     Checkbox,
-    Scroll
+    Scroll,
+    Input
 } from 'iview'
 import {
     getuserlottery,
     getchildlist,
-    getorderhistory,
-    getallordertype
+    gettaskhistory,
+    getuserlotterymethod
 } from '@/api/index'
 export default {
-    name: 'gameHistory',
+    name: 'traceHistory',
     data() {
         return {
             orderHistoryList: {
                 includechild: 0, //是否包含下級（0：不包含，1包含）
                 username: '', //用户名
-                ordertypeid: '', //帐变类型id
-                modes: '', //投注模式
+                taskstatus: '', //追号状态
+                issue: '', //彩种奖期
+                userpointtype: '',
+                methodid: '', //游戏玩法
                 lotteryid: '', //彩种名称
                 starttime: '', //起始时间
                 pn: 9, //请求的数据记录数量
                 p: 1 //请求的页面序号
             },
-            lotteryList: {}, //彩票id
-            lotteryModes: {
-                0: '所有模式',
-                1: '元',
-                2: '角',
-                3: '分'
-            }, //玩法id
+            tasksList: [
+                { value: -1, text: '所有状态' },
+                { value: 0, text: '进行中' },
+                { value: 1, text: '已取消' },
+                { value: 2, text: '已完成' }
+            ], //状态列表
+            lotteryList: {}, //彩票列表
+            userpointtypeList: [
+                { value: -1, text: '不含超级2000' },
+                { value: 1, text: '只有超级2000' },
+                { value: 2, text: '所有类型' }
+            ], //类型列表
+            lotteryMethodList: [], //彩票玩法id
             userList: [],
-            ordertypeid: [],
             userHistory: [],
             pages: 1, //页数
             scroll: true, //把滚动条置顶
@@ -137,21 +169,31 @@ export default {
         }
     },
     computed: {
-        totalMoney() {
-            let count = 0
-            if (this.userHistory.length) {
-                this.userHistory.forEach(item => {
-                    if (item.cntitle.slice(1, 2) == '+') {
-                        count += Number(item.amount)
-                    } else {
-                        count -= Number(item.amount)
-                    }
-                })
-            }
-            return parseFloat(count.toPrecision(12))
-        }
+        // totalMoney() {
+        //     let count = 0
+        //     if (this.userHistory.length) {
+        //         this.userHistory.forEach(item => {
+        //             if (item.cntitle.slice(1, 2) == '+') {
+        //                 count += Number(item.amount)
+        //             } else {
+        //                 count -= Number(item.amount)
+        //             }
+        //         })
+        //     }
+        //     return parseFloat(count.toPrecision(12))
+        // }
     },
     methods: {
+        //获取玩法
+        getMethods() {
+            getuserlotterymethod({ lotteryid: arguments[0] }).then(res => {
+                this.lotteryMethodList = [...res.data]
+                this.lotteryMethodList.unshift({
+                    methodid: 0,
+                    methodname: '所有玩法'
+                })
+            })
+        },
         handleOrderHistory() {
             this.scroll = false
             this.$nextTick(() => {
@@ -166,7 +208,7 @@ export default {
             )
             orderHistoryList.p = 1
             this.$set(this.orderHistoryList, 'p', 1)
-            getorderhistory({ ...orderHistoryList }).then(res => {
+            gettaskhistory({ ...orderHistoryList }).then(res => {
                 if (res.data.page_data) {
                     this.userHistory = [...res.data.page_data] //当前数据
                     this.pages = Math.ceil(
@@ -194,7 +236,7 @@ export default {
                         'p',
                         this.orderHistoryList.p + 1
                     )
-                    getorderhistory({ ...orderHistoryList }).then(res => {
+                    gettaskhistory({ ...orderHistoryList }).then(res => {
                         this.userHistory = [
                             ...this.userHistory,
                             ...res.data.page_data
@@ -230,10 +272,6 @@ export default {
         }
     },
     mounted() {
-        //获取游戏帐变类型
-        getallordertype().then(res => {
-            this.ordertypeid = [...res.data]
-        })
         getuserlottery().then(res => {
             this.lotteryList = { ...res.data }
             this.$set(this.lotteryList, 0, '所有游戏')
@@ -253,7 +291,8 @@ export default {
         DatePicker,
         Button,
         Checkbox,
-        Scroll
+        Scroll,
+        Input
     }
 }
 </script>

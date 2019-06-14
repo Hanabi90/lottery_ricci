@@ -25,6 +25,7 @@ import Loginpassword from './userCenter/loginPassword'
 import Information from './userCenter/information'
 import Bindquestion from './userCenter/bindquestion'
 import GameHistory from './userCenter/gameHistory'
+import TraceHistory from './userCenter/traceHistory'
 import BettingRecord from './userCenter/bettingRecord'
 import { Tabs, TabPane, Icon } from 'iview'
 export default {
@@ -38,9 +39,14 @@ export default {
                     content: 'BettingRecord'
                 },
                 {
+                    name: '游戏追号记录',
+                    content: 'TraceHistory'
+                },
+                {
                     name: '游戏帐变记录',
                     content: 'GameHistory'
                 },
+
                 {
                     name: '银行卡',
                     content: 'Bank'
@@ -79,7 +85,8 @@ export default {
         Bindquestion,
         GameHistory,
         BettingRecord,
-        Information
+        Information,
+        TraceHistory
     }
 }
 </script>

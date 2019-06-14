@@ -24,6 +24,7 @@
 <script>
 import CountDown from './countdown'
 import { getissue, getprize } from '@/api/index'
+import { EventBus } from '@/api/eventBus.js'
 export default {
     name: 'lottery_show',
     data() {
@@ -109,7 +110,6 @@ export default {
             getissue({
                 lotteryid
             }).then(res => {
-                this.$store.dispatch('handleIssue', res.data.issue)
                 this.saleend = res.data.saleend
                 this.issue = res.data.issue
                 let now = Math.trunc(
@@ -129,6 +129,9 @@ export default {
                     this.handleOpenTime()
                 }
                 this.openTimeOnOff = false
+                //奖期更新 处理 追号列表更新
+                this.$store.dispatch('handleIssue', res.data.issue)
+                EventBus.$emit('updateIssue')
             })
         }
     },

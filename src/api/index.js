@@ -169,11 +169,24 @@ export const getbethistory = formData =>
         url: 'gameinfo/getbethistory',
         data: qs.stringify(formData)
     })
+//获取所有游戏帐变类型
+export const getallordertype = formData =>
+    service.request({
+        method: 'post',
+        url: 'report/getallordertype'
+    })
 //游戏帐变记录
 export const getorderhistory = formData =>
     service.request({
         method: 'post',
         url: 'report/getorderhistory',
+        data: qs.stringify(formData)
+    })
+//游戏帐变记录
+export const gettaskhistory = formData =>
+    service.request({
+        method: 'post',
+        url: 'gameinfo/gettaskhistory',
         data: qs.stringify(formData)
     })
 

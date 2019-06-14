@@ -3,7 +3,12 @@
         <div class="content">
             <span>
                 <span style="margin-right:10px">追号</span>
-                <RadioGroup style="margin-top:-4px" v-model="zhuihao" size="small">
+                <RadioGroup
+                    @on-change="handleList('zhuihao',zhuihao)"
+                    style="margin-top:-4px"
+                    v-model="zhuihao"
+                    size="small"
+                >
                     <Radio label="1">利润率追号</Radio>
                     <Radio label="2">同倍追号</Radio>
                     <Radio label="3">翻倍追号</Radio>
@@ -11,7 +16,13 @@
             </span>
             <span>
                 <span style="margin-right:10px">追号期数</span>
-                <Select v-model="qissueno" style="width:70px" :transfer="true" size="small">
+                <Select
+                    @on-change="handleList"
+                    v-model="qissueno"
+                    style="width:70px"
+                    :transfer="true"
+                    size="small"
+                >
                     <Option
                         v-for="item in qissuenoList"
                         :value="item.value"
@@ -21,26 +32,48 @@
             </span>
             <span>
                 <span style="margin-right:10px">起始倍数</span>
-                <InputNumber :max="10" :min="1" v-model="multiple" size="small" style="width:50px"></InputNumber>
+                <InputNumber
+                    @on-change="handleList"
+                    :max="10"
+                    :min="1"
+                    v-model="multiple"
+                    size="small"
+                    style="width:50px"
+                ></InputNumber>
+            </span>
+            <span v-if="zhuihao==1">
+                <span style="margin-right:10px">最低收益</span>
+                <InputNumber
+                    @on-change="handleList"
+                    :formatter="value => `${value}%`"
+                    :parser="value => value.replace('%', '')"
+                    :min="1"
+                    v-model="lt_trace_margin"
+                    size="small"
+                    style="width:50px"
+                ></InputNumber>
             </span>
             <span>
                 <i>追号总金额</i>
-                <i>0</i>
+                <i>{{total.totalMoney}}</i>
                 <i>元</i>
                 <i style="margin-left:10px">总期数</i>
-                <i>0</i>
+                <i>{{total.totalIssue}}</i>
                 <i>期</i>
-            </span>
-            <span>
-                <Button @click="getissuesList" type="primary">生成号码</Button>
             </span>
         </div>
         <ul class="listContent">
-            <li v-for="(item,index) of handleList" :key="index">
+            <li v-for="(item,index) of list" :key="index">
                 <Checkbox v-model="item.active"></Checkbox>
                 <span style="margin:0 50px">{{item.index}}</span>
                 <span style="margin:0 50px;margin-right:100px">{{item.issue}}</span>
-                <InputNumber size="small" :style="{width:'80px'}" :min="1"></InputNumber>
+                <InputNumber
+                    @on-change="handleMoney(item)"
+                    size="small"
+                    v-model="item.multiple"
+                    :style="{width:'80px'}"
+                    :min="1"
+                ></InputNumber>
                 <span style="margin-left:10px">倍</span>
                 <span style="margin:0 100px">{{item.money}}</span>
             </li>
@@ -49,23 +82,17 @@
 </template>
 
 <script>
-import { getcreateissues } from '@/api/index'
-import {
-    RadioGroup,
-    Radio,
-    Select,
-    Option,
-    InputNumber,
-    Button,
-    Checkbox
-} from 'iview'
+import { RadioGroup, Radio, Select, Option, InputNumber, Checkbox } from 'iview'
+import { EventBus } from '@/api/eventBus.js'
 export default {
     name: 'trace',
+    props: ['orderList'],
     data() {
         return {
             zhuihao: '1', //1：利潤率追號；2：同倍追號；3：翻倍追號；,
-            qissueno: 0, //期号
+            qissueno: 10, //期数
             multiple: 1, //倍数
+            lt_trace_margin: 50, //最低收益
             qissuenoList: [
                 {
                     value: 5,
@@ -91,31 +118,62 @@ export default {
                     value: 50,
                     label: '全部'
                 }
-            ]
+            ],
+            list: [] //奖期列表
         }
     },
+    mounted() {
+        this.handleList()
+        EventBus.$on('updateIssue', () => {
+            this.handleList()
+        })
+    },
     computed: {
-        handleList() {
+        total() {
+            const total = {
+                totalMoney: 0,
+                totalIssue: 0
+            }
+            if (this.list.length) {
+                for (let index = 0; index < this.list.length; index++) {
+                    const item = this.list[index]
+                    if (item.active) {
+                        total.totalIssue++
+                        total.totalMoney += item.money
+                    }
+                }
+            }
+            return total
+        }
+    },
+    methods: {
+        handleList(typevalue, value) {
             let issue = this.$store.state.issue.split('-'), //当前期数
                 leg = this.qissueno, //期数
                 multiple = this.multiple, //倍数
                 list = [] //列表存放
+            if (typevalue && value == 3) {
+                this.multiple = 2
+            }
             for (let index = 0; index < leg; index++) {
+                if (this.zhuihao == 3) {
+                    //翻倍追号
+                    multiple = multiple * index ? multiple * this.multiple : 1
+                }
                 list.push({
                     active: true,
                     index: index + 1,
                     issue: issue[0] + '-' + (issue[1] * 1 + index),
-                    multiple,
-                    money: 10
+                    multiple: multiple,
+                    money: this.orderList.totalMoney * multiple
                 })
             }
-            return list
-        }
-    },
-    methods: {
-        getissuesList() {
-            let lotteryid = sessionStorage.getItem('lotteryId')
-            getcreateissues({ lotteryid }).then(res => {})
+            this.list = [...list]
+        },
+        //倍数变动-money 从新计算
+        handleMoney(item) {
+            let money = item.multiple * item.money
+            this.$set(item, 'money', money)
         }
     },
     components: {
@@ -124,7 +182,6 @@ export default {
         Select,
         Option,
         InputNumber,
-        Button,
         Checkbox
     }
 }

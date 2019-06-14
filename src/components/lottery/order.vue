@@ -90,7 +90,9 @@ export default {
                     arr.methods === '前二直选单式' ||
                     arr.methods === '前二组选单式' ||
                     arr.methods === '后二直选单式' ||
-                    arr.methods === '后二组选单式') &&
+                    arr.methods === '后二组选单式' ||
+                    arr.methods === '三码前三直选单式' ||
+                    arr.methods === '三码前三组选单式') &&
                 arr.list
             ) {
                 nums = arr.list.length
@@ -189,7 +191,8 @@ export default {
                 arr.methods === '中三直选复式' ||
                 arr.methods === '后三直选复式' ||
                 arr.methods === '三星大小单双前三' ||
-                arr.methods === '三星大小单双后三'
+                arr.methods === '三星大小单双后三' ||
+                arr.methods === '三码前三直选复式' 
             ) {
                 let arrList = []
                 for (let index = 0; index < arr.list.length - 2; index++) {
@@ -206,7 +209,8 @@ export default {
                 arr.methods === '前二直选复式' ||
                 arr.methods === '后二直选复式' ||
                 arr.methods === '二星大小单双前二' ||
-                arr.methods === '二星大小单双后二'
+                arr.methods === '二星大小单双后二' ||
+                arr.methods === '二码前二直选复式'
             ) {
                 let arrList = []
                 for (let index = 0; index < 2; index++) {
@@ -292,7 +296,8 @@ export default {
             if (
                 arr.methods === '前三组选组六复式' ||
                 arr.methods === '中三组选组六复式' ||
-                arr.methods === '后三组选组六复式'
+                arr.methods === '后三组选组六复式' ||
+                arr.methods === '三码前三组选复式'
             ) {
                 nums += this.handleGroup(Array.from(arr.list[0]), 3)
             }
@@ -618,6 +623,9 @@ export default {
                             leg++
                         }
                     }
+                    if (leg == 2) {
+                        nums = arr.list.length
+                    }
                     if (leg == 3) {
                         nums = arr.list.length * 3
                     }
@@ -781,6 +789,7 @@ export default {
             let postdata = {
                 betparams: {
                     iWalletType: 1, // 钱包类型
+                    prizegroup: this.nowPrizeGroup, //奖金组
                     curmid: Number(this.$route.query.menuId), //菜單ID,
                     lt_issue_start: this.$store.state.issue, //购买的彩票奖期
                     lt_project: [lt_project]
@@ -791,7 +800,7 @@ export default {
                 this.$store.dispatch('handleLotteryNumber', '')
                 this.lotterynumber.reset()
                 this.$store.dispatch('handleOrderHistory', [...res.data.betlog])
-                // this.$store.dispatch('handleMoney',)
+                this.$store.dispatch('handleMoney', { money: res.data.amount })
             })
         },
         //添加投注单
@@ -821,6 +830,7 @@ export default {
         },
         handleOrder() {
             let singleList = [], //单式
+                singleList11 = [], //11选5
                 descText = [], //为任选单式 类型 组合
                 title = this.$store.state.lotteryNumber.methods,
                 title1 = this.$store.state.lotteryNumber.title
@@ -886,7 +896,8 @@ export default {
                 title == '任二直选和值' ||
                 title == '任二组选复式' ||
                 title == '任二组选和值' ||
-                title1 == '龙虎和'
+                title1 == '龙虎和' ||
+                title == '三码前三组选复式'
             ) {
                 let count = this.$store.state.lotteryNumber.list
                 count.forEach(item => {
@@ -896,14 +907,17 @@ export default {
                 })
                 singleList.sort((a, b) => a - b)
             }
-            if(title=="前二直选和值"||title=="后二直选和值"){
-               this.$store.state.lotteryNumber.list.forEach(item =>
-                    Array.from(item).forEach(item=>{
+            if (title == '前二直选和值' || title == '后二直选和值') {
+                this.$store.state.lotteryNumber.list.forEach(item =>
+                    Array.from(item).forEach(item => {
                         singleList.push(item)
                     })
-                        
                 )
-                singleList.sort((a, b) => a - b)          
+                singleList.sort((a, b) => a - b)
+            }
+            if (title == '三码前三直选单式' || title == '三码前三组选单式') {
+                singleList = [...this.$store.state.lotteryNumber.list]
+                singleList = singleList.map(item => item.join(' '))
             }
             let codes = [...this.$store.state.lotteryNumber.list].map(item =>
                 Array.from(item)

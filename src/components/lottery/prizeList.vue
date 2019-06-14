@@ -32,7 +32,7 @@ export default {
         font-size 14px
     .list
         overflow hidden
-        padding 0 20px
+        padding 0 10px
         color #dcdcdc
         border-bottom 1px dashed #555
         font-size 14px
@@ -45,9 +45,8 @@ export default {
             color #000
         .time
             float left
-            margin-right 20px
         .prizeNumber
             float right
             span
-                margin-right 14px
+                margin-right 4px
 </style>

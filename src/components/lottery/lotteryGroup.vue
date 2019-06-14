@@ -25,9 +25,9 @@
                         size="large"
                         :parser="value => value"
                         :step="2"
-                        :min="1300"
                         :max="prizeGroup"
                         v-model="nowPrizeGroup"
+                        @on-blur="handleGroupMinValue"
                     ></InputNumber>
                 </div>
                 <div>
@@ -116,6 +116,12 @@ export default {
         })
     },
     methods: {
+        //处理奖金组 最小值
+        handleGroupMinValue() {
+            if (this.nowPrizeGroup < 1300) {
+                this.nowPrizeGroup = 1300
+            }
+        },
         getMethodId(item, value) {
             this.methodCrowdActive = value
             this.getmethod = item.label
@@ -170,6 +176,7 @@ export default {
             border-left 1px solid #3e3d3d
             line-height 44px
             flex 1
+            font-size 12px
             &.special_play
                 i
                     display inline-block

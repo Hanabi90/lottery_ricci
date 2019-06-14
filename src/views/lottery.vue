@@ -1,6 +1,6 @@
 <template>
     <div v-if="this.$store.state.hackReset" class="lottery">
-        <Sidebar/>
+        <Sidebar v-if="false"/>
         <div class="container">
             <div>
                 <div class="lottery_show_container">
@@ -10,7 +10,7 @@
                     <Tool/>
                 </div>
                 <div class="lottery_show_container">
-                    <LotteryGroup/>
+                    <LotteryGroup ref="lotteryGroup"/>
                 </div>
                 <div class="tools_container">
                     <PrizeList/>
@@ -18,7 +18,7 @@
                 </div>
             </div>
             <LotteryOrderList ref="orderList"/>
-            <Trace v-if="trace"/>
+            <Trace ref="traceList" :order-list="this.$refs.orderList" v-if="trace"/>
             <OrderHistory/>
         </div>
     </div>

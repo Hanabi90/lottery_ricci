@@ -1,10 +1,5 @@
 <template>
     <div class="tool">
-        <div class="userMoney">
-            <span>余额</span>
-            <span>888888</span>
-            <span>元</span>
-        </div>
         <ul>
             <li class="recharge">
                 <i></i>
@@ -45,16 +40,8 @@ export default {
     border 5px solid #5a5a5a
     overflow hidden
     cursor pointer
-    .userMoney
-        margin-left 10px
-        margin-top 10px
-        margin-bottom 6px
-        span
-            font-size 14px
-            &:nth-child(2)
-                margin 0 5px
-                color #ffbe00
     ul
+        margin-top 20px
         overflow hidden
         li
             float left

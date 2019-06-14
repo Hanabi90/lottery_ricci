@@ -9,6 +9,7 @@
             <li>投注内容</li>
             <li>倍数</li>
             <li>金额</li>
+            <li>中奖金额</li>
             <li>追号</li>
             <li>操作</li>
         </ul>
@@ -22,7 +23,8 @@
                 <span class="code">{{item.code}}</span>
                 <span>{{item.multiple}}</span>
                 <span>{{item.totalprice}}</span>
-                <span>{{}}</span>
+                <span>{{item.bonus}}</span>
+                <span>{{item.taskid==0?'未追号':'追号'}}</span>
                 <Button
                     :disabled="!item.canCancel"
                     @click="handleCancel(item.projectid)"

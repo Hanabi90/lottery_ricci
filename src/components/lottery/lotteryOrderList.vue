@@ -33,13 +33,13 @@
         <ul class="orderNow">
             <li>
                 <span>已选</span>
-                <span>0</span>
+                <span>{{this.$store.state.orderList.length}}</span>
                 <span>单</span>
                 <span>共计</span>
-                <span>0</span>
+                <span>{{totalLength}}</span>
                 <span>注</span>
                 <span>总金额</span>
-                <span>0.000</span>
+                <span>{{totalMoney}}</span>
                 <span>元</span>
             </li>
             <li>
@@ -51,8 +51,7 @@
                 <button @click="submint">立即投注</button>
             </li>
             <li>
-                <i class="icon"></i>
-                <span>开启中奖通知</span>
+                <Checkbox v-model="isTrace" style="margin-top:20px">中奖后立即停止追号</Checkbox>
             </li>
         </ul>
     </div>
@@ -63,9 +62,27 @@ import { Button, Checkbox } from 'iview'
 import { betting } from '@/api/index'
 export default {
     name: 'lotteryOrderList',
+    props: ['lotteryGroup'],
     data() {
         return {
-            trace: false
+            trace: false,
+            isTrace: false
+        }
+    },
+    computed: {
+        totalLength() {
+            let count = 0
+            this.$store.state.orderList.forEach(item => {
+                count += item.nums
+            })
+            return count
+        },
+        totalMoney() {
+            let count = 0
+            this.$store.state.orderList.forEach(item => {
+                count += item.money
+            })
+            return count
         }
     },
     methods: {
@@ -89,39 +106,52 @@ export default {
                 data: arr,
                 type: 'delete'
             })
+            if (!arr.length) {
+                this.$parent.$data.trace = this.trace = false //关闭追号
+            }
         },
         submint() {
             if (!this.$store.state.orderList.length) {
                 this.$Message.error('号码不完整')
                 return
             }
-            this.$parent.$data.trace = this.trace = false //关闭追号
+            let bettraceparams = {}, //追号
+                traceList = this.$parent.$refs.traceList //追号列表
+            if (this.trace && traceList.list.length) {
+                let listArray = [] //处理追号列表
+                traceList.list.forEach(item => {
+                    if (item.active) {
+                        listArray.push({
+                            lt_trace_issues: item.issue,
+                            lt_trace_times: item.multiple
+                        })
+                    }
+                })
+                bettraceparams = {
+                    lt_trace_if: 'yes', //是否追号
+                    lt_trace_stop: this.isTrace ? 'yes' : 'no', //中奖后是否停止追号 no-中奖后继续追号
+                    zhuihao: traceList.zhuihao, //1：利潤率追號；2：同倍追號；3：翻倍追號；
+                    lt_trace_count_input: traceList.total.totalIssue, //追号期数，指要追多少期
+                    lt_trace_money: traceList.total.totalMoney, //追号总金额
+                    lt_trace_times_margin: traceList.multiple, //起始倍数
+                    lt_trace_margin: traceList.lt_trace_margin, //最低收益
+                    lt_trace_times_same: 1, //固定值1
+                    lt_trace_diff: 1, //固定值1
+                    lt_trace_times_diff: 2, //固定值2
+                    lt_trace_issues: listArray
+                }
+            }
             let postdata = {
                 betparams: {
                     iWalletType: 1, // 钱包类型
+                    prizegroup: this.$parent.$refs.lotteryGroup.nowPrizeGroup, //奖金组
                     curmid: this.$route.query.menuId, //菜單ID,
                     lt_issue_start: this.$store.state.issue, //购买的彩票奖期
                     lt_project: [...this.$store.state.orderList]
                 },
-                bettraceparams: {
-                    lt_trace_if: 'no', //是否追号
-                    lt_trace_stop: 'no', //中奖后是否停止追号 no-中奖后继续追号
-                    zhuihao: 2, //1：利潤率追號；2：同倍追號；3：翻倍追號；
-                    lt_trace_count_input: 10, //追号期数，指要追多少期
-                    lt_trace_money: 0.1, //追号总金额
-                    lt_trace_times_margin: 1, //起始倍数
-                    lt_trace_margin: 50, //最低收益
-                    lt_trace_times_same: 1, //固定值1
-                    lt_trace_diff: 1, //固定值1
-                    lt_trace_times_diff: 2, //固定值2
-                    lt_trace_issues: [
-                        {
-                            lt_trace_issues: '20190531-048', //期数
-                            lt_trace_times: 1 //
-                        }
-                    ]
-                }
+                bettraceparams
             }
+            this.$parent.$data.trace = this.trace = false //关闭追号
             betting({ postdata: JSON.stringify(postdata) }).then(res => {
                 this.$Message.success('投注成功')
                 this.$store.dispatch('handleOrderHistory', [...res.data.betlog])
@@ -130,7 +160,8 @@ export default {
         }
     },
     components: {
-        Button
+        Button,
+        Checkbox
     }
 }
 </script>
@@ -171,6 +202,7 @@ export default {
                 flex 1.5
     .orderNow
         display flex
+        font-size 12px
         li
             flex 1
             color #e8e8e8
@@ -186,8 +218,8 @@ export default {
                 border-radius 3px
                 margin-bottom -2px
             i.active
-                background #ff632c
-                border-color #ff632c
+                background #2d8cf0
+                border-color #2d8cf0
                 position relative
                 &::after
                     content '√'

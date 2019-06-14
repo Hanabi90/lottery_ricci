@@ -151,7 +151,14 @@ export default {
                 new Set([])
             ],
             quickDontShow: new Set(['QZUHZ', 'Q3BD', 'QZXHZ']), //不显示快捷选好
-            quickUpload: new Set(['单式', '混合', '组三单式', '组六单式']), //是否显示单式玩法
+            quickUpload: new Set([
+                '单式',
+                '混合',
+                '组三单式',
+                '组六单式',
+                '前三直选单式',
+                '前三组选单式'
+            ]), //是否显示单式玩法
             singleList: '', //单式内容
             lotteryPosition: {
                 0: { text: '万位', value: false },
@@ -234,13 +241,16 @@ export default {
                 title == '任三直选单式' ||
                 title == '任三组选组三单式' ||
                 title == '任三组选组六单式' ||
-                title == '任三组选混合'
+                title == '任三组选混合' ||
+                title == '三码前三直选单式'
             ) {
                 leg = 3
             }
             if (
                 title == '前二直选单式' ||
                 title == '前二组选单式' ||
+                title == '后二直选单式' ||
+                title == '后二组选单式' ||
                 title == '任二直选单式' ||
                 title == '任二组选单式'
             ) {
@@ -275,7 +285,7 @@ export default {
                     })
                     codes = arr
                 }
-                if (title == '前二组选单式') {
+                if (title == '前二组选单式' || title == '后二组选单式') {
                     let arr = []
                     codes.forEach(item => {
                         let element = item.split('')
@@ -332,6 +342,47 @@ export default {
                     }
                     codes = Array.from(codes)
                 }
+                if (
+                    title == '三码前三直选单式' ||
+                    title == '三码前三组选单式'
+                ) {
+                    let arr = [], //存放数据
+                        repeatArr = new Set()
+                    codes = new Set([
+                        ...this.foo11(this.singleList.replace(reg, ''))
+                    ])
+                    for (const item of codes.values()) {
+                        item = item.split(/[\s+]/g)
+                        const bool = item.every(item => {
+                            if (item.length == 2) {
+                                if (item[0] == 0) {
+                                    return true
+                                }
+                                if (item[0] == 1 && item[1] <= 1) {
+                                    return true
+                                }
+                            }
+                        })
+                        if (
+                            item.length == 3 &&
+                            bool &&
+                            item[0] != item[1] &&
+                            item[0] != item[2]
+                        ) {
+                            arr.push(item)
+                        }
+                    }
+                    if (title == '三码前三组选单式') {
+                        arr.forEach(item =>
+                            repeatArr.add(item.sort((a, b) => a - b).join(','))
+                        )
+                        codes = Array.from(repeatArr).map(item =>
+                            item.split(',')
+                        )
+                    } else {
+                        codes = arr
+                    }
+                }
             }
             return codes
         }
@@ -349,6 +400,18 @@ export default {
         //分组
         foo3(str) {
             var temp = str.split(/[\n\s+,，；;]/g)
+            for (var i = 0; i < temp.length; i++) {
+                if (temp[i] == '') {
+                    // 删除数组中空值
+                    temp.splice(i, 1)
+                    i--
+                }
+            }
+            return temp
+        },
+        //不带空格
+        foo11(str) {
+            var temp = str.split(/[\n+,，；;]/g)
             for (var i = 0; i < temp.length; i++) {
                 if (temp[i] == '') {
                     // 删除数组中空值

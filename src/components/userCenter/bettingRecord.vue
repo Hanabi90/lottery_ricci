@@ -47,6 +47,9 @@
                     >{{item.username}}</Option>
                 </Select>
             </FormItem>
+            <FormItem label="彩种奖期">
+                <Input v-model="bettingRecord.issue" placeholder="请选择"></Input>
+            </FormItem>
             <FormItem label="下级">
                 <Checkbox v-model="bettingRecord.include"></Checkbox>
             </FormItem>
@@ -101,7 +104,8 @@ import {
     DatePicker,
     Button,
     Checkbox,
-    Scroll
+    Scroll,
+    Input
 } from 'iview'
 import {
     getuserlottery,
@@ -228,11 +232,14 @@ export default {
                         return '已派奖'
                     }
                 }
-            } else if (iscancel == 1) {
+            }
+            if (iscancel == 1) {
                 return '本人撤单'
-            } else if (iscancel == 2) {
+            }
+            if (iscancel == 2) {
                 return '平台撤单'
-            } else if (iscancel == 3) {
+            }
+            if (iscancel == 3) {
                 return '错开撤单'
             }
         }
@@ -257,7 +264,8 @@ export default {
         DatePicker,
         Button,
         Checkbox,
-        Scroll
+        Scroll,
+        Input
     }
 }
 </script>
