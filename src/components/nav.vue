@@ -70,7 +70,7 @@
                                 <h5>{{item.title}}</h5>
                                 <li v-for="(element,index) of item.lottery_data" :key="index">
                                     <span
-                                        @click="jump(element.lotteryid,element.menuid)"
+                                        @click="jump(element.lotteryid,element.menuid,keys)"
                                     >{{element.title}}</span>
                                 </li>
                             </ul>
@@ -130,7 +130,7 @@ export default {
             this.$store.dispatch('handleUserCenter', !onOff)
         },
         //跳转
-        jump(lotteryId, menuId) {
+        jump(lotteryId, menuId, group) {
             this.$store.dispatch('handleMenuId', menuId)
             this.$router.push({ path: 'lottery', query: { menuId: menuId } })
             sessionStorage.setItem('lotteryId', lotteryId)
@@ -139,6 +139,7 @@ export default {
                 this.$store.dispatch('handleHackReset', true)
                 this.$store.dispatch('handleOrderList', { type: 'clear' })
             })
+            sessionStorage.setItem('group', group)
         },
         //刷新金额
         refresh() {

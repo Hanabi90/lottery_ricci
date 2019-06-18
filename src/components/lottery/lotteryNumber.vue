@@ -42,7 +42,10 @@
             </div>
         </div>
         <ul class="number_container">
-            <li v-if="quickUpload.has(methodList.name)" class="listSingle">
+            <li
+                v-if="quickUpload.has(methodList.name)||quickUpload.has(methodList.title)"
+                class="listSingle"
+            >
                 <p style="margin-bottom:10px" v-if="getTitle">
                     <span style="margin-right:25px;font-size:14px">位置</span>
                     <Checkbox
@@ -157,7 +160,10 @@ export default {
                 '组三单式',
                 '组六单式',
                 '前三直选单式',
-                '前三组选单式'
+                '前三组选单式',
+                '前二直选单式',
+                '前二组选单式',
+                '任选单式'
             ]), //是否显示单式玩法
             singleList: '', //单式内容
             lotteryPosition: {
@@ -166,7 +172,8 @@ export default {
                 2: { text: '百位', value: false },
                 3: { text: '十位', value: false },
                 4: { text: '个位', value: false }
-            }
+            },
+            groupType: sessionStorage.getItem('group')
         }
     },
     computed: {
@@ -225,10 +232,23 @@ export default {
                 reg = /[^\d,，;；\n\s*]/g,
                 leg = 0,
                 title = this.methodList.title + this.methodList.name
-            if (title == '五星直选单式') {
+            if (title == '任选单式任选八中五') {
+                leg = 8
+            }
+            if (title == '任选单式任选七中五') {
+                leg = 7
+            }
+            if (title == '任选单式任选六中五') {
+                leg = 6
+            }
+            if (title == '五星直选单式' || title == '任选单式任选五中五') {
                 leg = 5
             }
-            if (title == '四星直选单式' || title == '任四直选单式') {
+            if (
+                title == '四星直选单式' ||
+                title == '任四直选单式' ||
+                title == '任选单式任选四中四'
+            ) {
                 leg = 4
             }
             if (
@@ -242,7 +262,9 @@ export default {
                 title == '任三组选组三单式' ||
                 title == '任三组选组六单式' ||
                 title == '任三组选混合' ||
-                title == '三码前三直选单式'
+                title == '三码前三直选单式' ||
+                title == '三码前三组选单式' ||
+                title == '任选单式任选三中三'
             ) {
                 leg = 3
             }
@@ -252,9 +274,15 @@ export default {
                 title == '后二直选单式' ||
                 title == '后二组选单式' ||
                 title == '任二直选单式' ||
-                title == '任二组选单式'
+                title == '任二组选单式' ||
+                title == '二码前二直选单式' ||
+                title == '二码前二组选单式' ||
+                title == '任选单式任选二中二'
             ) {
                 leg = 2
+            }
+            if (title == '任选单式任选一中一') {
+                leg = 1
             }
             if (this.singleList) {
                 codes = new Set([
@@ -343,8 +371,18 @@ export default {
                     codes = Array.from(codes)
                 }
                 if (
+                    title == '二码前二直选单式' ||
+                    title == '二码前二组选单式' ||
                     title == '三码前三直选单式' ||
-                    title == '三码前三组选单式'
+                    title == '三码前三组选单式' ||
+                    title == '任选单式任选一中一' ||
+                    title == '任选单式任选二中二' ||
+                    title == '任选单式任选三中三' ||
+                    title == '任选单式任选四中四' ||
+                    title == '任选单式任选五中五' ||
+                    title == '任选单式任选六中五' ||
+                    title == '任选单式任选七中五' ||
+                    title == '任选单式任选八中五'
                 ) {
                     let arr = [], //存放数据
                         repeatArr = new Set()
@@ -363,16 +401,22 @@ export default {
                                 }
                             }
                         })
-                        if (
-                            item.length == 3 &&
-                            bool &&
-                            item[0] != item[1] &&
-                            item[0] != item[2]
-                        ) {
+                        if (bool && new Set(item).size == leg) {
                             arr.push(item)
                         }
                     }
-                    if (title == '三码前三组选单式') {
+                    if (
+                        title == '二码前二组选单式' ||
+                        title == '三码前三组选单式' ||
+                        title == '任选单式任选一中一' ||
+                        title == '任选单式任选二中二' ||
+                        title == '任选单式任选三中三' ||
+                        title == '任选单式任选四中四' ||
+                        title == '任选单式任选五中五' ||
+                        title == '任选单式任选六中五' ||
+                        title == '任选单式任选七中五' ||
+                        title == '任选单式任选八中五'
+                    ) {
                         arr.forEach(item =>
                             repeatArr.add(item.sort((a, b) => a - b).join(','))
                         )
@@ -477,14 +521,77 @@ export default {
                 this.activeGroup[index].delete(number)
             } else {
                 this.activeGroup[index].add(number)
+                //任选胆拖
+                if (this.methodList.title == '任选胆拖') {
+                    if (index == 0) {
+                        let arr = Array.from(this.activeGroup[index])
+                        switch (this.methodList.name) {
+                            case '任选二中二':
+                                //清空第一列
+                                this.activeGroup[index].clear()
+                                break
+                            case '任选三中三':
+                                //清空第一列
+                                this.activeGroup[index] = new Set(
+                                    arr.splice(-2)
+                                )
+                                break
+                            case '任选四中四':
+                                //清空第一列
+                                this.activeGroup[index] = new Set(
+                                    arr.splice(-3)
+                                )
+                                break
+                            case '任选五中五':
+                                //清空第一列
+                                this.activeGroup[index] = new Set(
+                                    arr.splice(-4)
+                                )
+                                break
+                            case '任选六中五':
+                                //清空第一列
+                                this.activeGroup[index] = new Set(
+                                    arr.splice(-5)
+                                )
+                                break
+                            case '任选七中五':
+                                //清空第一列
+                                this.activeGroup[index] = new Set(
+                                    arr.splice(-6)
+                                )
+                                break
+                            case '任选八中五':
+                                //清空第一列
+                                this.activeGroup[index] = new Set(
+                                    arr.splice(-7)
+                                )
+                                break
+                        }
+                        //添加号码
+                        this.activeGroup[index].add(number)
+                        //查询第二行是否有同样的值，有的话删除掉
+                        if (this.activeGroup[1].has(number)) {
+                            this.activeGroup[1].delete(number)
+                        }
+                    }
+                    if (index == 1) {
+                        //添加号码
+                        this.activeGroup[index].add(number)
+                        //查询第一行是否有同样的值，有的话删除掉
+                        if (this.activeGroup[0].has(number)) {
+                            this.activeGroup[0].delete(number)
+                        }
+                    }
+                }
             }
             this.$set(this.activeGroup, index, this.activeGroup[index])
             this.$store.dispatch('handleLotteryNumber', {
                 list: this.activeGroup,
                 methods: this.methodList.title + this.methodList.name,
+                type: this.methodList.selectarea.type,
                 title: this.methodList.title,
                 name: this.methodList.name,
-                type: this.methodList.selectarea.type
+                methodname: this.methodList.methodname
             })
         },
         chosenType(lable, index, $event) {
@@ -495,15 +602,37 @@ export default {
                     .querySelectorAll('span')
                     .forEach(item => (item.className = ''))
             }
+            //清除类型的所有样式
+            e.target.parentNode.childNodes.forEach(
+                item => (item.className = '')
+            )
+            //添加激活样式
+            e.target.className = 'active'
 
-            if (e.target.className == 'active') {
-                e.target.className = ''
-            } else {
-                e.target.className = 'active'
-            }
             //清空
             this.activeGroup[index].clear()
-            let arr = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+            let arr =
+                this.groupType == '11selected5'
+                    ? [
+                          '01',
+                          '02',
+                          '03',
+                          '04',
+                          '05',
+                          '06',
+                          '07',
+                          '08',
+                          '09',
+                          '10',
+                          '11'
+                      ]
+                    : ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+            console.log(
+                arr,
+                arr.length,
+                arr.length / 2 - 1,
+                arr[arr.length / 2 - 1]
+            )
             switch (lable) {
                 case '全':
                     this.$set(this.activeGroup, index, new Set(arr))
@@ -512,14 +641,14 @@ export default {
                     this.$set(
                         this.activeGroup,
                         index,
-                        new Set(arr.filter(i => i > 4))
+                        new Set(arr.filter(i => i > arr[4]))
                     )
                     break
                 case '小':
                     this.$set(
                         this.activeGroup,
                         index,
-                        new Set(arr.filter(i => i < 5))
+                        new Set(arr.filter(i => i < arr[5]))
                     )
                     break
                 case '奇':
@@ -543,7 +672,10 @@ export default {
             this.$store.dispatch('handleLotteryNumber', {
                 list: this.activeGroup,
                 methods: this.methodList.title + this.methodList.name,
-                type: this.methodList.selectarea.type
+                type: this.methodList.selectarea.type,
+                title: this.methodList.title,
+                name: this.methodList.name,
+                methodname: this.methodList.methodname
             })
         },
         handleActive(index, item) {

@@ -64,7 +64,7 @@
         </div>
         <ul class="listContent">
             <li v-for="(item,index) of list" :key="index">
-                <Checkbox v-model="item.active"></Checkbox>
+                <Checkbox @on-change="test(index)" v-model="item.active"></Checkbox>
                 <span style="margin:0 50px">{{item.index}}</span>
                 <span style="margin:0 50px;margin-right:100px">{{item.issue}}</span>
                 <InputNumber
@@ -76,6 +76,7 @@
                 ></InputNumber>
                 <span style="margin-left:10px">倍</span>
                 <span style="margin:0 100px">{{item.money}}元</span>
+                <span>{{item.totalNowMoney}}</span>
             </li>
         </ul>
     </div>
@@ -147,6 +148,18 @@ export default {
         }
     },
     methods: {
+        test(index) {
+            let count = 0
+            for (let i = 0; i < this.list.length; i++) {
+                const item = this.list[i]
+                if (item.active) {
+                    count += item.money
+                    this.list[i].totalNowMoney = count
+                } else {
+                    this.list[i].totalNowMoney = 0
+                }
+            }
+        },
         handleList(typevalue, value) {
             let issue = this.$store.state.issue.split('-'), //当前期数
                 leg = this.qissueno, //期数
@@ -165,7 +178,9 @@ export default {
                     index: index + 1,
                     issue: issue[0] + '-' + (issue[1] * 1 + index),
                     multiple: multiple,
-                    money: this.orderList.totalMoney * multiple
+                    money: this.orderList.totalMoney * multiple,
+                    totalNowMoney:
+                        this.orderList.totalMoney * multiple * (index + 1)
                 })
             }
             this.list = [...list]

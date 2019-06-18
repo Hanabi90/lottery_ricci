@@ -92,7 +92,17 @@ export default {
                     arr.methods === '后二直选单式' ||
                     arr.methods === '后二组选单式' ||
                     arr.methods === '三码前三直选单式' ||
-                    arr.methods === '三码前三组选单式') &&
+                    arr.methods === '三码前三组选单式' ||
+                    arr.methods === '二码前二直选单式' ||
+                    arr.methods === '二码前二组选单式' ||
+                    arr.methods == '任选单式任选一中一' ||
+                    arr.methods == '任选单式任选二中二' ||
+                    arr.methods == '任选单式任选三中三' ||
+                    arr.methods == '任选单式任选四中四' ||
+                    arr.methods == '任选单式任选五中五' ||
+                    arr.methods == '任选单式任选六中五' ||
+                    arr.methods == '任选单式任选七中五' ||
+                    arr.methods == '任选单式任选八中五') &&
                 arr.list
             ) {
                 nums = arr.list.length
@@ -147,7 +157,8 @@ export default {
             }
             if (
                 (arr.methods === '五星组选组10' ||
-                    arr.methods === '五星组选组5') &&
+                    arr.methods === '五星组选组5' ||
+                    arr.methods === '二码前二直选复式') &&
                 arr.list[0].size >= 1 &&
                 arr.list[1].size >= 1
             ) {
@@ -161,14 +172,65 @@ export default {
                     }
                 }
             }
+
+            if (arr.title === '任选胆拖') {
+                let leg = 0
+                switch (arr.name) {
+                    case '任选二中二':
+                        leg = 2
+                        break
+                    case '任选三中三':
+                        leg = 3
+                        break
+                    case '任选四中四':
+                        leg = 4
+                        break
+                    case '任选五中五':
+                        leg = 5
+                        break
+                    case '任选六中五':
+                        leg = 6
+                        break
+                    case '任选七中五':
+                        leg = 7
+                        break
+                    case '任选八中五':
+                        leg = 8
+                        break
+                }
+                if (arr.list[0].size >= 1 && arr.list[1].size >= 1) {
+                    nums += math.combo(
+                        Array.from(arr.list[1]),
+                        leg - arr.list[0].size
+                    ).length
+                }
+            }
+
             if (
-                arr.methods === '特殊一帆风顺' ||
-                arr.methods === '特殊好事成双' ||
-                arr.methods === '特殊三星报喜' ||
-                arr.methods === '特殊四季发财' ||
-                arr.methods === '四星不定位后四一码' ||
-                arr.methods === '三星不定位前三一码' ||
-                arr.methods === '三星不定位后三一码'
+                arr.methods === '三码前三直选复式' &&
+                arr.list[0].size >= 1 &&
+                arr.list[1].size >= 1 &&
+                arr.list[2].size >= 1
+            ) {
+                for (let i of arr.list[0].values()) {
+                    for (let j of arr.list[1].values()) {
+                        for (let k of arr.list[2].values()) {
+                            if (i != j && i != k && j != k) {
+                                nums++
+                            }
+                        }
+                    }
+                }
+            }
+            if (
+                arr.methods == '特殊一帆风顺' ||
+                arr.methods == '特殊好事成双' ||
+                arr.methods == '特殊三星报喜' ||
+                arr.methods == '特殊四季发财' ||
+                arr.methods == '四星不定位后四一码' ||
+                arr.methods == '三星不定位前三一码' ||
+                arr.methods == '三星不定位后三一码' ||
+                arr.methods == '不定胆前三位'
             ) {
                 nums = arr.list[0].size
             }
@@ -191,8 +253,7 @@ export default {
                 arr.methods === '中三直选复式' ||
                 arr.methods === '后三直选复式' ||
                 arr.methods === '三星大小单双前三' ||
-                arr.methods === '三星大小单双后三' ||
-                arr.methods === '三码前三直选复式' 
+                arr.methods === '三星大小单双后三'
             ) {
                 let arrList = []
                 for (let index = 0; index < arr.list.length - 2; index++) {
@@ -209,8 +270,7 @@ export default {
                 arr.methods === '前二直选复式' ||
                 arr.methods === '后二直选复式' ||
                 arr.methods === '二星大小单双前二' ||
-                arr.methods === '二星大小单双后二' ||
-                arr.methods === '二码前二直选复式'
+                arr.methods === '二星大小单双后二'
             ) {
                 let arrList = []
                 for (let index = 0; index < 2; index++) {
@@ -276,7 +336,10 @@ export default {
                 arr.methods === '中三直选特殊号' ||
                 arr.methods === '后三直选和值尾数' ||
                 arr.methods === '后三直选特殊号' ||
-                arr.title === '龙虎和'
+                arr.title === '龙虎和' ||
+                arr.methods === '趣味型定单双' ||
+                arr.methods === '趣味型猜中位' ||
+                arr.methods === '任选复式任选一中一'
             ) {
                 nums += arr.list[0].size
             }
@@ -289,7 +352,8 @@ export default {
             }
             if (
                 arr.methods === '前二组选复式' ||
-                arr.methods === '后二组选复式'
+                arr.methods === '后二组选复式' ||
+                arr.methods === '二码前二组选复式'
             ) {
                 nums += this.handleGroup(Array.from(arr.list[0]), 2)
             }
@@ -348,17 +412,37 @@ export default {
                     nums += item.size
                 }
             }
-            if (arr.methods === '五星不定位三码' && arr.list[0].size >= 3) {
+            if (
+                (arr.methods === '五星不定位三码' ||
+                    arr.methods === '任选复式任选三中三') &&
+                arr.list[0].size >= 3
+            ) {
                 nums = math.combo(Array.from(arr.list[0]), 3).length
             }
             if (
                 (arr.methods === '五星不定位二码' ||
                     arr.methods === '四星不定位后四二码' ||
                     arr.methods === '三星不定位前三二码' ||
-                    arr.methods === '三星不定位后三二码') &&
+                    arr.methods === '三星不定位后三二码' ||
+                    arr.methods === '任选复式任选二中二') &&
                 arr.list[0].size >= 2
             ) {
                 nums = math.combo(Array.from(arr.list[0]), 2).length
+            }
+            if (arr.methods === '任选复式任选四中四' && arr.list[0].size >= 4) {
+                nums = math.combo(Array.from(arr.list[0]), 4).length
+            }
+            if (arr.methods === '任选复式任选五中五' && arr.list[0].size >= 5) {
+                nums = math.combo(Array.from(arr.list[0]), 5).length
+            }
+            if (arr.methods === '任选复式任选六中五' && arr.list[0].size >= 6) {
+                nums = math.combo(Array.from(arr.list[0]), 6).length
+            }
+            if (arr.methods === '任选复式任选七中五' && arr.list[0].size >= 7) {
+                nums = math.combo(Array.from(arr.list[0]), 7).length
+            }
+            if (arr.methods === '任选复式任选八中五' && arr.list[0].size >= 8) {
+                nums = math.combo(Array.from(arr.list[0]), 8).length
             }
             if (arr.methods === '任四直选复式') {
                 let leg = 0
@@ -833,7 +917,8 @@ export default {
                 singleList11 = [], //11选5
                 descText = [], //为任选单式 类型 组合
                 title = this.$store.state.lotteryNumber.methods,
-                title1 = this.$store.state.lotteryNumber.title
+                title1 = this.$store.state.lotteryNumber.title,
+                methodsName = this.$store.state.lotteryNumber.methodname
             if (
                 title == '五星直选单式' ||
                 title == '四星直选单式' ||
@@ -897,7 +982,18 @@ export default {
                 title == '任二组选复式' ||
                 title == '任二组选和值' ||
                 title1 == '龙虎和' ||
-                title == '三码前三组选复式'
+                title == '三码前三组选复式' ||
+                title == '二码前二组选复式' ||
+                title == '趣味型定单双' ||
+                title == '趣味型猜中位' ||
+                title == '任选复式任选一中一' ||
+                title == '任选复式任选二中二' ||
+                title == '任选复式任选三中三' ||
+                title == '任选复式任选四中四' ||
+                title == '任选复式任选五中五' ||
+                title == '任选复式任选六中五' ||
+                title == '任选复式任选七中五' ||
+                title == '任选复式任选八中五'
             ) {
                 let count = this.$store.state.lotteryNumber.list
                 count.forEach(item => {
@@ -915,7 +1011,20 @@ export default {
                 )
                 singleList.sort((a, b) => a - b)
             }
-            if (title == '三码前三直选单式' || title == '三码前三组选单式') {
+            if (
+                title == '三码前三直选单式' ||
+                title == '三码前三组选单式' ||
+                title == '二码前二直选单式' ||
+                title == '二码前二组选单式' ||
+                title == '任选单式任选一中一' ||
+                title == '任选单式任选二中二' ||
+                title == '任选单式任选三中三' ||
+                title == '任选单式任选四中四' ||
+                title == '任选单式任选五中五' ||
+                title == '任选单式任选六中五' ||
+                title == '任选单式任选七中五' ||
+                title == '任选单式任选八中五'
+            ) {
                 singleList = [...this.$store.state.lotteryNumber.list]
                 singleList = singleList.map(item => item.join(' '))
             }
@@ -940,6 +1049,12 @@ export default {
             ) {
                 codesSplice = codes[0]
                 for (let index = 1; index < codes.length; index++) {
+                    codesSplice = codesSplice + '|' + codes[index]
+                }
+            }
+            if (title == '定位胆定位胆' && methodsName == 'SDDWD5') {
+                codesSplice = codes[0]
+                for (let index = 1; index < 3; index++) {
                     codesSplice = codesSplice + '|' + codes[index]
                 }
             }

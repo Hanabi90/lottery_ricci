@@ -125,7 +125,7 @@ export default {
                 methodid: '', //游戏玩法
                 lotteryid: '', //彩种名称
                 starttime: '', //起始时间
-                pn: '', //请求的数据记录数量
+                pn: 15, //请求的数据记录数量
                 p: 1 //请求的页面序号
             },
             lotteryList: {}, //彩票id
@@ -170,7 +170,9 @@ export default {
             this.$set(this.bettingRecord, 'p', 1)
             getbethistory({ ...bettingRecord }).then(res => {
                 this.userHistory = [...res.data.page_data]
-                this.pages = Math.ceil(res.data.total_count / 25)
+                this.pages = Math.ceil(
+                    res.data.total_count / this.bettingRecord.pn
+                )
             })
         },
         handleReachBottom() {
@@ -292,6 +294,7 @@ export default {
                 flex 1
                 text-align center
                 font-size 12px
+                line-height 18px
             .code
                 overflow hidden
                 text-overflow ellipsis

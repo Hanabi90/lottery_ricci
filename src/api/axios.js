@@ -34,10 +34,6 @@ service.interceptors.response.use(
     response => {
         // 请求响应后关闭加载框
         LoadingBar.start()
-        if (typeof response.data == 'string') {
-            console.log(response.data.toString())
-            response.data = JSON.parse(response.data.toString())
-        }
         const responseCode = response.status
         // 如果返回的状态码为200，说明接口请求成功，可以正常拿到数据
         // 否则的话抛出错误
@@ -73,7 +69,6 @@ service.interceptors.response.use(
         if (!error.response) {
             // 请求超时状态
             if (error.message.includes('timeout')) {
-                console.log('超时了')
                 return Promise.resolve('超时了')
             } else {
                 // 可以展示断网组件
@@ -94,7 +89,7 @@ service.interceptors.response.use(
             // 403: token过期
             case 403:
                 // 弹出错误信息
-                console.log('错误')
+
                 // 清除token
                 localStorage.removeItem('token')
                 // 跳转登录页面，并将要浏览的页面fullPath传过去，登录成功后跳转需要访问的页面

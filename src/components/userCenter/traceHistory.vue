@@ -145,7 +145,7 @@ export default {
                 methodid: '', //游戏玩法
                 lotteryid: '', //彩种名称
                 starttime: '', //起始时间
-                pn: 9, //请求的数据记录数量
+                pn: 15, //请求的数据记录数量
                 p: 1 //请求的页面序号
             },
             tasksList: [

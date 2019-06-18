@@ -45,8 +45,8 @@ export default {
         return {
             onOff: false,
             login: {
-                username: 'tzdricci',
-                loginpass: '1234qwer'
+                username: '',
+                loginpass: ''
             },
             rememberUserName: false
         }
