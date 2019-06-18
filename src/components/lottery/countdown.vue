@@ -148,7 +148,7 @@ export default {
 }
 </script>
 
-<style scoped lang="css">
+<style lang="css" scoped>
 .flip-clock {
     text-align: center;
     perspective: 600px;
