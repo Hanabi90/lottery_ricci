@@ -36,7 +36,9 @@ export default {
             }, //开奖结果
             opentimeList: [], //开奖时间
             openTimeOnOff: true, //开奖函数只执行一次
-            count: 0
+            count: 0,
+            timerDown: '', //倒计时定时器
+            timerOpenTime: '' //倒计时开奖
         }
     },
     mounted() {
@@ -52,12 +54,12 @@ export default {
     methods: {
         down() {
             if (this.timercount) {
-                setTimeout(() => {
+                this.timerDown = setTimeout(() => {
                     this.timercount -= 1
                     this.down()
                 }, 1000)
             } else {
-                setTimeout(() => {
+                this.timerDown = setTimeout(() => {
                     this.handleIssues()
                 }, 1000)
             }
@@ -67,7 +69,7 @@ export default {
             let opentime = this.opentimeList[0].opentime,
                 current = this.opentimeList[0].current
             if (opentime) {
-                setTimeout(() => {
+                this.timerOpenTime = setTimeout(() => {
                     this.$set(this.opentimeList[0], 'opentime', opentime - 1)
                     this.handleOpenTime()
                 }, 1000)
@@ -99,7 +101,7 @@ export default {
                             this.$set(this.lotteryNumber, 'code', '-----')
                         }
                     }
-                    setTimeout(() => {
+                    this.timerOpenTime = setTimeout(() => {
                         this.handleOpenTime()
                     }, 1000)
                 })
@@ -134,6 +136,11 @@ export default {
                 EventBus.$emit('updateIssue')
             })
         }
+    },
+    beforeDestroy() {
+        //销毁时，清除定时器循环
+        clearTimeout(this.timerDown)
+        clearTimeout(this.timerOpenTime)
     },
     components: {
         CountDown

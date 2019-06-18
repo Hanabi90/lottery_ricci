@@ -627,12 +627,6 @@ export default {
                           '11'
                       ]
                     : ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-            console.log(
-                arr,
-                arr.length,
-                arr.length / 2 - 1,
-                arr[arr.length / 2 - 1]
-            )
             switch (lable) {
                 case '全':
                     this.$set(this.activeGroup, index, new Set(arr))
