@@ -62,21 +62,42 @@
                 <i>期</i>
             </span>
         </div>
-        <ul class="listContent">
-            <li v-for="(item,index) of list" :key="index">
-                <Checkbox @on-change="test(index)" v-model="item.active"></Checkbox>
-                <span style="margin:0 50px">{{item.index}}</span>
-                <span style="margin:0 50px;margin-right:100px">{{item.issue}}</span>
-                <InputNumber
-                    @on-change="handleMoney(item)"
-                    size="small"
-                    v-model="item.multiple"
-                    :style="{width:'80px'}"
-                    :min="1"
-                ></InputNumber>
-                <span style="margin-left:10px">倍</span>
-                <span style="margin:0 100px">{{item.money}}元</span>
-                <span>{{item.totalNowMoney}}</span>
+        <ul class="listTitle">
+            <li>选项</li>
+            <li>序号</li>
+            <li>追号期数</li>
+            <li>倍数</li>
+            <li>金额</li>
+            <li>累计金额</li>
+            <li v-if="zhuihao==1">奖金</li>
+            <li v-if="zhuihao==1">盈利金额</li>
+            <li v-if="zhuihao==1">盈利率</li>
+        </ul>
+        <ul class="listContent" v-for="(item,index) of list" :key="index">
+            <li>
+                <div>
+                    <Checkbox @on-change="test(index)" v-model="item.active"></Checkbox>
+                </div>
+                <div>
+                    <span>{{item.index}}</span>
+                </div>
+                <div>
+                    <span>{{item.issue}}</span>
+                </div>
+                <div>
+                    <InputNumber
+                        @on-change="handleMoney(item,index)"
+                        size="small"
+                        v-model="item.multiple"
+                        :style="{width:'80px'}"
+                        :min="1"
+                    ></InputNumber>
+                </div>
+                <div>{{item.money}}</div>
+                <div>{{item.totalNowMoney}}</div>
+                <div v-if="zhuihao==1">{{item.bonues}}</div>
+                <div v-if="zhuihao==1">{{item.profit}}</div>
+                <div v-if="zhuihao==1">{{item.Profitability}}</div>
             </li>
         </ul>
     </div>
@@ -84,13 +105,14 @@
 
 <script>
 import { RadioGroup, Radio, Select, Option, InputNumber, Checkbox } from 'iview'
+import { getcreateissues } from '@/api/index'
 import { EventBus } from '@/api/eventBus.js'
 export default {
     name: 'trace',
     props: ['orderList'],
     data() {
         return {
-            zhuihao: '1', //1：利潤率追號；2：同倍追號；3：翻倍追號；,
+            zhuihao: '2', //1：利潤率追號；2：同倍追號；3：翻倍追號；,
             qissueno: 10, //期数
             multiple: 1, //倍数
             lt_trace_margin: 50, //最低收益
@@ -125,7 +147,7 @@ export default {
     },
     mounted() {
         this.handleList()
-        EventBus.$on('updateIssue', () => {
+        EventBus.$on('updateTraceList', () => {
             this.handleList()
         })
     },
@@ -161,34 +183,144 @@ export default {
             }
         },
         handleList(typevalue, value) {
-            let issue = this.$store.state.issue.split('-'), //当前期数
+            let issue = '', //当前期数
                 leg = this.qissueno, //期数
                 multiple = this.multiple, //倍数
-                list = [] //列表存放
-            if (typevalue && value == 3) {
-                this.multiple = 2
-            }
-            for (let index = 0; index < leg; index++) {
-                if (this.zhuihao == 3) {
-                    //翻倍追号
-                    multiple = multiple * index ? multiple * this.multiple : 1
+                list = [], //列表存放
+                total = 0 //累计奖金
+            getcreateissues({
+                //获取奖期
+                lotteryid: sessionStorage.getItem('lotteryId'),
+                currissue: this.$store.state.issue
+            }).then(res => {
+                issue = res.data
+                if (typevalue && value == 3) {
+                    this.multiple = 2
                 }
-                list.push({
-                    active: true,
-                    index: index + 1,
-                    issue: issue[0] + '-' + (issue[1] * 1 + index),
-                    multiple: multiple,
-                    money: this.orderList.totalMoney * multiple,
-                    totalNowMoney:
-                        this.orderList.totalMoney * multiple * (index + 1)
-                })
-            }
-            this.list = [...list]
+                if (this.zhuihao != 1) {
+                    for (let index = 0; index < leg; index++) {
+                        if (this.zhuihao == 3) {
+                            //翻倍追号
+                            multiple =
+                                multiple * index ? multiple * this.multiple : 1
+                        }
+                        total += this.orderList.totalMoney * multiple
+                        list.push({
+                            active: true,
+                            index: index + 1,
+                            issue: issue[index],
+                            multiple: multiple,
+                            money: this.orderList.totalMoney * multiple,
+                            totalNowMoney: total //累计金额
+                        })
+                    }
+                    this.list = [...list]
+                }
+                if (this.zhuihao == 1) {
+                    //随机拿数组里面的方法id
+                    let methodid = this.$store.state.orderList[0].methodid,
+                        //判定是否为同一种玩法
+                        ifSame = this.$store.state.orderList.every(
+                            item => item.methodid == methodid
+                        )
+                    if (ifSame) {
+                        //如果是同一种玩法，在判断是否有利润空间
+                        let itemMoney = this.orderList.totalMoney,
+                            totalBonues = 0
+                        this.$store.state.orderList.forEach(item => {
+                            totalBonues += this.$store.state.bonues * item.times
+                        })
+                        if (totalBonues > itemMoney) {
+                            this.handleProfitMargin(issue, leg, multiple, 0, [])
+                        } else {
+                            this.$Message.error(
+                                '您设置的参数无法达到盈利，请重新设置'
+                            )
+                            this.zhuihao = '2'
+                        }
+                    } else {
+                        this.$Message.error(
+                            '利润率追号不支持混投,请确保您的投注都为同一玩法类型,且元角模式一致。'
+                        )
+                        this.zhuihao = '2'
+                    }
+                }
+            })
         },
         //倍数变动-money 从新计算
-        handleMoney(item) {
-            let money = item.multiple * this.orderList.totalMoney
-            this.$set(item, 'money', money)
+        handleMoney(item, index) {
+            let money = item.multiple * this.orderList.totalMoney //修改金额
+            this.item.this.$set(item, 'money', money)
+        },
+        //处理利润路追号
+        handleProfitMargin(issue, leg, multiple, index, list) {
+            //单笔金额
+            let itemMoney = this.orderList.totalMoney,
+                //利润率
+                lt_trace_margin = this.lt_trace_margin,
+                //累计总金额
+                totalNowMoney = list.length
+                    ? list[index - 1].totalNowMoney
+                    : itemMoney,
+                times = 0
+            this.$store.state.orderList.forEach(item => {
+                times += item.times
+            })
+            let //单笔奖金
+                bonues = this.$store.state.bonues * times,
+                //单笔利润
+                profit = (bonues - itemMoney).toFixed(2)
+            //需要获得的钱
+            if (leg > 0) {
+                //计算倍率
+                if (index == 0) {
+                    //单笔利润率
+                    let singleBonues = (bonues - itemMoney) / itemMoney
+                    while (singleBonues <= lt_trace_margin / 100) {
+                        multiple++
+                        bonues += bonues
+                        itemMoney += itemMoney
+                        singleBonues = (
+                            (bonues - itemMoney) /
+                            itemMoney
+                        ).toFixed(2)
+                    }
+                } else {
+                    multiple = Math.ceil(
+                        ((lt_trace_margin / 100) * totalNowMoney +
+                            totalNowMoney) /
+                            (bonues -
+                                itemMoney -
+                                (lt_trace_margin / 100) * itemMoney)
+                    )
+                }
+                let itemTotalNowMoney = index
+                        ? itemMoney * multiple + list[index - 1].totalNowMoney
+                        : itemMoney * multiple,
+                    itemProfit = index
+                        ? bonues * multiple -
+                          (itemMoney * multiple + list[index - 1].totalNowMoney)
+                        : bonues * multiple - itemMoney * multiple
+                list[index] = {
+                    active: true,
+                    index: index + 1,
+                    issue: issue[index],
+                    multiple: multiple,
+                    bonues: (bonues * multiple).toFixed(2),
+                    money: itemMoney * multiple,
+                    totalNowMoney: itemTotalNowMoney,
+                    profit: itemProfit.toFixed(2),
+                    Profitability: `${(
+                        (itemProfit / itemTotalNowMoney) *
+                        100
+                    ).toFixed(2)}%`
+                }
+                leg--
+                index++
+                this.handleProfitMargin(issue, leg, multiple, index, list)
+            } else {
+                this.list = list
+            }
         }
     },
     components: {
@@ -223,13 +355,21 @@ export default {
                 font-size 12px
     .listContent
         color #fff
+        display flex
         li
-            padding 10px
-            padding-left 40px
+            flex 1
+            line-height 40px
             border-top 1px solid #464646
             border-bottom 1px solid #1a1a1a
-            span
-                display inline-block
-                width 80px
-                text-align center
+            text-align center
+            display flex
+            div
+                flex 1
+    .listTitle
+        display flex
+        text-align center
+        line-height 30px
+        color #fff
+        li
+            flex 1
 </style>

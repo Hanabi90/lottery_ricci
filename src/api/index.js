@@ -81,6 +81,13 @@ export const checksecpass = formData =>
         url: 'security/checksecpass',
         data: qs.stringify(formData)
     })
+//使用密保找回资金密码
+export const changeusersecpass = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/changeusersecpass',
+        data: qs.stringify(formData)
+    })
 //设置密保问题
 export const setsequestion = formData =>
     service.request({
@@ -92,7 +99,8 @@ export const setsequestion = formData =>
 export const checksequestion = formData =>
     service.request({
         method: 'post',
-        url: 'security/checksequestion'
+        url: 'security/checksequestion',
+        data: qs.stringify(formData)
     })
 //修改昵称
 export const updatenickname = formData =>
@@ -142,7 +150,7 @@ export const getbanklist = formData =>
         url: 'bankmanage/getbanklist',
         data: qs.stringify(formData)
     })
-//获取银行列表
+//获取下级资讯
 export const getchildlist = formData =>
     service.request({
         method: 'post',
@@ -182,11 +190,39 @@ export const getorderhistory = formData =>
         url: 'report/getorderhistory',
         data: qs.stringify(formData)
     })
-//游戏帐变记录
+//查詢指定時間段內的追號投注記錄
 export const gettaskhistory = formData =>
     service.request({
         method: 'post',
         url: 'gameinfo/gettaskhistory',
+        data: qs.stringify(formData)
+    })
+//查询追号记录详情
+export const gettaskhistorydetail = formData =>
+    service.request({
+        method: 'post',
+        url: 'gameinfo/gettaskhistorydetail',
+        data: qs.stringify(formData)
+    })
+//追號撤單接口
+export const traceordercancel = formData =>
+    service.request({
+        method: 'post',
+        url: 'traceordercancel',
+        data: qs.stringify(formData)
+    })
+//非遊戲帳變記錄
+export const getbankreporthistory = formData =>
+    service.request({
+        method: 'post',
+        url: 'report/getbankreporthistory',
+        data: qs.stringify(formData)
+    })
+//获取所有非游戏帐变类型
+export const getallbankreporttype = formData =>
+    service.request({
+        method: 'post',
+        url: 'report/getallbankreporttype',
         data: qs.stringify(formData)
     })
 
@@ -224,7 +260,7 @@ export const betting = formData =>
         url: `lottery/betting`,
         data: qs.stringify(formData)
     })
-//投注接口
+//撤单接口
 export const ordercancel = formData =>
     service.request({
         method: 'post',
@@ -236,5 +272,81 @@ export const getcreateissues = formData =>
     service.request({
         method: 'post',
         url: `getcreateissues`,
+        data: qs.stringify(formData)
+    })
+//获取收到的消息
+export const getmessage = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/getmessage',
+        data: qs.stringify(formData)
+    })
+//获取消息内容
+export const getmessagecontent = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/getmessagecontent',
+        data: qs.stringify(formData)
+    })
+//删除发送的消息
+export const deletemessage = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/deletemessage',
+        data: qs.stringify(formData)
+    })
+//获取已发送的消息
+export const getSendMessage = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/getmessage',
+        data: qs.stringify(formData)
+    })
+//发消息给下级
+export const sendmessagetochild = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/sendmessagetochild',
+        data: qs.stringify(formData)
+    })
+//发消息给上级
+export const sendmessagetoparent = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/sendmessagetoparent',
+        data: qs.stringify(formData)
+    })
+//回复信息
+export const messagereply = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/messagereply',
+        data: qs.stringify(formData)
+    })
+//获取未读消息数量
+export const getunreadmessageamount = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/getunreadmessageamount',
+        data: qs.stringify(formData)
+    })
+//获取推广链接奖金组可选范围
+export const getreglink = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/getreglink'
+    })
+//获取推广链接奖金组可选范围
+export const addnewuser = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/addnewuser',
+        data: qs.stringify(formData)
+    })
+//代理设置推广链结
+export const setreglink = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/setreglink',
         data: qs.stringify(formData)
     })

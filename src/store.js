@@ -16,7 +16,10 @@ let oState = {
     issue: '', //当前奖期
     orderList: [], //投购篮
     orderHistory: [], //投注历史记录
-    openList: [] //开奖历史
+    openList: [], //开奖历史
+    unReadAmount: 0, //未读消息
+    bonues: '', //奖金,
+    trace: false //追号开关
 }
 export default new Vuex.Store({
     state: { ...oState },
@@ -26,6 +29,7 @@ export default new Vuex.Store({
                 state[iterator] = oState[iterator]
             }
         },
+
         lotteryMenue(state, data) {
             state.lotteryMenue = { ...data }
         },
@@ -77,6 +81,15 @@ export default new Vuex.Store({
         },
         openList(state, data) {
             state.openList = [...data]
+        },
+        unReadAmount(state, data) {
+            state.unReadAmount = data
+        },
+        bonues(state, data) {
+            state.bonues = data
+        },
+        trace(state, data) {
+            state.trace = data
         }
     },
     actions: {
@@ -121,6 +134,15 @@ export default new Vuex.Store({
         },
         handleOpenList(context, data) {
             context.commit('openList', data)
+        },
+        handleUnReadAmount(context, data) {
+            context.commit('unReadAmount', data)
+        },
+        handleBonues(context, data) {
+            context.commit('bonues', data)
+        },
+        handleTrace(context, data) {
+            context.commit('trace', data)
         }
     }
 })

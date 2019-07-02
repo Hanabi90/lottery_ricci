@@ -1,16 +1,6 @@
 <template>
     <div>
         <Form :model="orderHistoryList" :label-width="72" inline>
-            <FormItem label="彩种名称">
-                <Select v-model="orderHistoryList.lotteryid" style="width:110px">
-                    <Option v-for="(item,value) of lotteryList" :key="value" :value="value">{{item}}</Option>
-                </Select>
-            </FormItem>
-            <FormItem label="投注模式">
-                <Select v-model="orderHistoryList.modes" style="width:120px">
-                    <Option v-for="(item,key) of lotteryModes" :key="key" :value="key">{{item}}</Option>
-                </Select>
-            </FormItem>
             <FormItem label="帐变类型">
                 <Select v-model="orderHistoryList.ordertypeid" style="width:100px">
                     <Option
@@ -49,15 +39,15 @@
         </Form>
         <div class="content">
             <div class="title">
+                <h5>帐变编号</h5>
                 <h5>用户名</h5>
                 <h5>时间</h5>
-                <h5>帐变类型</h5>
-                <h5>彩种</h5>
-                <h5>玩法</h5>
-                <h5>投注模式</h5>
-                <h5>余额变动</h5>
+                <h5>类型</h5>
+                <h5>收入</h5>
+                <h5>支出</h5>
                 <h5>余额</h5>
                 <h5>状态</h5>
+                <h5>备注</h5>
             </div>
             <Scroll
                 v-if="scroll"
@@ -66,16 +56,16 @@
                 height="410"
             >
                 <ul class="list">
-                    <li v-for="(item,value) of userHistory" :key="value">
-                        <span>{{item.username}}</span>
+                    <li v-for="(item,value) of noGameList" :key="value">
+                        <span>{{item.orderno}}</span>
+                        <span>{{item.adminname}}</span>
                         <span>{{item.times}}</span>
                         <span>{{item.cntitle}}</span>
-                        <span>{{item.cnname}}</span>
-                        <span class="code">{{item.methodname}}</span>
-                        <span>{{item.modes}}</span>
-                        <span>{{item.amount}}</span>
-                        <span>{{item.money}}</span>
-                        <span>{{item.transferstatus}}</span>
+                        <span class="code">{{item.operations>0?item.amount:''}}</span>
+                        <span>{{item.operations==0?item.amount:''}}</span>
+                        <span>{{item.availablebalance}}</span>
+                        <span>{{(item.transferstatus==1||item.transferstatus==3)?'失败':'成功'}}</span>
+                        <span>{{item.allowdec==1?item.description:'---'}}</span>
                     </li>
                     <li v-if="pages<=orderHistoryList.p">
                         <span>{{datafinish}}</span>
@@ -102,35 +92,25 @@ import {
     Scroll
 } from 'iview'
 import {
-    getuserlottery,
     getchildlist,
-    getorderhistory,
-    getallordertype
+    getbankreporthistory,
+    getallbankreporttype
 } from '@/api/index'
 export default {
-    name: 'gameHistory',
+    name: 'noGameHistory',
     data() {
         return {
             orderHistoryList: {
                 includechild: 0, //是否包含下級（0：不包含，1包含）
                 username: '', //用户名
                 ordertypeid: '', //帐变类型id
-                modes: '', //投注模式
-                lotteryid: '', //彩种名称
                 starttime: '', //起始时间
                 pn: 18, //请求的数据记录数量
                 p: 1 //请求的页面序号
             },
-            lotteryList: {}, //彩票id
-            lotteryModes: {
-                0: '所有模式',
-                1: '元',
-                2: '角',
-                3: '分'
-            }, //玩法id
             userList: [],
             ordertypeid: [],
-            userHistory: [],
+            noGameList: [],
             pages: 1, //页数
             scroll: true, //把滚动条置顶
             datafinish: '数据已加载完'
@@ -139,8 +119,8 @@ export default {
     computed: {
         totalMoney() {
             let count = 0
-            if (this.userHistory.length) {
-                this.userHistory.forEach(item => {
+            if (this.noGameList.length) {
+                this.noGameList.forEach(item => {
                     if (item.cntitle.slice(1, 2) == '+') {
                         count += Number(item.amount)
                     } else {
@@ -166,14 +146,14 @@ export default {
             )
             orderHistoryList.p = 1
             this.$set(this.orderHistoryList, 'p', 1)
-            getorderhistory({ ...orderHistoryList }).then(res => {
+            getbankreporthistory({ ...orderHistoryList }).then(res => {
                 if (res.data.page_data) {
-                    this.userHistory = [...res.data.page_data] //当前数据
+                    this.noGameList = [...res.data.page_data] //当前数据
                     this.pages = Math.ceil(
                         res.data.total_count / this.orderHistoryList.pn
                     ) //页数
                 } else {
-                    this.userHistory = []
+                    this.noGameList = []
                     this.pages = 1
                 }
             })
@@ -195,8 +175,8 @@ export default {
                         this.orderHistoryList.p + 1
                     )
                     getorderhistory({ ...orderHistoryList }).then(res => {
-                        this.userHistory = [
-                            ...this.userHistory,
+                        this.noGameList = [
+                            ...this.noGameList,
                             ...res.data.page_data
                         ]
                         resolve()
@@ -231,12 +211,12 @@ export default {
     },
     mounted() {
         //获取游戏帐变类型
-        getallordertype().then(res => {
-            this.ordertypeid = [...res.data]
-        })
-        getuserlottery().then(res => {
-            this.lotteryList = { ...res.data }
-            this.$set(this.lotteryList, 0, '所有游戏')
+        getallbankreporttype().then(res => {
+            res.data['00'] = {
+                cntitle: '所有类型',
+                id: -1
+            }
+            this.ordertypeid = { ...res.data }
         })
         //获取用户下级
         getchildlist().then(res => {

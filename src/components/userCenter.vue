@@ -1,5 +1,5 @@
 <template>
-    <div class="mask" v-if="this.$store.state.userCenter">
+    <div class="userCenterBox" v-if="this.$store.state.userCenter">
         <div class="userCenter">
             <div class="title">
                 <Icon @click="close" :class="'close'" size="20" type="md-close-circle"/>
@@ -8,7 +8,7 @@
                 <TabPane
                     v-for="item of tableList"
                     :key="item.name"
-                    :label="item.name"
+                    :label="item.name=='消息'?Information:item.name"
                     :name="item.name"
                 >
                     <component v-if="active==item.name" :is="item.content"/>
@@ -21,13 +21,15 @@
 <script>
 import Bank from './userCenter/bank'
 import Notice from './userCenter/notice'
-import Loginpassword from './userCenter/loginPassword'
+import ChangePassword from './userCenter/changePassword'
 import Information from './userCenter/information'
 import Bindquestion from './userCenter/bindquestion'
 import GameHistory from './userCenter/gameHistory'
 import TraceHistory from './userCenter/traceHistory'
 import BettingRecord from './userCenter/bettingRecord'
-import { Tabs, TabPane, Icon } from 'iview'
+import NoGameHistory from './userCenter/noGameHistory'
+import AgentManagement from './userCenter/agentManagement'
+import { Tabs, TabPane, Icon, Badge } from 'iview'
 export default {
     name: 'userCenter',
     data() {
@@ -46,14 +48,22 @@ export default {
                     name: '游戏帐变记录',
                     content: 'GameHistory'
                 },
+                {
+                    name: '非游戏帐变记录',
+                    content: 'NoGameHistory'
+                },
 
                 {
                     name: '银行卡',
                     content: 'Bank'
                 },
                 {
-                    name: '修改登录密码',
-                    content: 'Loginpassword'
+                    name: '修改密码',
+                    content: 'ChangePassword'
+                },
+                {
+                    name: '代理管理',
+                    content: 'AgentManagement'
                 },
                 {
                     name: '密保',
@@ -67,7 +77,22 @@ export default {
                     name: '公告',
                     content: 'Notice'
                 }
-            ]
+            ],
+            Information: h => {
+                let count = this.$store.state.unReadAmount
+                if (count != 0) {
+                    return h('div', [
+                        h('span', '消息'),
+                        h(Badge, {
+                            props: {
+                                count: Number(count)
+                            }
+                        })
+                    ])
+                } else {
+                    return h('div', [h('span', '消息')])
+                }
+            }
         }
     },
     methods: {
@@ -81,18 +106,21 @@ export default {
         Bank,
         Notice,
         Icon,
-        Loginpassword,
+        ChangePassword,
         Bindquestion,
         GameHistory,
         BettingRecord,
         Information,
-        TraceHistory
+        TraceHistory,
+        NoGameHistory,
+        Badge,
+        AgentManagement
     }
 }
 </script>
 
 <style lang="stylus" scoped>
-.mask
+.userCenterBox
     background rgba(0, 0, 0, 0.6)
     position fixed
     z-index 100
@@ -104,7 +132,7 @@ export default {
     overflow hidden
     overscroll-behavior none
     .userCenter
-        width 782px
+        width 1200px
         height 676px
         margin auto
         margin-top 80px

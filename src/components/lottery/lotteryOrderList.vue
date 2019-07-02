@@ -21,7 +21,7 @@
                 <li>{{item.desc}}</li>
                 <li>{{item.codes}}</li>
                 <li>现金</li>
-                <li>元</li>
+                <li>{{getMode(item.mode)}}</li>
                 <li>{{item.times}}倍</li>
                 <li>{{item.nums}}注</li>
                 <li>{{item.money}}元</li>
@@ -60,12 +60,12 @@
 <script>
 import { Button, Checkbox } from 'iview'
 import { betting } from '@/api/index'
+import { EventBus } from '@/api/eventBus.js'
 export default {
     name: 'lotteryOrderList',
     props: ['lotteryGroup'],
     data() {
         return {
-            trace: false,
             isTrace: false
         }
     },
@@ -83,13 +83,34 @@ export default {
                 count += item.money
             })
             return count
+        },
+        trace: {
+            get: function() {
+                return this.$store.state.trace
+            },
+            set: function(value) {
+                this.$store.dispatch('handleTrace', value)
+            }
         }
     },
     methods: {
+        getMode(value) {
+            let text
+            if (value == 1) {
+                text = '元'
+            }
+            if (value == 2) {
+                text = '角'
+            }
+            if (value == 3) {
+                text = '分'
+            }
+            return text
+        },
         //是否追号
         handleTrace() {
             if (this.$store.state.orderList.length) {
-                this.$parent.$data.trace = this.trace = !this.trace
+                this.trace = !this.trace
             } else {
                 this.trace = false
                 this.$Message.error('请添加注单')
@@ -107,7 +128,9 @@ export default {
                 type: 'delete'
             })
             if (!arr.length) {
-                this.$parent.$data.trace = this.trace = false //关闭追号
+                this.trace = false //关闭追号
+            } else {
+                EventBus.$emit('updateTraceList')
             }
         },
         submint() {
@@ -151,7 +174,7 @@ export default {
                 },
                 bettraceparams
             }
-            this.$parent.$data.trace = this.trace = false //关闭追号
+            this.trace = false //关闭追号
             betting({ postdata: JSON.stringify(postdata) }).then(res => {
                 this.$Message.success('投注成功')
                 this.$store.dispatch('handleOrderHistory', [...res.data.betlog])

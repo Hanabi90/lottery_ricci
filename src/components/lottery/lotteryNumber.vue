@@ -85,7 +85,7 @@
                 </p>
                 <div class="list">
                     <h5>{{item.title}}</h5>
-                    <div>
+                    <div ref="numberContent">
                         <span
                             @click="chosenNumber(number,index,$event)"
                             v-for="number of item.no"
@@ -482,12 +482,28 @@ export default {
                 case '三星大小单双':
                 case '二星大小单双':
                 case '龙虎和':
+                case '和值':
+                case '三同号':
+                case '二同号':
+                case '三不同号':
+                case '二不同号':
+                case '三连号':
+                case '单投一号':
+                case '趣味':
+                case '龙虎':
+                case '冠亚组合':
+                case '盘面':
+                case '大小单双':
+                case '复合':
                     return this.labelTwo
                 default:
                     return this.label
             }
         },
         activeClass(number, index) {
+            if (this.methodList.title == '排名次' && !this.activeGroup[index]) {
+                this.activeGroup[index] = new Set()
+            }
             return this.activeGroup[index].has(number)
         },
         handleUpload(file) {
@@ -507,8 +523,7 @@ export default {
         chosenNumber(number, index, $event) {
             //去除快捷选取的激活样式
             let e = window.event || $event
-
-            if (!this.methodList.name == '和值') {
+            if (this.methodList.name != '和值') {
                 this.$refs.typeList[index]
                     .querySelectorAll('span')
                     .forEach(item => (item.className = ''))
@@ -611,25 +626,45 @@ export default {
 
             //清空
             this.activeGroup[index].clear()
-            let arr =
-                this.groupType == '11selected5'
-                    ? [
-                          '01',
-                          '02',
-                          '03',
-                          '04',
-                          '05',
-                          '06',
-                          '07',
-                          '08',
-                          '09',
-                          '10',
-                          '11'
-                      ]
-                    : ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+            console.log(this.groupType)
+            let arr = ''
+            if (this.groupType == '11selected5') {
+                arr = [
+                    '01',
+                    '02',
+                    '03',
+                    '04',
+                    '05',
+                    '06',
+                    '07',
+                    '08',
+                    '09',
+                    '10',
+                    '11'
+                ]
+            } else if (this.groupType == 'happy_lottery') {
+                arr = [
+                    '01',
+                    '02',
+                    '03',
+                    '04',
+                    '05',
+                    '06',
+                    '07',
+                    '08',
+                    '09',
+                    '10'
+                ]
+            } else {
+                arr = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+            }
             switch (lable) {
                 case '全':
-                    this.$set(this.activeGroup, index, new Set(arr))
+                    let count = []
+                    this.$refs.numberContent[index].childNodes.forEach(item => {
+                        count.push(item.innerHTML)
+                    })
+                    this.$set(this.activeGroup, index, new Set(count))
                     break
                 case '大':
                     this.$set(

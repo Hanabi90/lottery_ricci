@@ -94,9 +94,7 @@ export default {
         rebate() {
             return (
                 parseFloat(
-                    ((this.prizeGroup - this.nowPrizeGroup) / 20).toPrecision(
-                        12
-                    )
+                    ((this.prizeGroup - this.nowPrizeGroup) / 20).toFixed(1)
                 ) + '%'
             )
         }

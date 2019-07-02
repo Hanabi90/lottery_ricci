@@ -28,7 +28,6 @@
                     >{{item.name}}</Option>
                 </Select>
             </FormItem>
-            <Button style="width:160px" @click="getBetHistory" type="primary">查询</Button>
             <FormItem label="请选择日期">
                 <DatePicker
                     v-model="bettingRecord.starttime"
@@ -53,6 +52,7 @@
             <FormItem label="下级">
                 <Checkbox v-model="bettingRecord.include"></Checkbox>
             </FormItem>
+            <Button style="width:160px" @click="getBetHistory" type="primary">查询</Button>
         </Form>
         <div class="content">
             <div class="title">
@@ -70,7 +70,7 @@
             <Scroll
                 v-if="scroll"
                 :on-reach-bottom="handleReachBottom"
-                :distance-to-edge="-200"
+                :distance-to-edge="-10"
                 height="440"
             >
                 <ul class="list">
@@ -79,11 +79,17 @@
                         <span>{{item.username}}</span>
                         <span>{{item.cnname}}</span>
                         <span>{{item.issue}}</span>
-                        <span class="code">{{item.code}}</span>
+                        <Tooltip
+                            max-width="400"
+                            :content="item.code"
+                        >{{item.code.slice(0,16)}}{{item.code.length>16?"...":''}}</Tooltip>
                         <span>{{item.methodname}}</span>
                         <span>{{item.totalprice}}</span>
                         <span>{{item.bonus}}</span>
-                        <span>{{item.nocode}}</span>
+                        <Tooltip
+                            max-width="400"
+                            :content="item.nocode"
+                        >{{item.nocode?item.nocode.slice(0,16):''}}{{(item.nocode&&item.nocode.length)>16?"...":''}}</Tooltip>
                         <span>{{handleStatus(item.iscancel,item.isgetprize,item.prizestatus)}}</span>
                     </li>
                     <li v-if="pages<=bettingRecord.p">
@@ -105,7 +111,8 @@ import {
     Button,
     Checkbox,
     Scroll,
-    Input
+    Input,
+    Tooltip
 } from 'iview'
 import {
     getuserlottery,
@@ -125,7 +132,7 @@ export default {
                 methodid: '', //游戏玩法
                 lotteryid: '', //彩种名称
                 starttime: '', //起始时间
-                pn: 15, //请求的数据记录数量
+                pn: 18, //请求的数据记录数量
                 p: 1 //请求的页面序号
             },
             lotteryList: {}, //彩票id
@@ -267,7 +274,8 @@ export default {
         Button,
         Checkbox,
         Scroll,
-        Input
+        Input,
+        Tooltip
     }
 }
 </script>
@@ -290,13 +298,12 @@ export default {
         li
             display flex
             margin-bottom 10px
-            span
+            span, >div
                 flex 1
                 text-align center
                 font-size 12px
                 line-height 18px
+                height 100%
             .code
-                overflow hidden
-                text-overflow ellipsis
-                white-space nowrap
+                overflow-x auto
 </style>

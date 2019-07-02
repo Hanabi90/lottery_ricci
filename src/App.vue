@@ -1,5 +1,5 @@
 <template>
-    <div id="app">
+    <div id="app" :class="{'adminHidden':this.$store.state.userCenter}">
         <Nav/>
         <router-view/>
         <Footer/>
@@ -28,6 +28,9 @@ export default {
 
 #app
     padding-top 121px
+    &.adminHidden
+        height 100vh
+        overflow hidden
     .backtop
         background #ff0000
         color #fff

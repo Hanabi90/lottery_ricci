@@ -36,6 +36,7 @@
 <script>
 import { getissue, betting } from '@/api/index'
 import math from '@/assets/js/lib.js'
+import { EventBus } from '@/api/eventBus.js'
 export default {
     name: 'order',
     props: {
@@ -298,15 +299,28 @@ export default {
             }
             if (
                 arr.methods === '前二直选和值' ||
-                arr.methods === '后二直选和值'
+                arr.methods === '后二直选和值' ||
+                arr.methods === '冠亚组合和值'
             ) {
                 let arrList = []
                 for (let index = 0; index < 2; index++) {
                     let count = Array.from(arr.list[index])
-                    count.forEach(item => {
-                        nums += this.groupList(item, 2)
-                    })
+                    if (arr.methods == '冠亚组合和值') {
+                        count.forEach(item => {
+                            nums += this.groupList(item, 2, '冠亚组合和值')
+                        })
+                    } else {
+                        count.forEach(item => {
+                            nums += this.groupList(item, 2)
+                        })
+                    }
                 }
+            }
+            if (arr.methods === '和值和值') {
+                let count = Array.from(arr.list[0])
+                count.forEach(item => {
+                    nums += this.groupList(item, 'k3')
+                })
             }
             if (
                 arr.methods === '前三直选跨度' ||
@@ -329,20 +343,7 @@ export default {
                     nums += this.handleDifferenceValue(item, 2)
                 })
             }
-            if (
-                arr.methods === '前三直选和值尾数' ||
-                arr.methods === '前三直选特殊号' ||
-                arr.methods === '中三直选和值尾数' ||
-                arr.methods === '中三直选特殊号' ||
-                arr.methods === '后三直选和值尾数' ||
-                arr.methods === '后三直选特殊号' ||
-                arr.title === '龙虎和' ||
-                arr.methods === '趣味型定单双' ||
-                arr.methods === '趣味型猜中位' ||
-                arr.methods === '任选复式任选一中一'
-            ) {
-                nums += arr.list[0].size
-            }
+
             if (
                 arr.methods === '前三组选组三复式' ||
                 arr.methods === '中三组选组三复式' ||
@@ -383,13 +384,16 @@ export default {
                 arr.methods === '后二组选和值'
             ) {
                 let arrList = []
-                for (let index = 0; index < 1; index++) {
-                    let count = Array.from(arr.list[index])
-                    count.forEach(item => {
-                        nums += this.groupSumList(item, 2)
-                    })
+                for (let index = 0; index < 2; index++) {
+                    if (arr.list[index].size) {
+                        let count = Array.from(arr.list[index])
+                        count.forEach(item => {
+                            nums += this.groupSumList(item, 2)
+                        })
+                    }
                 }
             }
+
             if (
                 arr.methods === '前三组选包胆' ||
                 arr.methods === '中三组选包胆' ||
@@ -407,9 +411,43 @@ export default {
                     nums += this.handleBall(2)
                 }
             }
-            if (arr.methods === '定位胆定位胆') {
+            if (
+                arr.methods == '前三直选和值尾数' ||
+                arr.methods == '前三直选特殊号' ||
+                arr.methods == '中三直选和值尾数' ||
+                arr.methods == '中三直选特殊号' ||
+                arr.methods == '后三直选和值尾数' ||
+                arr.methods == '后三直选特殊号' ||
+                arr.title == '龙虎和' ||
+                arr.methods == '趣味型定单双' ||
+                arr.methods == '趣味型猜中位' ||
+                arr.methods == '任选复式任选一中一' ||
+                (arr.title == '和值' && arr.type != 'jsk3') ||
+                arr.title == '盘面' ||
+                arr.title == '大小单双' ||
+                arr.title == '复合' ||
+                arr.methods === '定位胆定位胆' ||
+                arr.title == '三同号' ||
+                arr.title === '二同号' ||
+                arr.title == '三不同号' ||
+                arr.title == '二不同号' ||
+                arr.title == '三连号' ||
+                arr.title == '单投一号' ||
+                arr.title == '趣味' ||
+                arr.title == '排名次' ||
+                arr.title == '龙虎'
+            ) {
                 for (const item of arr.list) {
                     nums += item.size
+                }
+            }
+            if (arr.methods == '冠亚组合大小单双和') {
+                for (const item of arr.list[0].values()) {
+                    if (item == '和') {
+                        nums++
+                    } else {
+                        nums += 4
+                    }
                 }
             }
             if (
@@ -853,12 +891,21 @@ export default {
                 return { prize, prizeSort }
             } else {
                 prize =
-                    (this.nowPrizeGroup / 2000) *
-                    this.prize[0] *
+                    (Math.floor(
+                        (this.nowPrizeGroup / 2000) * this.prize[0] * 100
+                    ) /
+                        100) *
                     this.modes[this.unitActive].rate *
                     this.multiple
-
-                return Math.floor(prize * 10000) / 10000
+                //单倍奖金
+                let singleBonues =
+                    (Math.floor(
+                        (this.nowPrizeGroup / 2000) * this.prize[0] * 100
+                    ) /
+                        100) *
+                    this.modes[this.unitActive].rate
+                this.$store.dispatch('handleBonues', singleBonues.toFixed(4))
+                return prize.toFixed(4)
             }
         }
     },
@@ -901,11 +948,28 @@ export default {
                     item.location == lt_project.location
             )
             if (!repeat) {
-                this.$Message.success(`添加成功${lt_project.desc}`)
                 this.$store.dispatch('handleOrderList', {
                     data: lt_project,
                     type: 'add'
                 })
+                if(this.$store.state.trace){
+                    let methodid = this.$store.state.orderList[0].methodid,
+                        ifSame = this.$store.state.orderList.every(
+                            item => item.methodid == methodid
+                        )
+                    if (!ifSame) {
+                      this.$Message.error(
+                            '利润率追号不支持混投,请确保您的投注都为同一玩法类型<br />且元角模式一致。'
+                        )
+                        this.$store.dispatch('handleTrace',false)
+                    }else{
+                        this.$Message.success(`添加成功${lt_project.desc}`)
+                        EventBus.$emit('updateTraceList')
+                    } 
+                }else{
+                    this.$Message.success(`添加成功${lt_project.desc}`)
+                }
+                
             } else {
                 this.$Message.error(`确认区有相同的投注内容${lt_project.desc}`)
             }
@@ -982,6 +1046,7 @@ export default {
                 title == '任二组选复式' ||
                 title == '任二组选和值' ||
                 title1 == '龙虎和' ||
+                title1 == '龙虎' ||
                 title == '三码前三组选复式' ||
                 title == '二码前二组选复式' ||
                 title == '趣味型定单双' ||
@@ -993,7 +1058,11 @@ export default {
                 title == '任选复式任选五中五' ||
                 title == '任选复式任选六中五' ||
                 title == '任选复式任选七中五' ||
-                title == '任选复式任选八中五'
+                title == '任选复式任选八中五' ||
+                title1 == '和值' ||
+                title1 == '盘面' ||
+                title == '冠亚组合大小单双和' ||
+                title == '冠亚组合和值'
             ) {
                 let count = this.$store.state.lotteryNumber.list
                 count.forEach(item => {
@@ -1045,7 +1114,8 @@ export default {
                 title == '定位胆定位胆' ||
                 title == '任四直选复式' ||
                 title == '任三直选复式' ||
-                title == '任二直选复式'
+                title == '任二直选复式' ||
+                title == '排名次排名次'
             ) {
                 codesSplice = codes[0]
                 for (let index = 1; index < codes.length; index++) {
@@ -1075,7 +1145,7 @@ export default {
             let lt_project = {
                 type: this.$store.state.lotteryNumber.type, //彩种类型
                 methodid: this.methodid,
-                point: this.rebate.slice(0, -1) / 100,
+                point: this.rebate.slice(0, -1),
                 codes: handleCodes,
                 nums: this.orders, //投注数
                 times: this.multiple, //倍数
@@ -1101,14 +1171,28 @@ export default {
             }
         },
         //和值
-        groupList(value, leg) {
-            let count = []
-            let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        groupList(value, leg, name) {
+            let count = [],
+                repeatList = new Set(),
+                arr = ''
+            if (leg == 'k3') {
+                arr = [1, 2, 3, 4, 5, 6]
+            } else if (name == '冠亚组合和值') {
+                arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            } else {
+                arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+            }
             for (let i = 0; i < arr.length; i++) {
                 for (let j = 0; j < arr.length; j++) {
                     if (leg == 2) {
                         if (arr[i] + arr[j] == value) {
-                            count.push([arr[i], arr[j]])
+                            if (name == '冠亚组合和值') {
+                                if (arr[i] != arr[j]) {
+                                    count.push([arr[i], arr[j]])
+                                }
+                            } else {
+                                count.push([arr[i], arr[j]])
+                            }
                         }
                     } else {
                         for (let k = 0; k < arr.length; k++) {

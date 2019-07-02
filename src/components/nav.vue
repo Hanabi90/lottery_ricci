@@ -38,12 +38,15 @@
                 </li>
                 <li class="border_style">
                     <i class="live_chat"></i>
-                    <span>线上客服</span>
+                    <a
+                        style="color:#f7e6b0;padding:0 6px"
+                        href="https://v60.livechatvalue.com/chat/chatClient/chatbox.jsp?companyID=80001185&configID=482"
+                    >线上客服</a>
                 </li>
-                <li class="border_style">
+                <!-- <li class="border_style">
                     <i class="free_call"></i>
                     <span>客服回拨</span>
-                </li>
+                </li>-->
             </ul>
         </div>
         <div style="border-top: 1px solid #424141">
@@ -93,7 +96,12 @@
 <script>
 import Login from '../components/home/login'
 import Registered from '../components/home/registered'
-import { getbalance, loginOut, getMenu } from '@/api/index.js'
+import {
+    getbalance,
+    loginOut,
+    getMenu,
+    getunreadmessageamount
+} from '@/api/index.js'
 import { Icon } from 'iview'
 export default {
     name: 'lobby_nav',
@@ -126,8 +134,18 @@ export default {
     methods: {
         //个人中心
         openCenter() {
-            let onOff = this.$store.state.userCenter
-            this.$store.dispatch('handleUserCenter', !onOff)
+            if (this.$store.state.loginCode) {
+                let onOff = this.$store.state.userCenter
+                this.$store.dispatch('handleUserCenter', !onOff)
+                getunreadmessageamount().then(res => {
+                    this.$store.dispatch(
+                        'handleUnReadAmount',
+                        res.data.unreadamount
+                    )
+                })
+            } else {
+                this.open('login')
+            }
         },
         //跳转
         jump(lotteryId, menuId, group) {

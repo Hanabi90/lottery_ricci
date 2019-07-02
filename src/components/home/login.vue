@@ -183,8 +183,6 @@ export default {
                     content '√'
                     position absolute
                     color #fff
-                    left 2px
-                    top 2px
         &>div:last-child
             float right
         .arrow_right

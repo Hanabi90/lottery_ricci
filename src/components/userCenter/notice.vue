@@ -39,10 +39,12 @@ export default {
 
 <style lang="stylus" scoped>
 .notice
-    width 740px
+    width 100%
     height 600px
     background #eee
     padding 10px 16px
     overflow-y auto
     overscroll-behavior-y contain
+    p
+        word-wrap break-word
 </style>

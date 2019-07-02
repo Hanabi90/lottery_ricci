@@ -16,7 +16,7 @@
                 <span>号码走势</span>
             </p>
             <p class="lottery_num_box">
-                <span v-for="(item,index) of lotteryNumber.code.split('')" :key="index">{{item}}</span>
+                <span v-for="(item,index) of lotteryNumber.code.split(' ')" :key="index">{{item}}</span>
             </p>
         </li>
     </ul>
@@ -98,7 +98,7 @@ export default {
                                 'issue',
                                 `${nowissue[0]}-${nowissue[1] - 1}`
                             ) //开奖
-                            this.$set(this.lotteryNumber, 'code', '-----')
+                            this.$set(this.lotteryNumber, 'code', '- - - - -')
                         }
                     }
                     this.timerOpenTime = setTimeout(() => {
@@ -132,8 +132,12 @@ export default {
                 }
                 this.openTimeOnOff = false
                 //奖期更新 处理 追号列表更新
+                this.$Message.info({
+                    content: '当前奖期已售完，请购买下一期',
+                    duration: 4
+                })
                 this.$store.dispatch('handleIssue', res.data.issue)
-                EventBus.$emit('updateIssue')
+                EventBus.$emit('updateTraceList')
             })
         }
     },

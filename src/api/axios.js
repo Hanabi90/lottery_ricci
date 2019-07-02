@@ -50,7 +50,7 @@ service.interceptors.response.use(
                 case -13:
                 case -51:
                     Message.error(response.data.msg)
-                    store.dispatch('handleLogin', false)
+                    store.dispatch('handleReset')
                     sessionStorage.clear()
                     Router.push('/')
                     return new Promise(() => {})
