@@ -350,3 +350,31 @@ export const setreglink = formData =>
         url: 'user/setreglink',
         data: qs.stringify(formData)
     })
+//获取团队管理清单
+export const getgrouplist = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/getgrouplist',
+        data: qs.stringify(formData)
+    })
+//获取返点设置条件-返点设置
+export const setpoints = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/setpoints',
+        data: qs.stringify(formData)
+    })
+//获取团队余额
+export const getgroupbalance = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/getgroupbalance',
+        data: qs.stringify(formData)
+    })
+//获取信用设置条件
+export const setcredit = formData =>
+    service.request({
+        method: 'post',
+        url: 'credit/setcredit',
+        data: qs.stringify(formData)
+    })

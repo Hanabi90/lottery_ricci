@@ -9,7 +9,7 @@
                     v-model="zhuihao"
                     size="small"
                 >
-                    <Radio label="1">利润率追号</Radio>
+                    <Radio v-if="this.$store.state.bonues" label="1">利润率追号</Radio>
                     <Radio label="2">同倍追号</Radio>
                     <Radio label="3">翻倍追号</Radio>
                 </RadioGroup>
@@ -97,7 +97,7 @@
                 <div>{{item.totalNowMoney}}</div>
                 <div v-if="zhuihao==1">{{item.bonues}}</div>
                 <div v-if="zhuihao==1">{{item.profit}}</div>
-                <div v-if="zhuihao==1">{{item.Profitability}}</div>
+                <div v-if="zhuihao==1">{{item.profitability}}</div>
             </li>
         </ul>
     </div>
@@ -150,6 +150,9 @@ export default {
         EventBus.$on('updateTraceList', () => {
             this.handleList()
         })
+    },
+    beforeDestroy() {
+        EventBus.$off('updateTraceList')
     },
     computed: {
         total() {
@@ -230,7 +233,16 @@ export default {
                         this.$store.state.orderList.forEach(item => {
                             totalBonues += this.$store.state.bonues * item.times
                         })
-                        if (totalBonues > itemMoney) {
+                        if (
+                            totalBonues - itemMoney >
+                            (itemMoney * this.lt_trace_margin) / 100
+                        ) {
+                            this.handleProfitMargin(issue, leg, multiple, 0, [])
+                        } else if (
+                            totalBonues - itemMoney >
+                            (itemMoney * 10) / 100
+                        ) {
+                            this.lt_trace_margin = 10
                             this.handleProfitMargin(issue, leg, multiple, 0, [])
                         } else {
                             this.$Message.error(
@@ -249,8 +261,41 @@ export default {
         },
         //倍数变动-money 从新计算
         handleMoney(item, index) {
-            let money = item.multiple * this.orderList.totalMoney //修改金额
-            this.item.this.$set(item, 'money', money)
+            this.list.forEach((item, index) => {
+                if (index) {
+                    item.money = item.multiple * this.orderList.totalMoney
+                    item.totalNowMoney =
+                        this.list[index - 1].totalNowMoney + item.money
+                    if (this.zhuihao == 1) {
+                        item.bonues = (
+                            this.$store.state.bonues * item.multiple
+                        ).toFixed(2)
+                        item.profit = (
+                            item.bonues - item.totalNowMoney
+                        ).toFixed(2)
+                        item.profitability = `${(
+                            (item.profit / item.totalNowMoney) *
+                            100
+                        ).toFixed(2)}%`
+                    }
+                } else {
+                    item.money = item.totalNowMoney =
+                        item.multiple * this.orderList.totalMoney
+                    if (this.zhuihao == 1) {
+                        item.bonues = (
+                            this.$store.state.bonues * item.multiple
+                        ).toFixed(2)
+                        item.profit = (
+                            item.bonues - item.totalNowMoney
+                        ).toFixed(2)
+                        item.profitability = `${(
+                            (item.profit / item.totalNowMoney) *
+                            100
+                        ).toFixed(2)}%`
+                    }
+                }
+            })
+            this.$set(this.list, this.list)
         },
         //处理利润路追号
         handleProfitMargin(issue, leg, multiple, index, list) {
@@ -310,7 +355,7 @@ export default {
                     money: itemMoney * multiple,
                     totalNowMoney: itemTotalNowMoney,
                     profit: itemProfit.toFixed(2),
-                    Profitability: `${(
+                    profitability: `${(
                         (itemProfit / itemTotalNowMoney) *
                         100
                     ).toFixed(2)}%`

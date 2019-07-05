@@ -6,6 +6,9 @@ import { Message } from 'iview'
 import 'iview/dist/styles/iview.css'
 Vue.prototype.$Message = Message
 Vue.config.productionTip = false
+Message.config({
+    duration: 4
+})
 
 new Vue({
     router,

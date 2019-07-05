@@ -2,7 +2,7 @@
     <div>
         <Form :model="orderHistoryList" :label-width="72" inline>
             <FormItem label="彩种名称">
-                <Select v-model="orderHistoryList.lotteryid" style="width:110px">
+                <Select v-model="orderHistoryList.lottery" style="width:110px">
                     <Option v-for="(item,value) of lotteryList" :key="value" :value="value">{{item}}</Option>
                 </Select>
             </FormItem>
@@ -13,6 +13,7 @@
             </FormItem>
             <FormItem label="帐变类型">
                 <Select v-model="orderHistoryList.ordertypeid" style="width:100px">
+                    <Option value="-1">所有类型</Option>
                     <Option
                         v-for="item of ordertypeid"
                         :key="item.id"
@@ -43,7 +44,7 @@
                 </Select>
             </FormItem>
             <FormItem label="下级">
-                <Checkbox v-model="orderHistoryList.includechild"></Checkbox>
+                <Checkbox true-value="1" false-value="0" v-model="orderHistoryList.includechild"></Checkbox>
             </FormItem>
             <Button style="width:160px" @click="handleOrderHistory" type="primary">查询</Button>
         </Form>
@@ -109,14 +110,15 @@ import {
 } from '@/api/index'
 export default {
     name: 'gameHistory',
+    props: ['username'],
     data() {
         return {
             orderHistoryList: {
                 includechild: 0, //是否包含下級（0：不包含，1包含）
                 username: '', //用户名
-                ordertypeid: '', //帐变类型id
-                modes: '', //投注模式
-                lotteryid: '', //彩种名称
+                ordertypeid: '-1', //帐变类型id
+                modes: '0', //投注模式
+                lottery: '-1', //彩种名称
                 starttime: '', //起始时间
                 pn: 18, //请求的数据记录数量
                 p: 1 //请求的页面序号
@@ -133,22 +135,8 @@ export default {
             userHistory: [],
             pages: 1, //页数
             scroll: true, //把滚动条置顶
-            datafinish: '数据已加载完'
-        }
-    },
-    computed: {
-        totalMoney() {
-            let count = 0
-            if (this.userHistory.length) {
-                this.userHistory.forEach(item => {
-                    if (item.cntitle.slice(1, 2) == '+') {
-                        count += Number(item.amount)
-                    } else {
-                        count -= Number(item.amount)
-                    }
-                })
-            }
-            return parseFloat(count.toPrecision(12))
+            datafinish: '数据已加载完',
+            totalMoney: 0 //余额变动
         }
     },
     methods: {
@@ -172,9 +160,11 @@ export default {
                     this.pages = Math.ceil(
                         res.data.total_count / this.orderHistoryList.pn
                     ) //页数
+                    this.totalMoney = res.data.money_change.toFixed(2)
                 } else {
                     this.userHistory = []
                     this.pages = 1
+                    this.totalMoney = 0
                 }
             })
         },
@@ -236,7 +226,7 @@ export default {
         })
         getuserlottery().then(res => {
             this.lotteryList = { ...res.data }
-            this.$set(this.lotteryList, 0, '所有游戏')
+            this.$set(this.lotteryList, -1, '所有游戏')
         })
         //获取用户下级
         getchildlist().then(res => {
@@ -244,6 +234,10 @@ export default {
                 this.userList = [...res.data]
             }
         })
+        this.orderHistoryList.username = this.username
+        if (this.username) {
+            this.handleOrderHistory()
+        }
     },
     components: {
         Form,

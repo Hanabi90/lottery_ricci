@@ -12,6 +12,7 @@
             </FormItem>
             <FormItem label="游戏玩法">
                 <Select v-model="orderHistoryList.methodid" style="width:120px">
+                    <Option value="0">所有玩法</Option>
                     <Option
                         v-for="(item,index) of lotteryMethodList"
                         :key="index"
@@ -63,7 +64,7 @@
                 ></DatePicker>
             </FormItem>
             <FormItem label="下级">
-                <Checkbox v-model="orderHistoryList.includechild"></Checkbox>
+                <Checkbox true-value="1" false-value="0" v-model="orderHistoryList.include"></Checkbox>
             </FormItem>
             <Button style="width:160px" @click="handleOrderHistory" type="primary">查询</Button>
         </Form>
@@ -108,6 +109,11 @@
                     </li>
                 </ul>
             </Scroll>
+            <div class="totalList">
+                <span>取消总金额：{{total_cancelprice}}</span>
+                <span>完成总金额：{{total_finishprice}}</span>
+                <span>追号总金额：{{total_taskprice}}</span>
+            </div>
         </div>
         <div v-if="detailedOnoff" class="listContent" style="height:560px">
             <Table width="100%" border :columns="columns2" :data="detailedTask"></Table>
@@ -148,28 +154,28 @@ export default {
     data() {
         return {
             orderHistoryList: {
-                includechild: 0, //是否包含下級（0：不包含，1包含）
+                include: 0, //是否包含下級（0：不包含，1包含）
                 username: '', //用户名
-                taskstatus: '', //追号状态
+                taskstatus: '-1', //追号状态
                 issue: '', //彩种奖期
-                userpointtype: '',
-                methodid: '', //游戏玩法
-                lotteryid: '', //彩种名称
+                userpointtype: '2',
+                methodid: '0', //游戏玩法
+                lotteryid: '0', //彩种名称
                 starttime: '', //起始时间
                 pn: 18, //请求的数据记录数量
                 p: 1 //请求的页面序号
             },
             tasksList: [
-                { value: -1, text: '所有状态' },
-                { value: 0, text: '进行中' },
-                { value: 1, text: '已取消' },
-                { value: 2, text: '已完成' }
+                { value: '-1', text: '所有状态' },
+                { value: '0', text: '进行中' },
+                { value: '1', text: '已取消' },
+                { value: '2', text: '已完成' }
             ], //状态列表
             lotteryList: {}, //彩票列表
             userpointtypeList: [
-                { value: -1, text: '不含超级2000' },
-                { value: 1, text: '只有超级2000' },
-                { value: 2, text: '所有类型' }
+                { value: '-1', text: '不含超级2000' },
+                { value: '1', text: '只有超级2000' },
+                { value: '2', text: '所有类型' }
             ], //类型列表
             lotteryMethodList: [], //彩票玩法id
             userList: [],
@@ -306,6 +312,10 @@ export default {
                                                     taskId: this.taskId,
                                                     detailsId: params.row.entry
                                                 }).then(res => {
+                                                    this.$store.dispatch(
+                                                        'handleMoney',
+                                                        res.data
+                                                    )
                                                     this.$Message.success(
                                                         '撤单成功'
                                                     )
@@ -328,7 +338,10 @@ export default {
                     }
                 }
             ],
-            taskId: '' //撤单使用
+            taskId: '', //撤单使用
+            total_cancelprice: '0', //取消总结
+            total_finishprice: '0', //完成总金额
+            total_taskprice: '0' //追号总金额
         }
     },
     computed: {},
@@ -394,10 +407,6 @@ export default {
         getMethods() {
             getuserlotterymethod({ lotteryid: arguments[0] }).then(res => {
                 this.lotteryMethodList = [...res.data]
-                this.lotteryMethodList.unshift({
-                    methodid: 0,
-                    methodname: '所有玩法'
-                })
             })
         },
         handleOrderHistory() {
@@ -420,9 +429,16 @@ export default {
                     this.pages = Math.ceil(
                         res.data.total_count / this.orderHistoryList.pn
                     ) //页数
+                    console.log(res.data.total_cancelprice)
+                    this.total_cancelprice = res.data.total_cancelprice //取消总结
+                    this.total_finishprice = res.data.total_finishprice //完成总金额
+                    this.total_taskprice = res.data.total_taskprice //追号总金额
                 } else {
                     this.userHistory = []
                     this.pages = 1
+                    this.total_cancelprice = 0 //取消总结
+                    this.total_finishprice = 0 //完成总金额
+                    this.total_taskprice = 0 //追号总金额
                 }
             })
         },
@@ -509,6 +525,8 @@ export default {
     box-shadow inset 0px 3px 20px 1px #d0d0d0
     border-radius 3px
     overflow hidden
+    position relative
+    padding-bottom 30px
     .title
         background #2d8cf0
         display flex
@@ -533,10 +551,18 @@ export default {
             .ivu-btn
                 span
                     vertical-align initial
-    .total
+    .totalList
         background #112840
+        height 30px
         line-height 30px
+        width 100%
+        position absolute
+        bottom 0
         color #fff
+        display flex
+        text-align center
+        span
+            flex 1
 .listContent
     width 100%
     height 100%

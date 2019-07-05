@@ -8,12 +8,18 @@
             </div>
         </li>
         <li>
-            <CountDown :difftime="timercount"/>
+            <CountDown :difftime="timercount" />
         </li>
         <li>
             <p class="lottery_history_issue">
                 <span>第{{lotteryNumber.issue}}期</span>
-                <span>号码走势</span>
+                <span>
+                    <a
+                        style="color:#fff"
+                        :href="`http://tapi.hoyibet.com/?controller=game&action=bonuscode&crumid=${this.$route.query.menuId}&issuecount=100`"
+                        target="_blank"
+                    >号码走势</a>
+                </span>
             </p>
             <p class="lottery_num_box">
                 <span v-for="(item,index) of lotteryNumber.code.split(' ')" :key="index">{{item}}</span>
@@ -113,7 +119,6 @@ export default {
                 lotteryid
             }).then(res => {
                 this.saleend = res.data.saleend
-                this.issue = res.data.issue
                 let now = Math.trunc(
                         Date.parse(res.data.nowtime.replace(/-/g, '/')) / 1000
                     ),
@@ -132,12 +137,17 @@ export default {
                 }
                 this.openTimeOnOff = false
                 //奖期更新 处理 追号列表更新
-                this.$Message.info({
-                    content: '当前奖期已售完，请购买下一期',
-                    duration: 4
-                })
-                this.$store.dispatch('handleIssue', res.data.issue)
-                EventBus.$emit('updateTraceList')
+                if (this.issue != res.data.issue) {
+                    if (this.issue) {
+                        this.$Message.info({
+                            content: '当前奖期已售完，请购买下一期'
+                        })
+                    }
+
+                    this.issue = res.data.issue
+                    this.$store.dispatch('handleIssue', res.data.issue)
+                    EventBus.$emit('updateTraceList')
+                }
             })
         }
     },

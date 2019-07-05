@@ -7,7 +7,7 @@ Vue.use(LoadingBar, Message)
 //建立实例
 const service = axios.create({
     // 设置超时时间
-    timeout: 6000,
+    timeout: 14000,
     baseURL: process.env.VUE_APP_BASE_URL
 })
 service.defaults.headers.post['Content-Type'] =
@@ -54,6 +54,8 @@ service.interceptors.response.use(
                     sessionStorage.clear()
                     Router.push('/')
                     return new Promise(() => {})
+                case -81:
+                    return Promise.reject(response.data)
                 default:
                     Message.error(response.data.msg)
                     return new Promise(() => {})

@@ -7,11 +7,11 @@
             <div class="form_list">
                 <div class="list">
                     <label for="user"></label>
-                    <input id="user" type="text" v-model="login.username" placeholder="用户名">
+                    <input id="user" type="text" v-model="login.username" placeholder="用户名" />
                 </div>
                 <div class="list">
                     <label for="password"></label>
-                    <input id="password" v-model="login.loginpass" type="password" placeholder="密码">
+                    <input id="password" v-model="login.loginpass" type="password" placeholder="密码" />
                 </div>
                 <button class="submint_button" @click="handlelogin">立即登录</button>
                 <div class="remanber">
@@ -77,6 +77,7 @@ export default {
             login(this.login).then(res => {
                 sessionStorage.setItem('token', res.data.token)
                 sessionStorage.setItem('nickname', res.data.nickname)
+                sessionStorage.setItem('userSeting', JSON.stringify(res.data))
                 this.onOff = false
                 this.$store.dispatch('handleLogin', 1)
                 this.$store.dispatch('handleNickName', res.data.nickname)

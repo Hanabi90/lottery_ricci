@@ -3,6 +3,7 @@
         <Form :model="orderHistoryList" :label-width="72" inline>
             <FormItem label="帐变类型">
                 <Select v-model="orderHistoryList.ordertypeid" style="width:100px">
+                    <Option value="-1">所有类型</Option>
                     <Option
                         v-for="item of ordertypeid"
                         :key="item.id"
@@ -33,7 +34,7 @@
                 </Select>
             </FormItem>
             <FormItem label="下级">
-                <Checkbox v-model="orderHistoryList.includechild"></Checkbox>
+                <Checkbox true-value="1" false-value="0" v-model="orderHistoryList.includechild"></Checkbox>
             </FormItem>
             <Button style="width:160px" @click="handleOrderHistory" type="primary">查询</Button>
         </Form>
@@ -58,14 +59,14 @@
                 <ul class="list">
                     <li v-for="(item,value) of noGameList" :key="value">
                         <span>{{item.orderno}}</span>
-                        <span>{{item.adminname}}</span>
+                        <span>{{item.username}}</span>
                         <span>{{item.times}}</span>
                         <span>{{item.cntitle}}</span>
                         <span class="code">{{item.operations>0?item.amount:''}}</span>
                         <span>{{item.operations==0?item.amount:''}}</span>
                         <span>{{item.availablebalance}}</span>
                         <span>{{(item.transferstatus==1||item.transferstatus==3)?'失败':'成功'}}</span>
-                        <span>{{item.allowdec==1?item.description:'---'}}</span>
+                        <span>{{item.description?item.description:'---'}}</span>
                     </li>
                     <li v-if="pages<=orderHistoryList.p">
                         <span>{{datafinish}}</span>
@@ -73,8 +74,8 @@
                 </ul>
             </Scroll>
             <div class="total">
-                <span style="margin-left:20px;margin-right:420px">余额变动总计</span>
-                <span>{{totalMoney}}</span>
+                <span>总收入：{{`${Number(total_income).toFixed(2)}`}}</span>
+                <span>总支出：{{`${Number(total_pay).toFixed(2)}`}}</span>
             </div>
         </div>
     </div>
@@ -103,7 +104,7 @@ export default {
             orderHistoryList: {
                 includechild: 0, //是否包含下級（0：不包含，1包含）
                 username: '', //用户名
-                ordertypeid: '', //帐变类型id
+                ordertypeid: '-1', //帐变类型id
                 starttime: '', //起始时间
                 pn: 18, //请求的数据记录数量
                 p: 1 //请求的页面序号
@@ -113,24 +114,12 @@ export default {
             noGameList: [],
             pages: 1, //页数
             scroll: true, //把滚动条置顶
-            datafinish: '数据已加载完'
+            datafinish: '数据已加载完',
+            total_income: 0, //收入
+            total_pay: 0 //支出
         }
     },
-    computed: {
-        totalMoney() {
-            let count = 0
-            if (this.noGameList.length) {
-                this.noGameList.forEach(item => {
-                    if (item.cntitle.slice(1, 2) == '+') {
-                        count += Number(item.amount)
-                    } else {
-                        count -= Number(item.amount)
-                    }
-                })
-            }
-            return parseFloat(count.toPrecision(12))
-        }
-    },
+
     methods: {
         handleOrderHistory() {
             this.scroll = false
@@ -152,9 +141,13 @@ export default {
                     this.pages = Math.ceil(
                         res.data.total_count / this.orderHistoryList.pn
                     ) //页数
+                    this.total_income = res.data.total_income //收入
+                    this.total_pay = res.data.total_pay //支出
                 } else {
                     this.noGameList = []
                     this.pages = 1
+                    this.total_income = 0 //收入
+                    this.total_pay = 0 //支出
                 }
             })
         },
@@ -212,10 +205,6 @@ export default {
     mounted() {
         //获取游戏帐变类型
         getallbankreporttype().then(res => {
-            res.data['00'] = {
-                cntitle: '所有类型',
-                id: -1
-            }
             this.ordertypeid = { ...res.data }
         })
         //获取用户下级
@@ -269,4 +258,8 @@ export default {
         background #112840
         line-height 30px
         color #fff
+        display flex
+        text-align center
+        span
+            flex 1
 </style>

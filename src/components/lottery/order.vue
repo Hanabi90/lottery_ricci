@@ -10,7 +10,7 @@
                 >{{item.name}}</li>
             </ul>
             <div class="multiple">
-                <input v-model="multiple" type="text">
+                <input v-model="multiple" type="text" />
                 <span class="multiple_text">倍</span>
                 <div>
                     <span @click="changeMultiple('+')">+</span>
@@ -94,8 +94,6 @@ export default {
                     arr.methods === '后二组选单式' ||
                     arr.methods === '三码前三直选单式' ||
                     arr.methods === '三码前三组选单式' ||
-                    arr.methods === '二码前二直选单式' ||
-                    arr.methods === '二码前二组选单式' ||
                     arr.methods == '任选单式任选一中一' ||
                     arr.methods == '任选单式任选二中二' ||
                     arr.methods == '任选单式任选三中三' ||
@@ -103,7 +101,13 @@ export default {
                     arr.methods == '任选单式任选五中五' ||
                     arr.methods == '任选单式任选六中五' ||
                     arr.methods == '任选单式任选七中五' ||
-                    arr.methods == '任选单式任选八中五') &&
+                    arr.methods == '任选单式任选八中五' ||
+                    arr.methods == '直选直选单式' ||
+                    arr.methods == '组选混合' ||
+                    arr.methods == '二码后二直选单式' ||
+                    arr.methods == '二码前二直选单式' ||
+                    arr.methods == '二码后二组选单式' ||
+                    arr.methods == '二码前二组选单式') &&
                 arr.list
             ) {
                 nums = arr.list.length
@@ -159,11 +163,13 @@ export default {
             if (
                 (arr.methods === '五星组选组10' ||
                     arr.methods === '五星组选组5' ||
-                    arr.methods === '二码前二直选复式') &&
+                    (arr.methods === '二码前二直选复式' &&
+                        arr.methodname == 'SDZX2')) &&
                 arr.list[0].size >= 1 &&
                 arr.list[1].size >= 1
             ) {
                 for (let item of arr.list[0].values()) {
+                    console.log(arr.list)
                     if (arr.list[1].has(item)) {
                         let element = new Set([...arr.list[1]])
                         element.delete(item)
@@ -208,7 +214,7 @@ export default {
             }
 
             if (
-                arr.methods === '三码前三直选复式' &&
+                arr.methods === '三码前三直选复式'  &&
                 arr.list[0].size >= 1 &&
                 arr.list[1].size >= 1 &&
                 arr.list[2].size >= 1
@@ -231,7 +237,8 @@ export default {
                 arr.methods == '四星不定位后四一码' ||
                 arr.methods == '三星不定位前三一码' ||
                 arr.methods == '三星不定位后三一码' ||
-                arr.methods == '不定胆前三位'
+                arr.methods == '不定胆前三位' ||
+                arr.methods == '不定胆一码不定胆'
             ) {
                 nums = arr.list[0].size
             }
@@ -254,7 +261,8 @@ export default {
                 arr.methods === '中三直选复式' ||
                 arr.methods === '后三直选复式' ||
                 arr.methods === '三星大小单双前三' ||
-                arr.methods === '三星大小单双后三'
+                arr.methods === '三星大小单双后三' ||
+                arr.methods === '直选直选复式'
             ) {
                 let arrList = []
                 for (let index = 0; index < arr.list.length - 2; index++) {
@@ -271,7 +279,10 @@ export default {
                 arr.methods === '前二直选复式' ||
                 arr.methods === '后二直选复式' ||
                 arr.methods === '二星大小单双前二' ||
-                arr.methods === '二星大小单双后二'
+                arr.methods === '二星大小单双后二' ||
+                arr.methods === '二码后二直选复式' ||
+                (arr.methods === '二码前二直选复式' &&
+                    arr.methodname == 'SSLQZX2')
             ) {
                 let arrList = []
                 for (let index = 0; index < 2; index++) {
@@ -287,7 +298,8 @@ export default {
             if (
                 arr.methods === '前三直选和值' ||
                 arr.methods === '中三直选和值' ||
-                arr.methods === '后三直选和值'
+                arr.methods === '后三直选和值' ||
+                arr.methods === '直选直选和值'
             ) {
                 let arrList = []
                 for (let index = 0; index < 2; index++) {
@@ -347,14 +359,16 @@ export default {
             if (
                 arr.methods === '前三组选组三复式' ||
                 arr.methods === '中三组选组三复式' ||
-                arr.methods === '后三组选组三复式'
+                arr.methods === '后三组选组三复式' ||
+                arr.methods === '组选组三'
             ) {
                 nums += this.handleGroup(Array.from(arr.list[0]), 2) * 2
             }
             if (
                 arr.methods === '前二组选复式' ||
                 arr.methods === '后二组选复式' ||
-                arr.methods === '二码前二组选复式'
+                arr.methods === '二码前二组选复式' ||
+                arr.methods === '二码后二组选复式'
             ) {
                 nums += this.handleGroup(Array.from(arr.list[0]), 2)
             }
@@ -362,14 +376,16 @@ export default {
                 arr.methods === '前三组选组六复式' ||
                 arr.methods === '中三组选组六复式' ||
                 arr.methods === '后三组选组六复式' ||
-                arr.methods === '三码前三组选复式'
+                arr.methods === '三码前三组选复式' ||
+                arr.methods === '组选组六'
             ) {
                 nums += this.handleGroup(Array.from(arr.list[0]), 3)
             }
             if (
                 arr.methods === '前三组选和值' ||
                 arr.methods === '中三组选和值' ||
-                arr.methods === '后三组选和值'
+                arr.methods === '后三组选和值' ||
+                arr.methods === '组选组选和值'
             ) {
                 let arrList = []
                 for (let index = 0; index < 2; index++) {
@@ -888,6 +904,8 @@ export default {
                     prize.push(Math.floor(count * 10000) / 10000)
                 })
                 let prizeSort = [...prize].sort((a, b) => a - b)
+                //如果是多倍数，就关闭利润率追号
+                this.$store.dispatch('handleBonues', '')
                 return { prize, prizeSort }
             } else {
                 prize =
@@ -952,24 +970,23 @@ export default {
                     data: lt_project,
                     type: 'add'
                 })
-                if(this.$store.state.trace){
+                if (this.$store.state.trace) {
                     let methodid = this.$store.state.orderList[0].methodid,
                         ifSame = this.$store.state.orderList.every(
                             item => item.methodid == methodid
                         )
                     if (!ifSame) {
-                      this.$Message.error(
+                        this.$Message.error(
                             '利润率追号不支持混投,请确保您的投注都为同一玩法类型<br />且元角模式一致。'
                         )
-                        this.$store.dispatch('handleTrace',false)
-                    }else{
+                        this.$store.dispatch('handleTrace', false)
+                    } else {
                         this.$Message.success(`添加成功${lt_project.desc}`)
                         EventBus.$emit('updateTraceList')
-                    } 
-                }else{
+                    }
+                } else {
                     this.$Message.success(`添加成功${lt_project.desc}`)
                 }
-                
             } else {
                 this.$Message.error(`确认区有相同的投注内容${lt_project.desc}`)
             }
@@ -1002,7 +1019,13 @@ export default {
                 title == '任三组选组六单式' ||
                 title == '任三组选混合' ||
                 title == '任二直选单式' ||
-                title == '任二组选单式'
+                title == '任二组选单式' ||
+                title == '直选直选单式' ||
+                title == '组选混合' ||
+                title == '二码后二直选单式' ||
+                (title == '二码前二直选单式' && this.methodid == '1199') || //区分11选五跟快乐彩
+                title == '二码后二组选单式' ||
+                (title == '二码前二组选单式' && this.methodid == '1203') //区分11选五跟快乐彩
             ) {
                 singleList = this.$store.state.lotteryNumber.list
             }
@@ -1062,7 +1085,12 @@ export default {
                 title1 == '和值' ||
                 title1 == '盘面' ||
                 title == '冠亚组合大小单双和' ||
-                title == '冠亚组合和值'
+                title == '冠亚组合和值' ||
+                title == '组选组三' ||
+                title == '组选组六' ||
+                title == '二码后二组选复式'||
+                title == '直选直选和值' ||
+                title == '组选组选和值'
             ) {
                 let count = this.$store.state.lotteryNumber.list
                 count.forEach(item => {
@@ -1080,11 +1108,12 @@ export default {
                 )
                 singleList.sort((a, b) => a - b)
             }
+            console.log(this.methodid)
             if (
                 title == '三码前三直选单式' ||
                 title == '三码前三组选单式' ||
-                title == '二码前二直选单式' ||
-                title == '二码前二组选单式' ||
+                (title == '二码前二直选单式' && this.methodid == '2566') || //区分11选五跟快乐彩
+                (title == '二码前二组选单式' && this.methodid == '2568') || //区分11选五跟快乐彩
                 title == '任选单式任选一中一' ||
                 title == '任选单式任选二中二' ||
                 title == '任选单式任选三中三' ||
@@ -1122,7 +1151,10 @@ export default {
                     codesSplice = codesSplice + '|' + codes[index]
                 }
             }
-            if (title == '定位胆定位胆' && methodsName == 'SDDWD5') {
+            if (
+                title == '定位胆定位胆' &&
+                (methodsName == 'SDDWD5' || methodsName == 'SSLDWD3')
+            ) {
                 codesSplice = codes[0]
                 for (let index = 1; index < 3; index++) {
                     codesSplice = codesSplice + '|' + codes[index]

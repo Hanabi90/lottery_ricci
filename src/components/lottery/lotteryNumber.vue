@@ -163,7 +163,12 @@ export default {
                 '前三组选单式',
                 '前二直选单式',
                 '前二组选单式',
-                '任选单式'
+                '任选单式',
+                '直选单式',
+                '后二直选单式',
+                '前二直选单式',
+                '后二组选单式',
+                '前二组选单式'
             ]), //是否显示单式玩法
             singleList: '', //单式内容
             lotteryPosition: {
@@ -264,7 +269,9 @@ export default {
                 title == '任三组选混合' ||
                 title == '三码前三直选单式' ||
                 title == '三码前三组选单式' ||
-                title == '任选单式任选三中三'
+                title == '任选单式任选三中三' ||
+                title == '直选直选单式' ||
+                title == '组选混合'
             ) {
                 leg = 3
             }
@@ -275,9 +282,11 @@ export default {
                 title == '后二组选单式' ||
                 title == '任二直选单式' ||
                 title == '任二组选单式' ||
+                title == '任选单式任选二中二' ||
+                title == '二码后二直选单式' ||
                 title == '二码前二直选单式' ||
-                title == '二码前二组选单式' ||
-                title == '任选单式任选二中二'
+                title == '二码后二组选单式' ||
+                title == '二码前二组选单式'
             ) {
                 leg = 2
             }
@@ -297,31 +306,38 @@ export default {
                 if (
                     title == '前三组选混合' ||
                     title == '中三组选混合' ||
-                    title == '后三组选混合'
+                    title == '后三组选混合' ||
+                    title == '组选混合'
                 ) {
                     let arr = []
                     codes.forEach(item => {
-                        let element = item.split('')
+                        let element = item.split('').sort((a, b) => a - b)
                         if (
                             element[0] +
                                 element[1] -
                                 (element[0] + element[2]) !=
                             0
                         ) {
-                            arr.push(item)
+                            arr.push(element.join(''))
                         }
                     })
-                    codes = arr
+                    codes = Array.from(new Set(arr))
                 }
-                if (title == '前二组选单式' || title == '后二组选单式') {
+                if (
+                    title == '前二组选单式' ||
+                    title == '后二组选单式' ||
+                    title == '二码后二组选单式' ||
+                    (title == '二码前二组选单式' &&
+                        this.groupType != '11selected5')
+                ) {
                     let arr = []
                     codes.forEach(item => {
-                        let element = item.split('')
+                        let element = item.split('').sort((a, b) => a - b)
                         if (element[0] != element[1]) {
-                            arr.push(item)
+                            arr.push(element.join(''))
                         }
                     })
-                    codes = arr
+                    codes = Array.from(new Set(arr))
                 }
                 if (title == '任二组选单式') {
                     let arr = []
@@ -371,8 +387,10 @@ export default {
                     codes = Array.from(codes)
                 }
                 if (
-                    title == '二码前二直选单式' ||
-                    title == '二码前二组选单式' ||
+                    (title == '二码前二直选单式' &&
+                        this.groupType == '11selected5') ||
+                    (title == '二码前二组选单式' &&
+                        this.groupType == '11selected5') ||
                     title == '三码前三直选单式' ||
                     title == '三码前三组选单式' ||
                     title == '任选单式任选一中一' ||
@@ -406,7 +424,8 @@ export default {
                         }
                     }
                     if (
-                        title == '二码前二组选单式' ||
+                        (title == '二码前二组选单式' &&
+                            this.groupType == '11selected5') ||
                         title == '三码前三组选单式' ||
                         title == '任选单式任选一中一' ||
                         title == '任选单式任选二中二' ||

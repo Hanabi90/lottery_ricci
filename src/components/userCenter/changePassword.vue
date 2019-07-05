@@ -103,7 +103,7 @@ export default {
                         })
                     }
                 } else {
-                    this.$Message.error('Fail!')
+                    this.$Message.error('信息输入不完整!')
                 }
             })
         },

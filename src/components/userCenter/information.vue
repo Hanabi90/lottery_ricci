@@ -460,7 +460,7 @@ export default {
                         }
                     })
                 } else {
-                    this.$Message.error('Fail!')
+                    this.$Message.error('信息输入不完整!')
                 }
             })
         },
@@ -481,7 +481,7 @@ export default {
                         this.replyOnoff = false
                     })
                 } else {
-                    this.$Message.error('Fail!')
+                    this.$Message.error('信息输入不完整!')
                 }
             })
         },
@@ -499,7 +499,7 @@ export default {
                         this.replyOnoff = false
                     })
                 } else {
-                    this.$Message.error('Fail!')
+                    this.$Message.error('信息输入不完整!')
                 }
             })
         },

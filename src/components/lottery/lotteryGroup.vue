@@ -26,6 +26,7 @@
                         :parser="value => value"
                         :step="2"
                         :max="prizeGroup"
+                        :active-change="false"
                         v-model="nowPrizeGroup"
                         @on-blur="handleGroupMinValue"
                     ></InputNumber>
@@ -43,7 +44,7 @@
                 </div>
             </li>
         </ul>
-        <Lotterynumber :order="this.$refs.order" ref="lotterynumber" :method-list="methodList"/>
+        <Lotterynumber :order="this.$refs.order" ref="lotterynumber" :method-list="methodList" />
         <Order
             :methodid="methodid"
             :i-wallet-type="iWalletType"
@@ -108,7 +109,9 @@ export default {
                 title: res.data[0].label[0].gtitle
             }
             this.prize = res.data[0].label[0].label[0].prize_level_special
-            this.nowPrizeGroup = res.data[0].label[0].label[0].nowPrizeGroup
+            this.nowPrizeGroup = Number(
+                res.data[0].label[0].label[0].nowPrizeGroup.toFixed()
+            )
             this.prizeGroup = res.data[0].label[0].label[0].nowPrizeGroup
             this.methodid = res.data[0].label[0].label[0].methodid
         })
@@ -121,6 +124,7 @@ export default {
             }
         },
         getMethodId(item, value) {
+            this.$store.dispatch('handleTrace', false) //关闭追号
             this.methodCrowdActive = value
             this.getmethod = item.label
             this.methodList = {
@@ -136,6 +140,7 @@ export default {
         },
         //获取最终玩法
         getItem(title, item, value, index) {
+            this.$store.dispatch('handleTrace', false) //关闭追号
             this.$store.dispatch('handleLotteryNumber', '')
             //重置选号区域
             this.$nextTick(() => {
@@ -146,7 +151,7 @@ export default {
             this.itemActive = { value, index }
             this.methodList = { ...item, title }
             this.prize = item.prize_level_special
-            this.nowPrizeGroup = item.nowPrizeGroup
+            this.nowPrizeGroup = Number(item.nowPrizeGroup.toFixed())
             this.prizeGroup = item.nowPrizeGroup
         }
     },

@@ -12,6 +12,7 @@
             </FormItem>
             <FormItem label="游戏玩法">
                 <Select placeholder="请先选择彩种" v-model="bettingRecord.methodid" style="width:120px">
+                    <Option value="0">所有玩法</Option>
                     <Option
                         v-for="item of lotteryMethodList"
                         :key="item.methodid"
@@ -50,7 +51,7 @@
                 <Input v-model="bettingRecord.issue" placeholder="请选择"></Input>
             </FormItem>
             <FormItem label="下级">
-                <Checkbox v-model="bettingRecord.include"></Checkbox>
+                <Checkbox true-value="1" false-value="0" v-model="bettingRecord.include"></Checkbox>
             </FormItem>
             <Button style="width:160px" @click="getBetHistory" type="primary">查询</Button>
         </Form>
@@ -71,7 +72,7 @@
                 v-if="scroll"
                 :on-reach-bottom="handleReachBottom"
                 :distance-to-edge="-10"
-                height="440"
+                height="410"
             >
                 <ul class="list">
                     <li v-for="(item,value) of userHistory" :key="value">
@@ -97,6 +98,7 @@
                     </li>
                 </ul>
             </Scroll>
+            <div class="totalList"></div>
         </div>
     </div>
 </template>
@@ -127,10 +129,10 @@ export default {
             bettingRecord: {
                 include: 0, //是否包含下級（0：不包含，1包含）
                 username: '', //用户名
-                userpointtype: '', //投注类型
+                userpointtype: '2', //投注类型
                 issue: '', //彩种奖期
-                methodid: '', //游戏玩法
-                lotteryid: '', //彩种名称
+                methodid: '0', //游戏玩法
+                lotteryid: '0', //彩种名称
                 starttime: '', //起始时间
                 pn: 18, //请求的数据记录数量
                 p: 1 //请求的页面序号
@@ -155,10 +157,6 @@ export default {
                 lotteryid: this.bettingRecord.lotteryid
             }).then(res => {
                 this.lotteryMethodList = [...res.data]
-                this.lotteryMethodList.unshift({
-                    methodid: 0,
-                    methodname: '所有玩法'
-                })
             })
         },
         getBetHistory() {
@@ -176,10 +174,15 @@ export default {
             bettingRecord.p = 1
             this.$set(this.bettingRecord, 'p', 1)
             getbethistory({ ...bettingRecord }).then(res => {
-                this.userHistory = [...res.data.page_data]
-                this.pages = Math.ceil(
-                    res.data.total_count / this.bettingRecord.pn
-                )
+                if (res.data.page_data) {
+                    this.userHistory = [...res.data.page_data]
+                    this.pages = Math.ceil(
+                        res.data.total_count / this.bettingRecord.pn
+                    )
+                } else {
+                    this.userHistory = []
+                    this.pages = 2
+                }
             })
         },
         handleReachBottom() {
@@ -285,6 +288,8 @@ export default {
     box-shadow inset 0px 3px 20px 1px #d0d0d0
     border-radius 3px
     overflow hidden
+    position relative
+    padding-bottom 30px
     .title
         background #2d8cf0
         display flex
@@ -306,4 +311,11 @@ export default {
                 height 100%
             .code
                 overflow-x auto
+    .totalList
+        position absolute
+        bottom 0
+        width 100%
+        height 30px
+        color #fff
+        background #112840
 </style>

@@ -47,6 +47,7 @@ export default {
                 let arr = [...this.$store.state.orderHistory]
                 arr = arr.filter(item => item.projectid != projectid)
                 this.$store.dispatch('handleOrderHistory', arr)
+                this.$store.dispatch('handleMoney', res.data)
                 this.$Message.success('撤单成功')
             })
         }

@@ -1,12 +1,12 @@
 <template>
     <div id="app" :class="{'adminHidden':this.$store.state.userCenter}">
-        <Nav/>
-        <router-view/>
-        <Footer/>
+        <Nav />
+        <router-view />
+        <Footer />
         <BackTop>
             <div class="backtop">返回顶端</div>
         </BackTop>
-        <UserCenter/>
+        <UserCenter />
     </div>
 </template>
 <script>
