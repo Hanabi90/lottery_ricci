@@ -67,6 +67,7 @@
                 <h5>奖金</h5>
                 <h5>开奖号码</h5>
                 <h5>状态</h5>
+                <h5>操作</h5>
             </div>
             <Scroll
                 v-if="scroll"
@@ -92,13 +93,23 @@
                             :content="item.nocode"
                         >{{item.nocode?item.nocode.slice(0,16):''}}{{(item.nocode&&item.nocode.length)>16?"...":''}}</Tooltip>
                         <span>{{handleStatus(item.iscancel,item.isgetprize,item.prizestatus)}}</span>
+                        <span>
+                            <Button
+                                type="primary"
+                                :disabled="!item.can"
+                                @click="handleCancel(item.projectid,value)"
+                            >撤单</Button>
+                        </span>
                     </li>
                     <li v-if="pages<=bettingRecord.p">
                         <span>{{datafinish}}</span>
                     </li>
                 </ul>
             </Scroll>
-            <div class="totalList"></div>
+            <div class="totalList">
+                <span>总投注金额：{{total_betmoney}}</span>
+                <span>总奖金：{{total_bonus}}</span>
+            </div>
         </div>
     </div>
 </template>
@@ -120,7 +131,8 @@ import {
     getuserlottery,
     getuserlotterymethod,
     getchildlist,
-    getbethistory
+    getbethistory,
+    ordercancel
 } from '@/api/index'
 export default {
     name: 'bettingRecord',
@@ -148,10 +160,18 @@ export default {
             userHistory: [],
             pages: 2, //页数
             scroll: true, //把滚动条置顶
-            datafinish: '数据已加载完'
+            datafinish: '数据已加载完',
+            total_betmoney: 0,
+            total_bonus: 0
         }
     },
     methods: {
+        handleCancel(projectid, value) {
+            ordercancel({ projectid }).then(res => {
+                this.$set(this.userHistory[value], 'can', 0)
+                this.$Message.success('撤单成功')
+            })
+        },
         getUserLotterymethod() {
             getuserlotterymethod({
                 lotteryid: this.bettingRecord.lotteryid
@@ -179,9 +199,13 @@ export default {
                     this.pages = Math.ceil(
                         res.data.total_count / this.bettingRecord.pn
                     )
+                    this.total_betmoney = res.data.total_betmoney
+                    this.total_bonus = res.data.total_bonus
                 } else {
                     this.userHistory = []
                     this.pages = 2
+                    this.total_betmoney = 0
+                    this.total_bonus = 0
                 }
             })
         },
@@ -318,4 +342,9 @@ export default {
         height 30px
         color #fff
         background #112840
+        display flex
+        span
+            flex 1
+            text-align center
+            line-height 30px
 </style>

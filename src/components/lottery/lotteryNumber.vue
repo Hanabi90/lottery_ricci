@@ -2,7 +2,7 @@
     <div class="lotteryNumber">
         <div class="numberTitle">
             <h5>{{methodList.title}}：{{methodList.name}}</h5>
-            <p class="switcher">
+            <!-- <p class="switcher">
                 <span
                     :class="value==switcherNow?'active':''"
                     v-for=" (item,value) of switcher"
@@ -16,7 +16,7 @@
                     v-for="(item,value) of switcher[switcherNow]"
                     :key="item"
                 >{{item}}</span>
-            </p>
+            </p>-->
             <div>
                 <p>
                     <Tooltip transfer max-width="300" :content="methodList.methoddesc">
@@ -153,7 +153,18 @@ export default {
                 new Set([]),
                 new Set([])
             ],
-            quickDontShow: new Set(['QZUHZ', 'Q3BD', 'QZXHZ']), //不显示快捷选好
+            quickDontShow: new Set([
+                'QZUHZ',
+                'Q3BD',
+                'QZXHZ',
+                'LTRXDT2',
+                'LTRXDT3',
+                'LTRXDT4',
+                'LTRXDT5',
+                'LTRXDT6',
+                'LTRXDT7',
+                'LTRXDT8'
+            ]), //不显示快捷选好
             quickUpload: new Set([
                 '单式',
                 '混合',
@@ -182,6 +193,9 @@ export default {
         }
     },
     computed: {
+        menuId() {
+            return this.$route.query.menuId
+        },
         getTitle() {
             let groupTitle
             if (this.methodList) {
@@ -542,7 +556,10 @@ export default {
         chosenNumber(number, index, $event) {
             //去除快捷选取的激活样式
             let e = window.event || $event
-            if (this.methodList.name != '和值') {
+            if (
+                this.methodList.name != '和值' &&
+                this.methodList.title != '任选胆拖'
+            ) {
                 this.$refs.typeList[index]
                     .querySelectorAll('span')
                     .forEach(item => (item.className = ''))
@@ -645,7 +662,6 @@ export default {
 
             //清空
             this.activeGroup[index].clear()
-            console.log(this.groupType)
             let arr = ''
             if (this.groupType == '11selected5') {
                 arr = [
@@ -661,7 +677,11 @@ export default {
                     '10',
                     '11'
                 ]
-            } else if (this.groupType == 'happy_lottery') {
+            } else if (
+                this.groupType == 'happy_lottery' &&
+                this.menuId != 614 &&
+                this.menuId != 151
+            ) {
                 arr = [
                     '01',
                     '02',

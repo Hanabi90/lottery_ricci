@@ -4,6 +4,7 @@
         <TeamAccount v-else-if="teamAccount" :uid="pointUserId" />
         <SetPoint v-else-if="setPoint" :uid="pointUserId" />
         <Reputation v-else-if="reputation" :uid="pointUserId" />
+        <SubordinateRecharge v-else-if="subordinateRecharge" :uid="pointUserId" />
         <div v-else>
             <Menu
                 mode="horizontal"
@@ -49,8 +50,7 @@
                             <li>用户名</li>
                             <li>用户类型</li>
                             <li>奖金组</li>
-                            <li>用户余额</li>
-                            <li>信用余额</li>
+                            <li>{{`${systemtype==0?'用户余额':'信用余额'}`}}</li>
                             <li style="flex:4">用户操作</li>
                         </ul>
 
@@ -65,25 +65,31 @@
                                     <span>{{item.groupname}}</span>
                                     <span>{{item.prizeGroup.toFixed()}}</span>
                                     <span>{{item.money}}</span>
-                                    <span>{{item.availablebalance}}</span>
                                     <span style="flex:4">
                                         <Button type="primary" size="small">详情</Button>
-                                        <Button type="primary" size="small" :disabled="istop!=1">充值</Button>
+                                        <Button
+                                            v-if="systemtype!=1"
+                                            type="primary"
+                                            size="small"
+                                            :disabled="istop!=1"
+                                            @click="handleSubordinateRecharge(item.userid)"
+                                        >充值</Button>
                                         <Button
                                             type="primary"
                                             size="small"
                                             @click="handleTeamAccount(item.userid)"
                                         >团队余额</Button>
                                         <Button
+                                            v-if="systemtype==1"
                                             type="primary"
                                             size="small"
-                                            :disabled="systemtype!=1||item.userid!=parentid"
+                                            :disabled="systemtype!=1||item.userid!=item.parentid"
                                             @click="handleReputation(item.userid)"
                                         >信用设置</Button>
                                         <Button
                                             type="primary"
                                             size="small"
-                                            :disabled="systemtype!=0||buttonPoint"
+                                            :disabled="systemtype!=0||buttonPoint||item.userid!=item.parentid"
                                             @click="handlePoint(item.userid)"
                                         >返点设置</Button>
                                         <Button
@@ -137,6 +143,7 @@
                                 :min="Number(bonusGroup.minodds)"
                                 :max="Number(bonusGroup.maxodds)"
                                 v-model="addUserList.bonus"
+                                :step="2"
                                 show-input
                                 :active-change="false"
                                 input-size="small"
@@ -166,6 +173,7 @@
                                     :min="Number(bonusGroup.minodds)"
                                     :max="Number(bonusGroup.maxodds)"
                                     v-model="addUserLine.keepodds"
+                                    :step="2"
                                     show-input
                                     input-size="small"
                                 ></Slider>
@@ -180,11 +188,18 @@
                                 <Button type="primary" @click="handleSubmit('addUserLine')">生成链接</Button>
                             </FormItem>
                         </Form>
-                        <p>
+                        <p v-for="(item,index) of userLineData" :key="index" class="line">
                             <span>推广链接用户类型：</span>
-                            <span>{{this.userLineData.ztype}}</span>
+                            <span>{{item.ztype}}</span>
+                            <span style="margin-left:20px">奖金组：</span>
+                            <span>{{item.odds}}</span>
                             <span style="margin-left:20px">推广链接：</span>
-                            <span style="user-select:all">{{this.userLineData.url}}</span>
+                            <span style="user-select:all">{{item.url}}</span>
+                            <Button
+                                style="float:right"
+                                type="error"
+                                @click="handleDelreglink(item.id,index)"
+                            >删除</Button>
                         </p>
                     </div>
                 </div>
@@ -214,16 +229,19 @@ import {
     addnewuser,
     RSAencrypt,
     setreglink,
-    getgrouplist
+    getgrouplist,
+    delreglink
 } from '@/api/index'
 import GameHistory from './gameHistory'
 import SetPoint from './setPoint'
 import TeamAccount from './teamAccount'
 import Reputation from './reputation'
+import SubordinateRecharge from './subordinateRecharge'
 export default {
     name: 'agentManagement',
     data() {
         return {
+            subordinateRecharge: false, //充值
             reputation: false, //信誉设置
             buttonPoint: true, //按钮是否可以点击
             teamAccount: false, //显示团队余额
@@ -276,11 +294,9 @@ export default {
                 p: 1,
                 pn: 15
             },
-            userLineData: {
+            userLineData: [
                 //推广链接存放
-                ztype: '暂无',
-                url: '暂无'
-            },
+            ],
             teamList: [],
             istop: '', //是否是vip类型
             systemtype: JSON.parse(sessionStorage.getItem('userSeting'))
@@ -290,11 +306,24 @@ export default {
         }
     },
     methods: {
+        //删除推广链接
+        handleDelreglink(id, index) {
+            delreglink({ id }).then(res => {
+                this.userLineData.splice(index, 1)
+                this.$Message.success(res.msg)
+            })
+        },
         //查看团队余额
         handleTeamAccount(value) {
             this.pointUserId = value
             this.teamAccount = true
             this.backOnoff = true
+        },
+        //设置充值
+        handleSubordinateRecharge(value) {
+            this.backOnoff = true
+            this.pointUserId = value
+            this.subordinateRecharge = true
         },
         //设置返点
         handlePoint(value) {
@@ -316,6 +345,7 @@ export default {
             this.backOnoff = false
             this.buttonPoint = false
             this.reputation = false
+            this.subordinateRecharge = false
         },
         //游戏帐变查询
         getGameHistory(value) {
@@ -392,19 +422,21 @@ export default {
         handleSubmit(name) {
             if (name == 'addUserLine') {
                 setreglink(this.addUserLine).then(res => {
-                    this.userLineData.ztype =
-                        res.data.tuiguan.ztype == 1 ? '代理' : '会员'
-                    this.$set(
-                        this.userLineData,
-                        'url',
-                        res.data.tuiguan.url + res.data.tuiguan.urlparam
-                    )
+                    if (res.data.length) {
+                        this.userLineData = []
+                        res.data.forEach(item => {
+                            let ztype = item.ztype == 1 ? '代理' : '会员',
+                                url = item.url + item.urlparam,
+                                odds = item.odds,
+                                id = item.id
+                            this.userLineData.push({ ztype, url, odds, id })
+                        })
+                    }
                 })
                 return
             }
             if (name == 'addUserList') {
                 this.$refs[name].validate(valid => {
-                    console.log(valid)
                     if (valid) {
                         this.loading = true
                         let dataJson = {
@@ -443,14 +475,15 @@ export default {
             for (const key in res.data) {
                 this.$set(this.bonusGroup, key, res.data[key])
             }
-            if (!(res.data.tuiguan instanceof Array)) {
-                this.userLineData.ztype =
-                    res.data.tuiguan.ztype == 1 ? '代理' : '会员'
-                this.$set(
-                    this.userLineData,
-                    'url',
-                    res.data.tuiguan.url + res.data.tuiguan.urlparam
-                )
+            if (res.data.tuiguan.length) {
+                this.userLineData = []
+                res.data.tuiguan.forEach(item => {
+                    let ztype = item.ztype == 1 ? '代理' : '会员',
+                        url = item.url + item.urlparam,
+                        odds = item.odds,
+                        id = item.id
+                    this.userLineData.push({ ztype, url, odds, id })
+                })
             }
         })
     },
@@ -470,7 +503,8 @@ export default {
         GameHistory,
         SetPoint,
         TeamAccount,
-        Reputation
+        Reputation,
+        SubordinateRecharge
     }
 }
 </script>
@@ -504,4 +538,10 @@ export default {
     width 40px
     padding 0
     line-height 30px
+.line
+    margin-bottom 10px
+    border-bottom 1px solid #e6e6e6
+    line-height 30px
+    color #000
+    text-indent 10px
 </style>

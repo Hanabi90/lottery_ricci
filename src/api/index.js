@@ -343,6 +343,13 @@ export const addnewuser = formData =>
         url: 'user/addnewuser',
         data: qs.stringify(formData)
     })
+//删除推广链接
+export const delreglink = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/delreglink',
+        data: qs.stringify(formData)
+    })
 //代理设置推广链结
 export const setreglink = formData =>
     service.request({
@@ -376,5 +383,38 @@ export const setcredit = formData =>
     service.request({
         method: 'post',
         url: 'credit/setcredit',
+        data: qs.stringify(formData)
+    })
+//取得充值条件
+export const topup = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/topup',
+        data: qs.stringify(formData)
+    })
+//获取联系信息管理清单
+export const getemailbindlist = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/getemailbindlist'
+    })
+//設置联系信息
+export const setemailbind = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/setemailbind',
+        data: qs.stringify(formData)
+    })
+//获取活动列表
+export const getactivitylist = formData =>
+    service.request({
+        method: 'post',
+        url: 'activity/getactivitylist'
+    })
+//获取活动列表
+export const getactivityinfo = formData =>
+    service.request({
+        method: 'post',
+        url: 'activity/getactivityinfo',
         data: qs.stringify(formData)
     })

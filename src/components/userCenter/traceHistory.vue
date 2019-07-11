@@ -84,7 +84,7 @@
                 v-if="scroll"
                 :on-reach-bottom="handleReachBottom"
                 :distance-to-edge="-10"
-                height="410"
+                height="380"
             >
                 <ul class="list">
                     <li v-for="(item,value) of userHistory" :key="value">
@@ -314,7 +314,7 @@ export default {
                                                 }).then(res => {
                                                     this.$store.dispatch(
                                                         'handleMoney',
-                                                        res.data
+                                                        res.data.money
                                                     )
                                                     this.$Message.success(
                                                         '撤单成功'
@@ -349,6 +349,7 @@ export default {
         //返回
         back() {
             this.detailedOnoff = false
+            this.handleOrderHistory()
         },
         //获取详情
         getDetailed(id) {
@@ -429,7 +430,6 @@ export default {
                     this.pages = Math.ceil(
                         res.data.total_count / this.orderHistoryList.pn
                     ) //页数
-                    console.log(res.data.total_cancelprice)
                     this.total_cancelprice = res.data.total_cancelprice //取消总结
                     this.total_finishprice = res.data.total_finishprice //完成总金额
                     this.total_taskprice = res.data.total_taskprice //追号总金额
@@ -570,4 +570,5 @@ export default {
     top 0
     z-index 2
     overflow-y scroll
+    background #fff
 </style>

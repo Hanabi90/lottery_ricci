@@ -7,51 +7,15 @@
             <MenuItem name="4">给上级发消息</MenuItem>
         </Menu>
         <div v-show="navIndex==1" class="content" style="padding:10px">
-            <div style="margin-bottom:10px">
-                <Checkbox @on-change="handleAll" v-model="all">全部</Checkbox>
-                <Button @click="handleDelete" size="small" type="error">删除</Button>
-            </div>
-            <Collapse v-model="activeIndex" accordion @on-change="handleContent">
-                <Panel
-                    :style="{'fontSize':'12px',}"
-                    v-for="(item,value) of list"
-                    :key="value"
-                    :name="`${value}`"
-                    hide-arrow
-                >
-                    <span
-                        class="box"
-                        :class="{active:item.active}"
-                        @click.stop="handleActive(item)"
-                    ></span>
-                    {{item.subject}}
-                    {{`(${item.sendtime})`}}
-                    <span
-                        v-if="!item.readtime"
-                        style="color:#fff;background-color:#ff0000;padding:0 4px;border-radius:3px"
-                    >{{item.readtime?"":"未读"}}</span>
-                    <p class="listContent" slot="content">
-                        {{item.content}}
-                        <button
-                            style="position:absolute;right:0;bottom:0;"
-                            v-if="(item.msgtypeid==3||item.msgtypeid==5)&&item.isreplay==0"
-                            class="ivu-btn ivu-btn-primary ivu-btn-small"
-                            @click="openReply"
-                        >{{(item.msgtypeid==3||item.msgtypeid==5)&&item.isreplay==0?"回复":''}}</button>
-                    </p>
-                </Panel>
-            </Collapse>
-        </div>
-        <div v-show="navIndex==2" class="content" style="padding:10px">
-            <div style="margin-bottom:10px">
-                <Checkbox @on-change="handleAll" v-model="all">全部</Checkbox>
-                <Button @click="handleDelete" size="small" type="error">删除</Button>
-            </div>
-            <Scroll :on-reach-bottom="handleReachBottom" :distance-to-edge="-10" height="440">
-                <Collapse v-model="activeIndex" accordion @on-change="handleSendContent">
+            <div v-show="list.length">
+                <div style="margin-bottom:10px">
+                    <Checkbox @on-change="handleAll" v-model="all">全部</Checkbox>
+                    <Button @click="handleDelete" size="small" type="error">删除</Button>
+                </div>
+                <Collapse v-model="activeIndex" accordion @on-change="handleContent">
                     <Panel
                         :style="{'fontSize':'12px',}"
-                        v-for="(item,value) of messageSendList"
+                        v-for="(item,value) of list"
                         :key="value"
                         :name="`${value}`"
                         hide-arrow
@@ -67,10 +31,52 @@
                             v-if="!item.readtime"
                             style="color:#fff;background-color:#ff0000;padding:0 4px;border-radius:3px"
                         >{{item.readtime?"":"未读"}}</span>
-                        <p slot="content">{{item.content}}</p>
+                        <p class="listContent" slot="content" v-html="item.content"></p>
+                        <p class="listContent" slot="content">
+                            <button
+                                style="position:absolute;right:0;bottom:0;"
+                                v-if="(item.msgtypeid==3||item.msgtypeid==5)&&item.isreplay==0"
+                                class="ivu-btn ivu-btn-primary ivu-btn-small"
+                                @click="openReply"
+                            >{{(item.msgtypeid==3||item.msgtypeid==5)&&item.isreplay==0?"回复":''}}</button>
+                        </p>
                     </Panel>
                 </Collapse>
-            </Scroll>
+            </div>
+            <div v-show="!list.length">暂无数据...</div>
+        </div>
+        <div v-show="navIndex==2" class="content" style="padding:10px">
+            <div v-show="messageSendList.length">
+                <div style="margin-bottom:10px">
+                    <Checkbox @on-change="handleAll" v-model="all">全部</Checkbox>
+                    <Button @click="handleDelete" size="small" type="error">删除</Button>
+                </div>
+                <Scroll :on-reach-bottom="handleReachBottom" :distance-to-edge="-10" height="440">
+                    <Collapse v-model="activeIndex" accordion @on-change="handleSendContent">
+                        <Panel
+                            :style="{'fontSize':'12px',}"
+                            v-for="(item,value) of messageSendList"
+                            :key="value"
+                            :name="`${value}`"
+                            hide-arrow
+                        >
+                            <span
+                                class="box"
+                                :class="{active:item.active}"
+                                @click.stop="handleActive(item)"
+                            ></span>
+                            {{item.subject}}
+                            {{`(${item.sendtime})`}}
+                            <span
+                                v-if="!item.readtime"
+                                style="color:#fff;background-color:#ff0000;padding:0 4px;border-radius:3px"
+                            >{{item.readtime?"":"未读"}}</span>
+                            <p slot="content">{{item.content}}</p>
+                        </Panel>
+                    </Collapse>
+                </Scroll>
+            </div>
+            <div v-show="!messageSendList.length">暂无数据...</div>
         </div>
         <div v-show="navIndex==3" class="content" style="padding:10px">
             <Form ref="formInline" :model="formInline" :rules="ruleInline" :label-width="60">
@@ -84,7 +90,7 @@
                     </Select>
                 </FormItem>
                 <FormItem prop="subject" label="信息标题">
-                    <Input type="text" v-model="formInline.subject" placeholder="请输入标题"/>
+                    <Input type="text" v-model="formInline.subject" placeholder="请输入标题" />
                 </FormItem>
                 <FormItem prop="content" label="消息内容">
                     <Input
@@ -103,7 +109,7 @@
         <div v-show="navIndex==4" class="content" style="padding:10px">
             <Form ref="parentsLine" :model="parentsLine" :rules="ruleParents" :label-width="60">
                 <FormItem prop="subject" label="信息标题">
-                    <Input type="text" v-model="parentsLine.subject" placeholder="请输入标题"/>
+                    <Input type="text" v-model="parentsLine.subject" placeholder="请输入标题" />
                 </FormItem>
                 <FormItem prop="content" label="消息内容">
                     <Input
@@ -127,9 +133,9 @@
                 :rules="ruleReplyLine"
                 :label-width="60"
             >
-                <Icon @click="close" class="close" type="md-close-circle"/>
+                <Icon @click="close" class="close" type="md-close-circle" />
                 <FormItem prop="subject" label="信息标题">
-                    <Input type="text" v-model="replyLine.subject" placeholder="请输入标题"/>
+                    <Input type="text" v-model="replyLine.subject" placeholder="请输入标题" />
                 </FormItem>
                 <FormItem prop="content" label="消息内容">
                     <Input
@@ -371,7 +377,6 @@ export default {
                     this.navIndex == 1
                         ? [...this.list]
                         : [...this.messageSendList]
-            console.log(dataList)
 
             dataList.forEach((item, index) => {
                 item.active && arr.push(item.entry) && arrIndex.push(index)
@@ -389,6 +394,12 @@ export default {
                         ? (this.list = [...dataList])
                         : (this.messageSendList = [...dataList])
                     this.activeIndex = ''
+                    if (this.all) {
+                        this.navIndex == 1
+                            ? (this.list = [])
+                            : (this.messageSendList = [])
+                        this.all = false
+                    }
                 })
             } else {
                 this.$Message.error('请选择要删除的信息')
@@ -413,14 +424,18 @@ export default {
                     )
                 })
                 getmessage(this.messageSetting).then(res => {
-                    res.data.page_data.forEach(item => {
-                        item.active = false
-                        item.content = '加载中。。。'
-                    })
-                    this.getPage = Math.ceil(
-                        res.data.total_count / res.data.page_size
-                    )
-                    this.list = [...res.data.page_data]
+                    if (res.data.page_data) {
+                        res.data.page_data.forEach(item => {
+                            item.active = false
+                            item.content = '加载中。。。'
+                        })
+                        this.getPage = Math.ceil(
+                            res.data.total_count / res.data.page_size
+                        )
+                        this.list = [...res.data.page_data]
+                    } else {
+                        this.list = []
+                    }
                 })
             }
             if (name == 2) {
@@ -431,20 +446,28 @@ export default {
                     p: 1 //页数
                 }
                 getSendMessage(this.messageSendSetting).then(res => {
-                    res.data.page_data.forEach(item => {
-                        item.active = false
-                        item.content = '加载中。。。'
-                    })
-                    this.sendPage = Math.ceil(
-                        res.data.total_count / res.data.page_size
-                    )
-                    this.messageSendList = [...res.data.page_data]
+                    if (res.data.page_data) {
+                        res.data.page_data.forEach(item => {
+                            item.active = false
+                            item.content = '加载中。。。'
+                        })
+
+                        this.sendPage = Math.ceil(
+                            res.data.total_count / res.data.page_size
+                        )
+                        this.messageSendList = [...res.data.page_data]
+                    } else {
+                        this.messageSendList = []
+                    }
                 })
             }
             if (name == 3) {
                 getchildlist().then(res => {
-                    console.log(res)
-                    this.childList = [...res.data]
+                    if (res.data.length) {
+                        this.childList = [...res.data]
+                    } else {
+                        this.childList = []
+                    }
                 })
             }
         },
@@ -525,11 +548,13 @@ export default {
     },
     mounted() {
         getmessage(this.messageSetting).then(res => {
-            res.data.page_data.forEach(item => {
-                item.active = false
-                item.content = '加载中。。。'
-            })
-            this.list = [...res.data.page_data]
+            if (res.data.page_data) {
+                res.data.page_data.forEach(item => {
+                    item.active = false
+                    item.content = '加载中。。。'
+                })
+                this.list = [...res.data.page_data]
+            }
         })
     },
     components: {

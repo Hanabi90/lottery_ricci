@@ -11,7 +11,7 @@
                     :min="0"
                     v-model="credit"
                 ></InputNumber>
-                <span>可回收余额{{creditavailable}}</span>
+                <span style="margin:0 10px">可回收余额{{creditavailable}}</span>
                 <span>上级余额{{parentCreditavailable}}</span>
             </li>
             <li>
@@ -24,7 +24,7 @@
                     :min="0"
                     v-model="parentProxyRate"
                 ></InputNumber>
-                <span>最高可设置占成{{parentMaxRate}}%</span>
+                <span style="margin:0 10px">最高可设置占成{{parentMaxRate}}%</span>
             </li>
             <li>
                 代理占成上线
@@ -99,7 +99,7 @@ export default {
                 rMaxRate: this.rMaxRate,
                 limit_max_rate: this.rMaxRate ? this.limitMaxRate : 100
             }).then(res => {
-                console.log(res.data)
+                this.creditavailable = res.data.creditavailable
             })
         }
     },
@@ -112,4 +112,10 @@ export default {
 }
 </script>
 
-<style lang="stylus" scoped></style>
+<style lang="stylus" scoped>
+.reputation
+    ul
+        li
+            line-height 30px
+            margin-bottom 10px
+</style>

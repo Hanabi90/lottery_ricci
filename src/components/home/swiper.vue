@@ -12,17 +12,17 @@
     >
         <CarouselItem>
             <div class="demo-carousel">
-                <img src="@/assets/images/demo.jpg">
+                <img src="@/assets/images/demo.jpg" />
             </div>
         </CarouselItem>
         <CarouselItem>
             <div class="demo-carousel">
-                <img src="@/assets/images/demo_one.jpg">
+                <img src="@/assets/images/demo_one.jpg" />
             </div>
         </CarouselItem>
         <CarouselItem>
             <div class="demo-carousel">
-                <img src="@/assets/images/demo_two.jpg">
+                <img src="@/assets/images/demo_two.jpg" />
             </div>
         </CarouselItem>
     </Carousel>

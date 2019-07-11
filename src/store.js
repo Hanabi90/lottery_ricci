@@ -38,7 +38,7 @@ export default new Vuex.Store({
             state.loginCode = data
         },
         money(state, data) {
-            state.money = data.money
+            state.money = data
         },
         nickname(state, data) {
             state.nickname = data

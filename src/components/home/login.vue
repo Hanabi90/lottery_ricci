@@ -83,7 +83,7 @@ export default {
                 this.$store.dispatch('handleNickName', res.data.nickname)
                 this.$Message.info('登录成功')
                 getbalance().then(res => {
-                    this.$store.dispatch('handleMoney', res.data)
+                    this.$store.dispatch('handleMoney', res.data.money)
                 })
                 getMenu().then(res => {
                     this.$store.dispatch('handleLotteryMenue', {

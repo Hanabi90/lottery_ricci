@@ -25,6 +25,18 @@ export default new Router({
             name: 'test',
             component: () =>
                 import(/* webpackChunkName: "test" */ './views/test.vue')
+        },
+        {
+            path: '/activityList',
+            name: 'activityList',
+            component: () =>
+                import(/* webpackChunkName: "activityList" */ './views/activityList.vue')
+        },
+        {
+            path: '/registered',
+            name: 'registered',
+            component: () =>
+                import(/* webpackChunkName: "registered" */ './views/registered.vue')
         }
     ]
 })

@@ -8,7 +8,7 @@
                 :name="`${value}`"
             >
                 {{item.subject}}
-                <p slot="content">{{item.content}}</p>
+                <p slot="content" v-html="item.content"></p>
             </Panel>
         </Collapse>
     </div>

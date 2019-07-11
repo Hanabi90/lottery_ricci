@@ -177,6 +177,7 @@ export default {
             this.trace = false //关闭追号
             betting({ postdata: JSON.stringify(postdata) }).then(res => {
                 this.$Message.success('投注成功')
+                this.$store.dispatch('handleMoney', res.data.amount)
                 this.$store.dispatch('handleOrderHistory', [...res.data.betlog])
                 this.$store.dispatch('handleOrderList', { type: 'clear' })
             })
@@ -245,11 +246,17 @@ export default {
                 border-color #2d8cf0
                 position relative
                 &::after
-                    content '√'
+                    content ''
                     position absolute
+                    border 2px solid #fff
+                    width 4px
+                    height 8px
+                    left 4px
+                    top 1px
+                    border-top 0
+                    border-left 0
+                    transform rotate(45deg) scale(1)
                     color #fff
-                    left 2px
-                    top -22px
             button
                 height 42px
                 border none

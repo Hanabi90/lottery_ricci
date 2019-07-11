@@ -139,7 +139,7 @@ export default {
                 },
                 {
                     value: 50,
-                    label: '全部'
+                    label: '50期'
                 }
             ],
             list: [] //奖期列表
@@ -197,6 +197,10 @@ export default {
                 currissue: this.$store.state.issue
             }).then(res => {
                 issue = res.data
+                if (issue.length < this.qissueno) {
+                    this.$Message.error('奖期过长，无法进行追号')
+                    this.$store.dispatch('handleTrace', false)
+                }
                 if (typevalue && value == 3) {
                     this.multiple = 2
                 }

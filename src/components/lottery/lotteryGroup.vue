@@ -35,13 +35,13 @@
                     <span>单注返点:</span>
                     <span>{{rebate}}</span>
                 </div>
-                <div>
+                <!-- <div>
                     <span>单注返点:</span>
                     <RadioGroup v-model="iWalletType">
                         <Radio label="1">现金</Radio>
                         <Radio label="2">信用</Radio>
                     </RadioGroup>
-                </div>
+                </div>-->
             </li>
         </ul>
         <Lotterynumber :order="this.$refs.order" ref="lotterynumber" :method-list="methodList" />

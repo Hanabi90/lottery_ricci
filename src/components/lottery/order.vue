@@ -169,7 +169,6 @@ export default {
                 arr.list[1].size >= 1
             ) {
                 for (let item of arr.list[0].values()) {
-                    console.log(arr.list)
                     if (arr.list[1].has(item)) {
                         let element = new Set([...arr.list[1]])
                         element.delete(item)
@@ -214,7 +213,7 @@ export default {
             }
 
             if (
-                arr.methods === '三码前三直选复式'  &&
+                arr.methods === '三码前三直选复式' &&
                 arr.list[0].size >= 1 &&
                 arr.list[1].size >= 1 &&
                 arr.list[2].size >= 1
@@ -949,7 +948,7 @@ export default {
                 this.$store.dispatch('handleLotteryNumber', '')
                 this.lotterynumber.reset()
                 this.$store.dispatch('handleOrderHistory', [...res.data.betlog])
-                this.$store.dispatch('handleMoney', { money: res.data.amount })
+                this.$store.dispatch('handleMoney', res.data.amount)
             })
         },
         //添加投注单
@@ -1023,9 +1022,11 @@ export default {
                 title == '直选直选单式' ||
                 title == '组选混合' ||
                 title == '二码后二直选单式' ||
-                (title == '二码前二直选单式' && this.methodid == '1199') || //区分11选五跟快乐彩
+                (title == '二码前二直选单式' &&
+                    (this.methodid == '1199' || this.methodid == '199')) ||
                 title == '二码后二组选单式' ||
-                (title == '二码前二组选单式' && this.methodid == '1203') //区分11选五跟快乐彩
+                (title == '二码前二组选单式' &&
+                    (this.methodid == '1203' || this.methodid == '203')) //区分11选五跟快乐彩
             ) {
                 singleList = this.$store.state.lotteryNumber.list
             }
@@ -1088,7 +1089,7 @@ export default {
                 title == '冠亚组合和值' ||
                 title == '组选组三' ||
                 title == '组选组六' ||
-                title == '二码后二组选复式'||
+                title == '二码后二组选复式' ||
                 title == '直选直选和值' ||
                 title == '组选组选和值'
             ) {
@@ -1108,7 +1109,6 @@ export default {
                 )
                 singleList.sort((a, b) => a - b)
             }
-            console.log(this.methodid)
             if (
                 title == '三码前三直选单式' ||
                 title == '三码前三组选单式' ||

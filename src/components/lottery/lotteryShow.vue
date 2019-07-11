@@ -73,8 +73,10 @@ export default {
         handleOpenTime() {
             let lotteryid = sessionStorage.getItem('lotteryId')
             let opentime = this.opentimeList[0].opentime,
-                current = this.opentimeList[0].current
-            if (opentime) {
+                current = this.opentimeList[0].current.split('-')[1]
+                    ? this.opentimeList[0].current.split('-')[1]
+                    : this.opentimeList[0].current.split('-')[0]
+            if (!!opentime) {
                 this.timerOpenTime = setTimeout(() => {
                     this.$set(this.opentimeList[0], 'opentime', opentime - 1)
                     this.handleOpenTime()
@@ -82,7 +84,12 @@ export default {
             } else {
                 getprize({ lotteryid, size: 7 }).then(res => {
                     let getCurrent = res.data[0].issue.split('-')[1]
-                    let nowissue = this.issue.split('-') //当前的奖期
+                        ? res.data[0].issue.split('-')[1]
+                        : res.data[0].issue.split('-')[0]
+                    let nowissue = this.issue.split('-')[1]
+                        ? this.issue.split('-')[1]
+                        : this.issue.split('-')[0] //当前的奖期
+
                     if (current == getCurrent) {
                         this.count = 0 //从新计数
                         for (const key in res.data[0]) {
@@ -102,7 +109,7 @@ export default {
                             this.$set(
                                 this.lotteryNumber,
                                 'issue',
-                                `${nowissue[0]}-${nowissue[1] - 1}`
+                                `${nowissue - 1}`
                             ) //开奖
                             this.$set(this.lotteryNumber, 'code', '- - - - -')
                         }
@@ -125,12 +132,12 @@ export default {
                     date = Math.trunc(
                         Date.parse(res.data.saleend.replace(/-/g, '/')) / 1000
                     ),
-                    open = (date = Math.trunc(
+                    open = Math.trunc(
                         Date.parse(res.data.opentime.replace(/-/g, '/')) / 1000
-                    )),
+                    ),
                     opentime = open - now
                 this.timercount = date - now
-                this.opentimeList.push({ current: res.data.current, opentime })
+                this.opentimeList.push({ current: res.data.issue, opentime })
                 this.down()
                 if (this.openTimeOnOff) {
                     this.handleOpenTime()

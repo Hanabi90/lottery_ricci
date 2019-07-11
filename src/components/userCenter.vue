@@ -2,7 +2,7 @@
     <div class="userCenterBox" v-if="this.$store.state.userCenter">
         <div class="userCenter">
             <div class="title">
-                <Icon @click="close" :class="'close'" size="20" type="md-close-circle"/>
+                <Icon @click="close" :class="'close'" size="20" type="md-close-circle" />
             </div>
             <Tabs :style="{'padding':'0 20px 20px'}" v-model="active">
                 <TabPane
@@ -11,7 +11,7 @@
                     :label="item.name=='消息'?Information:item.name"
                     :name="item.name"
                 >
-                    <component v-if="active==item.name" :is="item.content"/>
+                    <component v-if="active==item.name" :is="item.content" />
                 </TabPane>
             </Tabs>
         </div>
@@ -29,6 +29,7 @@ import TraceHistory from './userCenter/traceHistory'
 import BettingRecord from './userCenter/bettingRecord'
 import NoGameHistory from './userCenter/noGameHistory'
 import AgentManagement from './userCenter/agentManagement'
+import ContactInformation from './userCenter/contactInformation'
 import { Tabs, TabPane, Icon, Badge } from 'iview'
 export default {
     name: 'userCenter',
@@ -76,6 +77,10 @@ export default {
                 {
                     name: '公告',
                     content: 'Notice'
+                },
+                {
+                    name: '联系信息管理',
+                    content: 'ContactInformation'
                 }
             ],
             Information: h => {
@@ -114,7 +119,8 @@ export default {
         TraceHistory,
         NoGameHistory,
         Badge,
-        AgentManagement
+        AgentManagement,
+        ContactInformation
     }
 }
 </script>
@@ -135,7 +141,7 @@ export default {
         width 1200px
         height 676px
         margin auto
-        margin-top 80px
+        margin-top 40px
         overflow hidden
         border-radius 10px
         background #fff

@@ -62,9 +62,9 @@
                         <span>{{item.username}}</span>
                         <span>{{item.times}}</span>
                         <span>{{item.cntitle}}</span>
-                        <span class="code">{{item.operations>0?item.amount:''}}</span>
-                        <span>{{item.operations==0?item.amount:''}}</span>
-                        <span>{{item.availablebalance}}</span>
+                        <span class="code">{{item.operations>0?item.amount:0}}</span>
+                        <span>{{item.operations==0?item.amount:0}}</span>
+                        <span>{{item.money}}</span>
                         <span>{{(item.transferstatus==1||item.transferstatus==3)?'失败':'成功'}}</span>
                         <span>{{item.description?item.description:'---'}}</span>
                     </li>
@@ -167,7 +167,7 @@ export default {
                         'p',
                         this.orderHistoryList.p + 1
                     )
-                    getorderhistory({ ...orderHistoryList }).then(res => {
+                    getbankreporthistory({ ...orderHistoryList }).then(res => {
                         this.noGameList = [
                             ...this.noGameList,
                             ...res.data.page_data

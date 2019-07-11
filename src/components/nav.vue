@@ -9,51 +9,48 @@
             </ul>
             <ul class="line_help">
                 <li class="nowDate">{{nowDate}}</li>
-                <li>切换手机显示</li>
-                <li>牌照显示</li>
+                <li>PC客户端</li>
+                <li>手机客户端</li>
                 <li>线路中心</li>
             </ul>
             <ul class="nav_top_right">
                 <li v-if="this.$store.state.loginCode==0" class="login_content">
-                    <button @click="open('login')">登录</button>
+                    <button @click="open('login',$event)">登录</button>
                     <button @click="open('registered')">注册</button>
-                    <Login ref="login"/>
-                    <Registered ref="registered"/>
                 </li>
                 <li v-else-if="this.$store.state.loginCode==1" class="money_content">
-                    <p>
-                        <span>用户名:</span>
-                        <span>{{this.$store.state.nickname}}</span>
-                    </p>
-                    <p>
-                        <span>金额:</span>
-                        <span>{{this.$store.state.money}}</span>
-                    </p>
-                    <button class="refresh" @click="refresh">刷新</button>
+                    <div>
+                        <div>
+                            <span>账号:</span>
+                            <span>{{this.$store.state.nickname}}</span>
+                            <span>高级会员</span>
+                            <Icon type="ios-arrow-down" />
+                        </div>
+                        <div>
+                            <span>余额:</span>
+                            <span>{{this.$store.state.money}}</span>
+                            <Icon
+                                @click="refresh"
+                                style="font-size:20px;color:#d49815"
+                                type="md-refresh-circle"
+                            />
+                        </div>
+                    </div>
                     <button @click="loginOut">退出</button>
                 </li>
                 <li class="border_style">
-                    <i class="phone"></i>
-                    <span>手机版</span>
+                    <span>充值</span>
                 </li>
                 <li class="border_style">
-                    <i class="live_chat"></i>
-                    <a
-                        style="color:#f7e6b0;padding:0 6px"
-                        href="https://v60.livechatvalue.com/chat/chatClient/chatbox.jsp?companyID=80001185&configID=482"
-                    >线上客服</a>
+                    <span>提款</span>
                 </li>
-                <!-- <li class="border_style">
-                    <i class="free_call"></i>
-                    <span>客服回拨</span>
-                </li>-->
             </ul>
         </div>
         <div style="border-top: 1px solid #424141">
             <div class="nav_bottom fixed_layout">
                 <div class="logo_left">
-                    <img id="logo" src="../assets/images/page_logo.png">
-                    <img id="vwin-logo" src="../assets/images/vwin-logo-acmiland-cn.png">
+                    <img id="logo" src="../assets/images/page_logo.png" />
+                    <img id="vwin-logo" src="../assets/images/vwin-logo-acmiland-cn.png" />
                 </div>
                 <ul class="nav_list">
                     <router-link tag="li" to="/">首页</router-link>
@@ -81,7 +78,7 @@
                     </router-link>
                     <li>电子游戏</li>
                     <li>棋牌</li>
-                    <li>最新优惠</li>
+                    <router-link tag="li" to="/activityList">最新优惠</router-link>
                     <li class="btn-sign">
                         <button @click="openCenter">
                             <i></i>
@@ -91,10 +88,13 @@
                 </ul>
             </div>
         </div>
+        <Login :style="{left:x+'px'}" ref="login" />
+        <Registered :style="{left:x+'px'}" ref="registered" />
     </div>
 </template>
 <script>
 import Login from '../components/home/login'
+import Fast from '../components/home/fast'
 import Registered from '../components/home/registered'
 import {
     getbalance,
@@ -109,7 +109,9 @@ export default {
         return {
             nowDate: '',
             nickname: '',
-            id: ''
+            id: '',
+            x: 0,
+            y: 0
         }
     },
     mounted() {
@@ -121,7 +123,7 @@ export default {
                 sessionStorage.getItem('nickname')
             )
             getbalance().then(res => {
-                this.$store.dispatch('handleMoney', res.data)
+                this.$store.dispatch('handleMoney', res.data.money)
             })
             getMenu().then(res => {
                 this.$store.dispatch('handleLotteryMenue', { ...res.data })
@@ -156,14 +158,14 @@ export default {
             this.$nextTick(() => {
                 this.$store.dispatch('handleHackReset', true)
                 this.$store.dispatch('handleOrderList', { type: 'clear' })
+                this.$store.dispatch('handleTrace', false)
             })
             sessionStorage.setItem('group', group)
         },
         //刷新金额
         refresh() {
             getbalance().then(res => {
-                this.spinShow = true
-                this.$store.dispatch('handleMoney', res.data)
+                this.$router.go()
             })
         },
         //退出登录
@@ -178,11 +180,20 @@ export default {
             })
         },
         //打开登录页面
-        open(target) {
+        open(target, $event) {
+            let e = window.event || $event
             for (const iterator in this.$refs) {
                 this.$refs[iterator].onOff = false
             }
             this.$refs[target].onOff = true
+            this.$nextTick(() => {
+                this.x =
+                    this.getElementLeft(e.target) +
+                    e.target.offsetWidth / 2 -
+                    this.$refs[target].$el.offsetWidth / 2
+            })
+
+            this.y = this.getElementTop(e.target) - e.target.offsetTop * 2
         },
         //获取当前时间
         getTime() {
@@ -221,12 +232,36 @@ export default {
                 ':' +
                 seconds
             setTimeout(this.getTime, 1000)
+        },
+        getElementLeft(element) {
+            var actualLeft = element.offsetLeft
+            var current = element.offsetParent
+
+            while (current !== null) {
+                actualLeft += current.offsetLeft
+                current = current.offsetParent
+            }
+
+            return actualLeft
+        },
+
+        getElementTop(element) {
+            var actualTop = element.offsetTop
+            var current = element.offsetParent
+
+            while (current !== null) {
+                actualTop += current.offsetTop
+                current = current.offsetParent
+            }
+
+            return actualTop
         }
     },
     components: {
         Login,
         Registered,
-        Icon
+        Icon,
+        Fast
     }
 }
 </script>
@@ -236,18 +271,17 @@ export default {
     position fixed
     background mainColor
     cursor pointer
-    line-height 40px
     top 0
     width 100%
     z-index 99
 .nav_top
     width 1200px
     margin auto
-    height 40px
+    overflow hidden
 .flag
     color defaultColor
-    font-size 13px
     line-height 40px
+    font-size 13px
     float left
     i
         background url('../assets/images/flag.png')
@@ -260,6 +294,7 @@ export default {
 .line_help
     float left
     color #fff
+    line-height 40px
     display flex
     li
         flex 1
@@ -270,31 +305,19 @@ export default {
         color defaultColor
 .nav_top_right
     float right
-    display flex
+    overflow hidden
     li
-        flex 1
+        float left
         color #fff
         font-size 12px
         white-space nowrap
         span
             padding 0 6px
             color #f7e6b0
-        i
-            display inline-block
-            height 23px
-            width 14px
-            margin-bottom -2px
-            &.phone
-                background url('../assets/images/icon-mobile.gif') no-repeat bottom right
-            &.live_chat
-                background url('../assets/images/icon-liveChat.gif') no-repeat bottom right
-            &.free_call
-                background url('../assets/images/icon-freeCall.png') no-repeat bottom right
     .money_content
-        display flex
-        p
-            flex 1
-            position relative
+        overflow hidden
+        &>div
+            float left
         button
             margin-top 6px
             &.refresh
@@ -310,8 +333,9 @@ button
     height 26px
     line-height 26px
 .border_style
+    line-height 40px
     border-left 1px solid #424141
-    padding-left 10px
+    padding 0 10px
 .nav_bottom
     color #fff
     font-size 14px
@@ -394,4 +418,5 @@ button
     background #a92c2d
 .login_content
     position relative
+    line-height 40px
 </style>
