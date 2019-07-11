@@ -239,7 +239,7 @@ export default {
     },
     mounted() {
         checksequestion().then(res => {
-            if (res.data) {
+            if (!(res.data instanceof Array)) {
                 this.listIndex = res.data
             }
         })

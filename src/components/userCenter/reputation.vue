@@ -99,7 +99,8 @@ export default {
                 rMaxRate: this.rMaxRate,
                 limit_max_rate: this.rMaxRate ? this.limitMaxRate : 100
             }).then(res => {
-                this.creditavailable = res.data.creditavailable
+                this.creditavailable = res.data.userCredit.creditavailable
+                this.parentCreditavailable = res.data.parentCreditAvailable
             })
         }
     },

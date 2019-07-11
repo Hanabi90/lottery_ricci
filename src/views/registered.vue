@@ -3,52 +3,134 @@
         <div class="arrow"></div>
         <div class="container">
             <h5>注册您的账户</h5>
-            <div class="form_list">
-                <div class="list">
-                    <label for="user"></label>
-                    <input id="user" type="text" placeholder="用户名" />
-                </div>
-                <div class="list">
-                    <label for="password"></label>
-                    <input id="password" type="password" placeholder="密码" />
-                </div>
-                <div class="list">
-                    <label for="repeatPassword"></label>
-                    <input id="repeatPassword" type="password" placeholder="确认密码" />
-                </div>
-                <div class="list">
-                    <label for="contact"></label>
-                    <input id="contact" type="text" placeholder="联系方式" />
-                </div>
-                <div class="list">
-                    <label for="proxy_code"></label>
-                    <input id="proxy_code" type="password" placeholder="代码代码" />
-                </div>
-                <button class="submint_button">立即注册</button>
-                <div class="remanber">
-                    <div>
-                        <i></i>
-                        <span>我确认我已年满18岁，并已阅读和接受本网站的</span>
-                    </div>
-                </div>
-            </div>
+            <Form ref="formInline" :model="formInline" :rules="ruleInline" :label-width="80">
+                <FormItem prop="user" label="用户名称">
+                    <Input
+                        type="text"
+                        :readonly="readonly"
+                        @on-focus="removeInputReadonly"
+                        v-model="formInline.user"
+                        placeholder="请输入用户名"
+                    ></Input>
+                </FormItem>
+                <FormItem prop="password" label="用户密码">
+                    <Input type="password" v-model="formInline.password" placeholder="请输入密码"></Input>
+                </FormItem>
+                <FormItem prop="password" label="确认密码">
+                    <Input type="password" v-model="formInline.confirm" placeholder="请确认密码"></Input>
+                </FormItem>
+                <FormItem label="特邀代码">
+                    <Input type="text" v-model="formInline.code" placeholder="请输入邀请码"></Input>
+                </FormItem>
+                <FormItem prop="imgCode" label="验证码">
+                    <img style="position:absolute;z-index:1;right:0" :src="img" alt />
+                    <Input type="text" v-model="formInline.imgCode" placeholder="请输入验证码"></Input>
+                </FormItem>
+                <FormItem>
+                    <Button type="primary" @click="handleSubmit('formInline')">确定</Button>
+                </FormItem>
+            </Form>
         </div>
         <div @click="close" class="close"></div>
     </div>
 </template>
 
 <script>
+import { popularizereg } from '@/api/index'
+import { Form, FormItem, Input, Button } from 'iview'
+import md5 from 'js-md5'
 export default {
     name: 'registered',
     data() {
         return {
-            onOff: false
+            readonly: true,
+            onOff: false,
+            img: '',
+            vvccookie: '',
+            formInline: {
+                user: '',
+                password: '',
+                confirm: '',
+                code: '',
+                imgCode: ''
+            },
+            ruleInline: {
+                user: [
+                    {
+                        required: true,
+                        message: 'Please fill in the user name',
+                        trigger: 'blur'
+                    }
+                ],
+                password: [
+                    {
+                        required: true,
+                        message: 'Please fill in the password.',
+                        trigger: 'blur'
+                    }
+                ],
+                confirm: [
+                    {
+                        required: true,
+                        message: 'Please fill in the password.',
+                        trigger: 'blur'
+                    }
+                ],
+                imgCode: [
+                    {
+                        required: true,
+                        message: 'Please fill in the password.',
+                        trigger: 'blur'
+                    }
+                ]
+            }
         }
     },
     methods: {
         close() {
             this.onOff = false
+        },
+        handleSubmit(name) {
+            this.$refs[name].validate(valid => {
+                if (valid) {
+                    popularizereg({
+                        flag: 'reg',
+                        c: '907aaa458f1339608ec119824be510f0',
+                        username: this.formInline.user,
+                        code: md5(this.formInline.imgCode), //验证码
+                        vvccookie: this.vvccookie,
+                        password: this.formInline.password
+                    }).then(res => {
+                        this.onOff = false
+                        this.formInline = {
+                            user: '',
+                            password: '',
+                            confirm: '',
+                            code: '',
+                            imgCode: ''
+                        }
+                        this.$Message.success(res.msg)
+                    })
+                } else {
+                    this.$Message.error('Fail!')
+                }
+            })
+        },
+        removeInputReadonly() {
+            this.readonly = false
         }
+    },
+    mounted() {
+        popularizereg().then(res => {
+            this.img = res.data.imgurl
+            this.vvccookie = res.data.vvccookie
+        })
+    },
+    components: {
+        Form,
+        FormItem,
+        Input,
+        Button
     }
 }
 </script>
@@ -56,6 +138,7 @@ export default {
 <style lang="stylus" scoped>
 .registered
     width 378px
+    margin auto
     right -157px
     top 45px
     line-height normal
@@ -75,54 +158,6 @@ export default {
             text-align center
             font-size 20px
             color #000
-    .form_list
-        overflow hidden
-        margin-top 20px
-        .list
-            box-shadow inset -1px 1px 5px rgba(0, 0, 0, 0.35)
-            margin-bottom 15px
-            border-radius 10px
-            overflow hidden
-            &:first-child
-                label
-                    background url('../assets/images/icon-user.png')
-            &:nth-child(2)
-                label
-                    background url('../assets/images/icon-lock.png')
-            &:nth-child(3)
-                label
-                    background url('../assets/images/icon-openLock.png')
-            &:nth-child(4)
-                label
-                    background url('../assets/images/icon-mobile.png')
-            &:nth-child(5)
-                label
-                    background url('../assets/images/icon-agents.png')
-            label
-                display inline-block
-                width 40px
-                height 45px
-                vertical-align top
-            input
-                display inline-block
-                height 42px
-                width calc(100% - 40px)
-                border none
-                vertical-align top
-                background none
-                outline none
-                text-indent 20px
-    .submint_button
-        background linear-gradient(#c74546, #a92c2d)
-        border none
-        width 100%
-        color #fff
-        line-height 36px
-        border-radius 10px
-        display block
-        outline none
-        &:hover
-            background linear-gradient(#a41c1d, #7c1212)
     .remanber
         color #000
         margin-top 10px

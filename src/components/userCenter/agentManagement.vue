@@ -24,7 +24,7 @@
                                 type="text"
                                 :readonly="readonly"
                                 @on-focus="removeInputReadonly"
-                                v-model="teamGroup.userName"
+                                v-model="teamGroup.username"
                                 placeholder="请输入用户名"
                             ></Input>
                         </FormItem>
@@ -362,16 +362,7 @@ export default {
             } else {
                 this.buttonPoint = false
             }
-            //数据重置
-            this.teamGroup = {
-                username: '',
-                bank_min: '',
-                bank_max: '',
-                p: 1,
-                pn: 15
-            }
-            //数据重置
-            this.teamGroupUpdate = true
+            this.teamGroupUpdate = true //打开下拉加载
             getgrouplist({ ...this.teamGroup, ...obj }).then(res => {
                 this.istop = res.data.istop
                 this.teamList = res.data.page_data

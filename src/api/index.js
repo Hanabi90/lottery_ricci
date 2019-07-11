@@ -418,3 +418,11 @@ export const getactivityinfo = formData =>
         url: 'activity/getactivityinfo',
         data: qs.stringify(formData)
     })
+
+//注册-获取注册验证码
+export const popularizereg = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/popularizereg',
+        data: qs.stringify(formData)
+    })
