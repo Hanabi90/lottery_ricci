@@ -95,7 +95,9 @@ export default {
                 if (valid) {
                     popularizereg({
                         flag: 'reg',
-                        c: '907aaa458f1339608ec119824be510f0',
+                        c: this.formInline.code
+                            ? this.formInline.code
+                            : '907aaa458f1339608ec119824be510f0',
                         username: this.formInline.user,
                         code: md5(this.formInline.imgCode), //验证码
                         vvccookie: this.vvccookie,

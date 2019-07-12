@@ -109,106 +109,14 @@
                         </Scroll>
                     </div>
                 </div>
-                <div v-show="navIndex==2" class="addUser">
-                    <RadioGroup style="margin-bottom:20px" v-model="addUserType">
-                        <Radio label="1">添加会员</Radio>
-                        <Radio label="0">会员链接开户</Radio>
-                    </RadioGroup>
-                    <Form
-                        v-show="addUserType==1"
-                        ref="addUserList"
-                        :model="addUserList"
-                        :rules="ruleAddUserList"
-                        :label-width="80"
-                    >
-                        <FormItem label="用户名" prop="userName">
-                            <Input
-                                type="text"
-                                ref="userInput"
-                                v-model="addUserList.userName"
-                                placeholder="请输入用户名"
-                                :readonly="readonly"
-                                @on-focus="removeInputReadonly"
-                            ></Input>
-                        </FormItem>
-                        <FormItem label="密码" prop="password">
-                            <Input
-                                type="password"
-                                v-model="addUserList.password"
-                                placeholder="请输入密码"
-                            ></Input>
-                        </FormItem>
-                        <FormItem label="奖金组">
-                            <Slider
-                                :min="Number(bonusGroup.minodds)"
-                                :max="Number(bonusGroup.maxodds)"
-                                v-model="addUserList.bonus"
-                                :step="2"
-                                show-input
-                                :active-change="false"
-                                input-size="small"
-                            ></Slider>
-                        </FormItem>
-                        <FormItem label="用户类型">
-                            <RadioGroup v-model="addUserList.userType">
-                                <Radio label="1">代理</Radio>
-                                <Radio label="0">会员</Radio>
-                            </RadioGroup>
-                        </FormItem>
-                        <FormItem>
-                            <Button
-                                type="primary"
-                                :loading="loading"
-                                @click="handleSubmit('addUserList')"
-                            >
-                                <span v-if="!loading">添加用户</span>
-                                <span v-else>创建用户中...</span>
-                            </Button>
-                        </FormItem>
-                    </Form>
-                    <div v-show="addUserType==0">
-                        <Form ref="addUserLine" :model="addUserLine" :label-width="80">
-                            <FormItem label="奖金组">
-                                <Slider
-                                    :min="Number(bonusGroup.minodds)"
-                                    :max="Number(bonusGroup.maxodds)"
-                                    v-model="addUserLine.keepodds"
-                                    :step="2"
-                                    show-input
-                                    input-size="small"
-                                ></Slider>
-                            </FormItem>
-                            <FormItem label="用户类型">
-                                <RadioGroup v-model="addUserLine.usertype">
-                                    <Radio label="1">代理</Radio>
-                                    <Radio label="0">会员</Radio>
-                                </RadioGroup>
-                            </FormItem>
-                            <FormItem>
-                                <Button type="primary" @click="handleSubmit('addUserLine')">生成链接</Button>
-                            </FormItem>
-                        </Form>
-                        <p v-for="(item,index) of userLineData" :key="index" class="line">
-                            <span>推广链接用户类型：</span>
-                            <span>{{item.ztype}}</span>
-                            <span style="margin-left:20px">奖金组：</span>
-                            <span>{{item.odds}}</span>
-                            <span style="margin-left:20px">推广链接：</span>
-                            <span style="user-select:all">{{item.url}}</span>
-                            <Button
-                                style="float:right"
-                                type="error"
-                                @click="handleDelreglink(item.id,index)"
-                            >删除</Button>
-                        </p>
-                    </div>
+                <div v-if="navIndex==2" class="addUser">
+                    <OpenAccountLine />
                 </div>
             </div>
         </div>
         <Button v-if="backOnoff" @click="back" type="primary" class="black">返回</Button>
     </div>
 </template>
-
 <script>
 import {
     Menu,
@@ -217,26 +125,17 @@ import {
     FormItem,
     Input,
     Button,
-    Slider,
-    RadioGroup,
-    Radio,
     Scroll,
     Breadcrumb,
     BreadcrumbItem
 } from 'iview'
-import {
-    getreglink,
-    addnewuser,
-    RSAencrypt,
-    setreglink,
-    getgrouplist,
-    delreglink
-} from '@/api/index'
+import { getgrouplist } from '@/api/index'
 import GameHistory from './gameHistory'
 import SetPoint from './setPoint'
 import TeamAccount from './teamAccount'
 import Reputation from './reputation'
 import SubordinateRecharge from './subordinateRecharge'
+import OpenAccountLine from './openAccountLine'
 export default {
     name: 'agentManagement',
     data() {
@@ -254,39 +153,6 @@ export default {
             addUserType: '1', //选择添加类型
             readonly: true, //解决浏览器默认密码输入
             navIndex: 1, //导航下标位置
-            bonusGroup: {
-                curodds: 0,
-                maxodds: 2000,
-                minodds: 1300,
-                tuiguan: [],
-                userid: 0
-            }, //个人信息、奖金组，用户id
-            addUserList: {
-                bonus: 1500,
-                userName: '',
-                password: '',
-                userType: '1' //1-代理| 0-会员
-            },
-            ruleAddUserList: {
-                userName: [
-                    {
-                        required: true,
-                        message: 'Please fill in the user name',
-                        trigger: 'blur'
-                    }
-                ],
-                password: [
-                    {
-                        required: true,
-                        message: 'Please fill in the user name',
-                        trigger: 'blur'
-                    }
-                ]
-            },
-            addUserLine: {
-                keepodds: 1500,
-                usertype: '1' //1-代理| 0-会员
-            },
             teamGroup: {
                 username: '',
                 bank_min: '',
@@ -294,9 +160,6 @@ export default {
                 p: 1,
                 pn: 15
             },
-            userLineData: [
-                //推广链接存放
-            ],
             teamList: [],
             istop: '', //是否是vip类型
             systemtype: JSON.parse(sessionStorage.getItem('userSeting'))
@@ -306,13 +169,6 @@ export default {
         }
     },
     methods: {
-        //删除推广链接
-        handleDelreglink(id, index) {
-            delreglink({ id }).then(res => {
-                this.userLineData.splice(index, 1)
-                this.$Message.success(res.msg)
-            })
-        },
         //查看团队余额
         handleTeamAccount(value) {
             this.pointUserId = value
@@ -395,7 +251,9 @@ export default {
                 })
             }
         },
-
+        removeInputReadonly() {
+            this.readonly = false
+        },
         //切换内容
         changeContent(index) {
             this.navIndex = index
@@ -408,75 +266,7 @@ export default {
                     pn: 15
                 }
             }
-        },
-        //提交
-        handleSubmit(name) {
-            if (name == 'addUserLine') {
-                setreglink(this.addUserLine).then(res => {
-                    if (res.data.length) {
-                        this.userLineData = []
-                        res.data.forEach(item => {
-                            let ztype = item.ztype == 1 ? '代理' : '会员',
-                                url = item.url + item.urlparam,
-                                odds = item.odds,
-                                id = item.id
-                            this.userLineData.push({ ztype, url, odds, id })
-                        })
-                    }
-                })
-                return
-            }
-            if (name == 'addUserList') {
-                this.$refs[name].validate(valid => {
-                    if (valid) {
-                        this.loading = true
-                        let dataJson = {
-                            onekeyodds: this.addUserList.bonus, //奖金
-                            usertype: this.addUserList.userType, //用户类型
-                            username: this.addUserList.userName, //用户名
-                            userpass: this.addUserList.password //密码
-                        }
-                        addnewuser({
-                            ...dataJson,
-                            pdata: RSAencrypt(JSON.stringify(dataJson))
-                        })
-                            .then(res => {
-                                this.loading = false
-                                this.$Message.success(res.msg)
-                                this.$refs[name].resetFields()
-                            })
-                            .catch(error => {
-                                this.loading = false
-                                this.$Message.error(error.msg)
-                            })
-                    } else {
-                        this.loading = false
-                        this.$Message.error('信息输入不完整!')
-                    }
-                })
-                return
-            }
-        },
-        removeInputReadonly() {
-            this.readonly = false
         }
-    },
-    mounted() {
-        getreglink().then(res => {
-            for (const key in res.data) {
-                this.$set(this.bonusGroup, key, res.data[key])
-            }
-            if (res.data.tuiguan.length) {
-                this.userLineData = []
-                res.data.tuiguan.forEach(item => {
-                    let ztype = item.ztype == 1 ? '代理' : '会员',
-                        url = item.url + item.urlparam,
-                        odds = item.odds,
-                        id = item.id
-                    this.userLineData.push({ ztype, url, odds, id })
-                })
-            }
-        })
     },
     components: {
         Menu,
@@ -485,9 +275,6 @@ export default {
         FormItem,
         Input,
         Button,
-        Slider,
-        RadioGroup,
-        Radio,
         Scroll,
         Breadcrumb,
         BreadcrumbItem,
@@ -495,7 +282,8 @@ export default {
         SetPoint,
         TeamAccount,
         Reputation,
-        SubordinateRecharge
+        SubordinateRecharge,
+        OpenAccountLine
     }
 }
 </script>
@@ -529,10 +317,4 @@ export default {
     width 40px
     padding 0
     line-height 30px
-.line
-    margin-bottom 10px
-    border-bottom 1px solid #e6e6e6
-    line-height 30px
-    color #000
-    text-indent 10px
 </style>

@@ -19,8 +19,13 @@
                 <FormItem prop="password" label="确认密码">
                     <Input type="password" v-model="formInline.confirm" placeholder="请确认密码"></Input>
                 </FormItem>
-                <FormItem label="特邀代码">
-                    <Input type="text" v-model="formInline.code" placeholder="请输入邀请码"></Input>
+                <FormItem prop="code" label="特邀代码">
+                    <Input
+                        type="text"
+                        :readonly="true"
+                        v-model="formInline.code"
+                        placeholder="请输入邀请码"
+                    ></Input>
                 </FormItem>
                 <FormItem prop="imgCode" label="验证码">
                     <img style="position:absolute;z-index:1;right:0" :src="img" alt />
@@ -82,6 +87,13 @@ export default {
                         message: 'Please fill in the password.',
                         trigger: 'blur'
                     }
+                ],
+                code: [
+                    {
+                        required: true,
+                        message: 'Please fill in the password.',
+                        trigger: 'blur'
+                    }
                 ]
             }
         }
@@ -125,6 +137,9 @@ export default {
             this.img = res.data.imgurl
             this.vvccookie = res.data.vvccookie
         })
+        let index = window.location.search.indexOf('=') + 1,
+            code = window.location.search.slice(index)
+        this.$set(this.formInline, 'code', code)
     },
     components: {
         Form,
