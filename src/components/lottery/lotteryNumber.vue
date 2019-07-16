@@ -558,7 +558,8 @@ export default {
             let e = window.event || $event
             if (
                 this.methodList.name != '和值' &&
-                this.methodList.title != '任选胆拖'
+                this.methodList.title != '任选胆拖'&&
+                this.methodList.name != '包胆'
             ) {
                 let oNodeList = this.$refs.typeList[index].querySelectorAll(
                     'span'
