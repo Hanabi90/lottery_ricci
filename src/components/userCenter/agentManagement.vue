@@ -66,7 +66,6 @@
                                     <span>{{item.prizeGroup.toFixed()}}</span>
                                     <span>{{item.money}}</span>
                                     <span style="flex:4">
-                                        <Button type="primary" size="small">详情</Button>
                                         <Button
                                             v-if="systemtype!=1"
                                             type="primary"
@@ -112,6 +111,9 @@
                 <div v-if="navIndex==2" class="addUser">
                     <OpenAccountLine />
                 </div>
+                <div v-if="navIndex==3" class="addUser">
+                    <TeamProfitLossStatement />
+                </div>
             </div>
         </div>
         <Button v-if="backOnoff" @click="back" type="primary" class="black">返回</Button>
@@ -136,6 +138,7 @@ import TeamAccount from './teamAccount'
 import Reputation from './reputation'
 import SubordinateRecharge from './subordinateRecharge'
 import OpenAccountLine from './openAccountLine'
+import TeamProfitLossStatement from './teamProfitLossStatement'
 export default {
     name: 'agentManagement',
     data() {
@@ -225,6 +228,7 @@ export default {
                 if (res.data.usertree) {
                     this.userTree = res.data.usertree
                 } else {
+                    this.teamGroup.p = 1
                     this.userTree = []
                 }
             })
@@ -283,7 +287,8 @@ export default {
         TeamAccount,
         Reputation,
         SubordinateRecharge,
-        OpenAccountLine
+        OpenAccountLine,
+        TeamProfitLossStatement
     }
 }
 </script>

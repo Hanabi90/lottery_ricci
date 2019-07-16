@@ -560,9 +560,12 @@ export default {
                 this.methodList.name != '和值' &&
                 this.methodList.title != '任选胆拖'
             ) {
-                this.$refs.typeList[index]
-                    .querySelectorAll('span')
-                    .forEach(item => (item.className = ''))
+                let oNodeList = this.$refs.typeList[index].querySelectorAll(
+                    'span'
+                )
+                for (let i = 0; i < oNodeList.length; i++) {
+                    oNodeList[i].className = ''
+                }
             }
             if (this.methodList.name == '包胆') {
                 this.activeGroup[index].clear()
@@ -646,7 +649,8 @@ export default {
             })
         },
         chosenType(lable, index, $event) {
-            let e = window.event || $event
+            let e = window.event || $event,
+                domTarget = event.target || event.srcElement
 
             if (!this.methodList.name == '和值') {
                 this.$refs.typeList[index]
@@ -654,11 +658,11 @@ export default {
                     .forEach(item => (item.className = ''))
             }
             //清除类型的所有样式
-            e.target.parentNode.childNodes.forEach(
+            domTarget.parentNode.childNodes.forEach(
                 item => (item.className = '')
             )
             //添加激活样式
-            e.target.className = 'active'
+            domTarget.className = 'active'
 
             //清空
             this.activeGroup[index].clear()
@@ -869,6 +873,7 @@ export default {
                     margin-right 0
                 span
                     flex 1
+                    display block
                     background #2b2a2a
                     box-shadow 0 0 0 1.8px #262626, 0 0 4px 0 rgba(255, 255, 255, 0.6), 0 2px 0 rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.2)
                     margin-right 8px

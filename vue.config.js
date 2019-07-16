@@ -2,6 +2,7 @@ const path = require('path')
 const CompressionPlugin = require('compression-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 module.exports = {
+    transpileDependencies: ['iview'],
     chainWebpack: config => {
         if (process.env.NODE_ENV === 'production') {
             config

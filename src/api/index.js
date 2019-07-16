@@ -426,3 +426,17 @@ export const popularizereg = formData =>
         url: 'user/popularizereg',
         data: qs.stringify(formData)
     })
+//团队盈亏报表
+export const reallist = formData =>
+    service.request({
+        method: 'post',
+        url: 'report/reallist',
+        data: qs.stringify(formData)
+    })
+//修改银行卡
+export const updateuserbankcard = formData =>
+    service.request({
+        method: 'post',
+        url: 'user/updateuserbankcard',
+        data: qs.stringify(formData)
+    })

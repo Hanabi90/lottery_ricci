@@ -16,14 +16,19 @@
                 <FormItem prop="password" label="用户密码">
                     <Input type="password" v-model="formInline.password" placeholder="请输入密码"></Input>
                 </FormItem>
-                <FormItem prop="password" label="确认密码">
+                <FormItem prop="confirm" label="确认密码">
                     <Input type="password" v-model="formInline.confirm" placeholder="请确认密码"></Input>
                 </FormItem>
                 <FormItem label="特邀代码">
                     <Input type="text" v-model="formInline.code" placeholder="请输入邀请码"></Input>
                 </FormItem>
                 <FormItem prop="imgCode" label="验证码">
-                    <img style="position:absolute;z-index:1;right:0" :src="img" alt />
+                    <img
+                        @click="getPopularizereg"
+                        style="position:absolute;z-index:1;right:0"
+                        :src="img"
+                        alt
+                    />
                     <Input type="text" v-model="formInline.imgCode" placeholder="请输入验证码"></Input>
                 </FormItem>
                 <FormItem>
@@ -42,6 +47,40 @@ import md5 from 'js-md5'
 export default {
     name: 'registered',
     data() {
+        const validateUser = (rule, value, callback) => {
+            if (value == '') {
+                callback(new Error('请输入用户名'))
+            } else {
+                callback()
+            }
+        }
+        const validatePass = (rule, value, callback) => {
+            if (value === '') {
+                callback(new Error('请输入密码'))
+            } else {
+                if (this.formInline.confirm !== '') {
+                    // 对第二个密码框单独验证
+                    this.$refs.formInline.validateField('confirm')
+                }
+                callback()
+            }
+        }
+        const validateConfirm = (rule, value, callback) => {
+            if (value === '') {
+                callback(new Error('请再次输入密码'))
+            } else if (value !== this.formInline.password) {
+                callback(new Error('两次密码输入不一致'))
+            } else {
+                callback()
+            }
+        }
+        const validateImgCode = (rule, value, callback) => {
+            if (value == '') {
+                callback(new Error('验证码输入错误'))
+            } else {
+                callback()
+            }
+        }
         return {
             readonly: true,
             onOff: false,
@@ -55,34 +94,10 @@ export default {
                 imgCode: ''
             },
             ruleInline: {
-                user: [
-                    {
-                        required: true,
-                        message: 'Please fill in the user name',
-                        trigger: 'blur'
-                    }
-                ],
-                password: [
-                    {
-                        required: true,
-                        message: 'Please fill in the password.',
-                        trigger: 'blur'
-                    }
-                ],
-                confirm: [
-                    {
-                        required: true,
-                        message: 'Please fill in the password.',
-                        trigger: 'blur'
-                    }
-                ],
-                imgCode: [
-                    {
-                        required: true,
-                        message: 'Please fill in the password.',
-                        trigger: 'blur'
-                    }
-                ]
+                user: [{ validator: validateUser, trigger: 'blur' }],
+                password: [{ validator: validatePass, trigger: 'blur' }],
+                confirm: [{ validator: validateConfirm, trigger: 'blur' }],
+                imgCode: [{ validator: validateImgCode, trigger: 'blur' }]
             }
         }
     },
@@ -95,9 +110,7 @@ export default {
                 if (valid) {
                     popularizereg({
                         flag: 'reg',
-                        c: this.formInline.code
-                            ? this.formInline.code
-                            : '907aaa458f1339608ec119824be510f0',
+                        c: this.formInline.code ? this.formInline.code : '',
                         username: this.formInline.user,
                         code: md5(this.formInline.imgCode), //验证码
                         vvccookie: this.vvccookie,
@@ -114,19 +127,24 @@ export default {
                         this.$Message.success(res.msg)
                     })
                 } else {
-                    this.$Message.error('Fail!')
+                    this.$Message.error('格式错误，请重新输入!')
                 }
+                this.getPopularizereg()
+                this.$set(this.formInline, 'imgCode', '')
             })
         },
         removeInputReadonly() {
             this.readonly = false
+        },
+        getPopularizereg() {
+            popularizereg().then(res => {
+                this.img = res.data.imgurl
+                this.vvccookie = res.data.vvccookie
+            })
         }
     },
     mounted() {
-        popularizereg().then(res => {
-            this.img = res.data.imgurl
-            this.vvccookie = res.data.vvccookie
-        })
+        this.getPopularizereg()
     },
     components: {
         Form,

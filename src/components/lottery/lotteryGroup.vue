@@ -60,7 +60,7 @@
 </template>
 
 <script>
-import { InputNumber, RadioGroup, Radio } from 'iview'
+import { InputNumber } from 'iview'
 import Lotterynumber from './lotteryNumber'
 import Order from '@/components/lottery/order.vue'
 import { MethodCrowd, getmethod, getLotteryInfo } from '@/api/index.js'
@@ -158,9 +158,7 @@ export default {
     components: {
         Lotterynumber,
         Order,
-        InputNumber,
-        RadioGroup,
-        Radio
+        InputNumber
     }
 }
 </script>

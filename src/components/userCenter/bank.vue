@@ -5,7 +5,13 @@
                 <p slot="title">
                     <Icon type="ios-card"></Icon>我的银行卡
                 </p>
-                <Button type="error" href="#" slot="extra" @click.prevent>锁定银行卡</Button>
+                <Button
+                    v-if="item.islock==1"
+                    type="error"
+                    href="#"
+                    slot="extra"
+                    @click.prevent="changeBank"
+                >修改银行卡信息</Button>
                 <p>
                     <span>银行账户：</span>
                     <span v-cloak>{{item.account}}</span>
@@ -84,7 +90,7 @@
                 </Input>
             </FormItem>
             <FormItem>
-                <Button type="primary" long @click="handleSubmit('formInline')">添加银行卡</Button>
+                <Button type="primary" long @click="handleSubmit('formInline')">设置银行卡</Button>
             </FormItem>
         </Form>
     </div>
@@ -96,7 +102,8 @@ import {
     getcitylist,
     getbanklist,
     getbankinfo,
-    adduserbank
+    adduserbank,
+    updateuserbankcard
 } from '@/api/index.js'
 import {
     Form,
@@ -179,11 +186,22 @@ export default {
         }
     },
     methods: {
+        //修改银行卡信息
+        changeBank() {
+            this.show = false
+        },
         handleSubmit(name) {
-            adduserbank(this.formInline).then(res => {
-                this.bankinfo = res.data.banklist
-                this.show = true
-            })
+            if (this.bankinfo.length) {
+                updateuserbankcard(this.formInline).then(res => {
+                    this.bankinfo = res.data.banklist
+                    this.show = true
+                })
+            } else {
+                adduserbank(this.formInline).then(res => {
+                    this.bankinfo = res.data.banklist
+                    this.show = true
+                })
+            }
         },
         changeCity(value) {
             getcitylist({ province: value.substr(0, value.indexOf('#')) }).then(

@@ -2,11 +2,12 @@
     <Carousel
         :autoplay="setting.autoplay"
         :autoplay-speed="setting.autoplaySpeed"
-        :dots="setting.dots"
+        dots="inside"
         :radius-dot="setting.radiusDot"
         :trigger="setting.trigger"
         :arrow="setting.arrow"
-        :height="setting.height"
+        :height="500"
+        ref="carousel"
         v-model="value1"
         loop
     >
@@ -35,15 +36,16 @@ export default {
         return {
             value1: 0,
             setting: {
-                height: 'auto',
                 autoplay: true,
                 autoplaySpeed: 2000,
-                dots: 'inside',
                 radiusDot: false,
                 trigger: 'click',
                 arrow: 'hover'
             }
         }
+    },
+    mounted() {
+        this.$refs.carousel.handleResize()
     },
     components: {
         Carousel,
@@ -60,4 +62,5 @@ export default {
         display block
         height 100%
         width 100%
+        background #000
 </style>

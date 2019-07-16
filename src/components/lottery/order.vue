@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import { getissue, betting } from '@/api/index'
+import { getissue, betting ,RSAencrypt} from '@/api/index'
 import math from '@/assets/js/lib.js'
 import { EventBus } from '@/api/eventBus.js'
 export default {
@@ -943,7 +943,7 @@ export default {
                     lt_project: [lt_project]
                 }
             }
-            betting({ postdata: JSON.stringify(postdata) }).then(res => {
+            betting({ postdata: RSAencrypt(JSON.stringify(postdata)) }).then(res => {
                 this.$Message.success('投注成功')
                 this.$store.dispatch('handleLotteryNumber', '')
                 this.lotterynumber.reset()

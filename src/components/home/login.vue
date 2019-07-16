@@ -13,6 +13,15 @@
                     <label for="password"></label>
                     <input id="password" v-model="login.loginpass" type="password" placeholder="密码" />
                 </div>
+                <div class="list">
+                    <img
+                        @click="getPopularizereg"
+                        style="position:absolute;z-index:1;right:0;top:6px"
+                        :src="img"
+                        alt
+                    />
+                    <input type="text" v-model="login.imgCode" placeholder="请输入验证码" />
+                </div>
                 <button class="submint_button" @click="handlelogin">立即登录</button>
                 <div class="remanber">
                     <div @click="handleUser">
@@ -21,7 +30,7 @@
                     </div>
                     <div>
                         <i></i>
-                        <span>免费注册</span>
+                        <span @click="openRegistered">免费注册</span>
                     </div>
                 </div>
                 <p class="discription">
@@ -38,7 +47,7 @@
 </template>
 
 <script>
-import { login, getbalance, getMenu } from '@/api/index.js'
+import { login, getbalance, getMenu, popularizereg } from '@/api/index.js'
 export default {
     name: 'login',
     data() {
@@ -46,8 +55,11 @@ export default {
             onOff: false,
             login: {
                 username: '',
-                loginpass: ''
+                loginpass: '',
+                imgCode: ''
             },
+            img: '',
+            vvccookie: '',
             rememberUserName: false
         }
     },
@@ -56,10 +68,20 @@ export default {
             this.rememberUserName = true
             this.$set(this.login, 'username', localStorage.getItem('userName'))
         }
+        this.getPopularizereg()
     },
     methods: {
+        openRegistered() {
+            this.$parent.open('registered', 'registeredPosition')
+        },
         close() {
             this.onOff = false
+        },
+        getPopularizereg() {
+            popularizereg().then(res => {
+                this.img = res.data.imgurl
+                this.vvccookie = res.data.vvccookie
+            })
         },
         handleUser() {
             if (this.rememberUserName) {
@@ -131,6 +153,7 @@ export default {
             margin-bottom 15px
             border-radius 10px
             overflow hidden
+            position relative
             &:first-child
                 label
                     background url('../../assets/images/icon-user.png')
@@ -177,13 +200,20 @@ export default {
                 vertical-align bottom
                 margin-right 5px
             i.active
-                background #ff632c
-                border-color #ff632c
+                background #2d8cf0
+                border-color #2d8cf0
                 position relative
                 &::after
-                    content '√'
+                    content ''
                     position absolute
-                    color #fff
+                    border 2px solid #fff
+                    width 4px
+                    height 8px
+                    left 4px
+                    top 1px
+                    border-top 0
+                    border-left 0
+                    transform rotate(45deg) scale(1)
         &>div:last-child
             float right
         .arrow_right

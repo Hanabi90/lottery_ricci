@@ -15,8 +15,11 @@
             </ul>
             <ul class="nav_top_right">
                 <li v-if="this.$store.state.loginCode==0" class="login_content">
-                    <button @click="open('login',$event)">登录</button>
-                    <button @click="open('registered')">注册</button>
+                    <button ref="loginPosition" @click="open('login','loginPosition')">登录</button>
+                    <button
+                        ref="registeredPosition"
+                        @click="open('registered','registeredPosition')"
+                    >注册</button>
                 </li>
                 <li v-else-if="this.$store.state.loginCode==1" class="money_content">
                     <div>
@@ -146,7 +149,7 @@ export default {
                     )
                 })
             } else {
-                this.open('login')
+                this.open('login', 'loginPosition')
             }
         },
         //跳转
@@ -180,20 +183,23 @@ export default {
             })
         },
         //打开登录页面
-        open(target, $event) {
-            let e = window.event || $event
+        open(target, targetButn, $event) {
+            let e = window.event || $event,
+                domTarget = event.target || event.srcElement
             for (const iterator in this.$refs) {
                 this.$refs[iterator].onOff = false
             }
             this.$refs[target].onOff = true
             this.$nextTick(() => {
                 this.x =
-                    this.getElementLeft(e.target) +
-                    e.target.offsetWidth / 2 -
+                    this.getElementLeft(this.$refs[targetButn]) +
+                    this.$refs[targetButn].offsetWidth / 2 -
                     this.$refs[target].$el.offsetWidth / 2
             })
 
-            this.y = this.getElementTop(e.target) - e.target.offsetTop * 2
+            this.y =
+                this.getElementTop(this.$refs[targetButn]) -
+                this.$refs[targetButn].offsetTop * 2
         },
         //获取当前时间
         getTime() {
@@ -297,7 +303,6 @@ export default {
     line-height 40px
     display flex
     li
-        flex 1
         white-space nowrap
         padding 0 7px
         font-size 12px
@@ -347,7 +352,6 @@ button
         float right
         display flex
         &>li
-            flex 1
             white-space nowrap
             padding 0 20px
             &:hover
