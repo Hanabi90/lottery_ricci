@@ -59,7 +59,7 @@
 
 <script>
 import { Button, Checkbox } from 'iview'
-import { betting, RSAencrypt } from '@/api/index'
+import { betting, RSAencrypt, decryptData } from '@/api/index'
 import { EventBus } from '@/api/eventBus.js'
 export default {
     name: 'lotteryOrderList',
@@ -175,16 +175,16 @@ export default {
                 bettraceparams
             }
             this.trace = false //关闭追号
-            betting({ postdata: RSAencrypt(JSON.stringify(postdata)) }).then(
-                res => {
-                    this.$Message.success('投注成功')
-                    this.$store.dispatch('handleMoney', res.data.amount)
-                    this.$store.dispatch('handleOrderHistory', [
-                        ...res.data.betlog
-                    ])
-                    this.$store.dispatch('handleOrderList', { type: 'clear' })
-                }
-            )
+            betting({
+                postdata: RSAencrypt(
+                    encodeURIComponent(JSON.stringify(postdata))
+                )
+            }).then(res => {
+                this.$Message.success('投注成功')
+                this.$store.dispatch('handleMoney', res.data.amount)
+                this.$store.dispatch('handleOrderHistory', [...res.data.betlog])
+                this.$store.dispatch('handleOrderList', { type: 'clear' })
+            })
         }
     },
     components: {

@@ -94,7 +94,7 @@
                     ></InputNumber>
                 </div>
                 <div>{{item.money}}</div>
-                <div>{{item.totalNowMoney}}</div>
+                <div>{{item.totalNowMoney?item.totalNowMoney.toFixed(2):''}}</div>
                 <div v-if="zhuihao==1">{{item.bonues}}</div>
                 <div v-if="zhuihao==1">{{item.profit}}</div>
                 <div v-if="zhuihao==1">{{item.profitability}}</div>
@@ -165,7 +165,7 @@ export default {
                     const item = this.list[index]
                     if (item.active) {
                         total.totalIssue++
-                        total.totalMoney += item.money
+                        total.totalMoney = total.totalMoney + Number(item.money)
                     }
                 }
             }
@@ -356,7 +356,7 @@ export default {
                     issue: issue[index],
                     multiple: multiple,
                     bonues: (bonues * multiple).toFixed(2),
-                    money: itemMoney * multiple,
+                    money: (itemMoney * multiple).toFixed(2),
                     totalNowMoney: itemTotalNowMoney,
                     profit: itemProfit.toFixed(2),
                     profitability: `${(

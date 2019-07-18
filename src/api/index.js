@@ -8,21 +8,22 @@ const public_key = `-----BEGIN PUBLIC KEY-----
                 1w7tA6yR5iwYfN5vS+aorsI8tcRxuNGpDtJsLS9kINGd7VH2ocmYSv8PDUKZMLqr
                 i5Azz9DtRubvoQJFAgMBAAE=
                 -----END PUBLIC KEY-----`
-// const public_key = `-----BEGIN PUBLIC KEY-----
-// MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA4xKlQqd6KvLKyDto0z94
-// nr5E7Njl/Yi0Vk8UTgeFn8THZhaMXA1n0V3uYi+steaUEPxEkvHF4w49eX7omevf
-// dprmhEfVdy8oGMNdEkiKvYBHJLGPJ3zG8jenaCf214X6MAn4ne6LWXpw0C013fLj
-// yUpK4pSvitCnZGzxnSnTCl6fWjKBKzrxQC0Cs55VhjSXX3N6rDqF+GTWogmLqn3n
-// qejxcxvrcTascjrBeItahW9ITvcaQfr7yMpE44zszbBrs0IRuhJa/mEDKLAwfXqa
-// oGc3ZOfBVFJ5EQtjN4TI5Q0ihIuNFG0b3sLw23Kb7Vj8r585JclxN+KxDB5reloL
-// Io3TESIzlWD4nuIreTZpHOfsceGvRZnDmzh/4apmXiuKi42ZXWEz2dqYu7biTXmW
-// +7uY+wK7zRzzXsFk+IgE69/Bak/jSdVWqsOHPBV9nW29DIMVANdjZLW4C9oIzToi
-// OZ7cyebauGcEQRDDgyHl18HzeM+zhoyH73B02H2kP4rxR7nSxnUIwe1m5UYYcPry
-// ZZLhxs0k74P1hLKjl5mO1ZYaEICdn4KH2Gd6GCw0gum868rfItVC7rcYTPUVvsw5
-// sKbH4ddnThRrJIWSkvHB+fj04tQFsZfOVh91MJZtRQSBxQ8RIw+6WjRK9QcnBITo
-// RAsCWj/j1goqVyCFSZq0WPMCAwEAAQ==
-// -----END PUBLIC KEY-----`
-//分段加密
+const privateKey = `
+-----BEGIN RSA PRIVATE KEY-----
+MIICWgIBAAKBgGeBwE0bATN5j/AWlYAiAMRE+6FNJGxIXZmW2J7Qks1c+inXB4KQ
+IuXK2a6DLfuGnxRWCTa0XJvHr6vLWvx1J8zVktOq1w7tA6yR5iwYfN5vS+aorsI8
+tcRxuNGpDtJsLS9kINGd7VH2ocmYSv8PDUKZMLqri5Azz9DtRubvoQJFAgMBAAEC
+gYAWf+fzWtlp/RTC1cXtsnaEM5KXP5OZTim6h0XTT/d5WKqwiaOCSB6t4OhsvOsz
+79GItCMQlyhCXKfdKjk/A6CA6WG4DUhJywDsO9W56xp9wBBE047qukZioIHTKLbX
+omsTCuIwalAKQ1uRd+9y1tf/pD/vSODBvAxOVXLvVPbJSQJBAKkm/wbz7uo9a1vV
+Olu+olFHN361bygUlyA5L+pvviboXb47Bf4HemR/xENZez/rXcduCFuIkSZ+6TA3
+oSXVacsCQQCcpnV0C4nCP9po0GaQImJPuQz4Yacol5nODuTxS/GjRl/BVWbEp/qo
+tMjalmSuDXiiwjzYp43c3kk2Qx6v/QIvAkBAsCghmZIJxJlVElNyGJJssOaZL3um
+AVHWQeiAKGG48W5APMRK5MM6wd3lv8expypDBWJu1uhjp284QF4BYP9HAkA+3R4t
+X6P87Br+DQPbu7CwRZbK5oVqaMw0QQ3nN47U8xziPR9ss+yHX2VrMwdcQdOznTdF
+ypfHlvzSZcUe4u3JAkBIGDs4HLojgf05f/c17zN/Zav+D7aMHAYr2ZM5PGmIv4MJ
+rlPH5K63Mupv/Lb+2rVVI0os6nEeLo5v7sWQjoNG
+-----END RSA PRIVATE KEY-----`
 export const RSAencrypt = str => {
     let BLOCK_SIZE = 100,
         jse = new JSEncrypt(),
@@ -39,6 +40,14 @@ export const RSAencrypt = str => {
         ret += jse.encrypt(str_1) + ' '
     }
     return ret
+}
+export const decryptData = data => {
+    let decrypt = new JSEncrypt()
+
+    // 设置私钥
+    decrypt.setPrivateKey(privateKey)
+    // 解密数据
+    return decrypt.decrypt(data)
 }
 
 //登录

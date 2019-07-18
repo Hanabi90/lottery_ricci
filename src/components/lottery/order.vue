@@ -943,7 +943,9 @@ export default {
                     lt_project: [lt_project]
                 }
             }
-            betting({ postdata: RSAencrypt(JSON.stringify(postdata)) }).then(res => {
+            betting({ postdata: RSAencrypt(
+                    encodeURIComponent(JSON.stringify(postdata))
+                )}).then(res => {
                 this.$Message.success('投注成功')
                 this.$store.dispatch('handleLotteryNumber', '')
                 this.lotterynumber.reset()
